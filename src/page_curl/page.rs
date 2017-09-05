@@ -1,20 +1,21 @@
 pub use genmesh::{Line,Triangle};
-use std::f64::consts::PI;
-const RAD:f64 = 180.0 / PI;
+pub use page_curl::vertex::Vertex;
+use std::f32::consts::PI;
+const RAD:f32 = 180.0 / PI;
 
 pub struct Page{
-    width:f64,
-    height:f64,
+    width:f32,
+    height:f32,
     columns:i32,
     rows:i32,
     flipping:bool,
-    time:f64,
-    theta:f64,
-    rotation:f64,
-    translation:f64,
-    in_mesh:Vec<Line<f64>>,
-    out_mesh:Vec<Triangle<f64>>,
-    tex_coords:Vec<Line<f64>>,
+    time:f32,
+    theta:f32,
+    rotation:f32,
+    translation:f32,
+    in_mesh:Vec<Line<f32>>,
+    pub out_mesh:Vec<Vertex>,
+    tex_coords:Vec<Line<f32>>,
     front_strip:Vec<i32>,
     back_strip:Vec<i32>,
     n_vertices:i32,
@@ -36,7 +37,7 @@ impl Page{
             tex_coords:vec![],
             front_strip:vec![],
             back_strip:vec![],
-            n_vertices:0
+            n_vertices:0,
         }
     }
     pub fn create_mesh(&mut self){
@@ -56,20 +57,22 @@ impl Page{
         self.out_mesh = vec![];
         self.tex_coords = vec![];
         for iy in 0..cy{
-            let iiy =iy as f64;
+            let iiy =iy as f32;
             for ix in 0..cx{
-                let iix = ix as f64;
-                let px = iix* self.width/ (self.columns as f64);
-                let py = iiy  * self.height/ (self.rows as f64);
+                let iix = ix as f32;
+                let px = iix* self.width/ (self.columns as f32);
+                let py = iiy  * self.height/ (self.rows as f32);
                 self.in_mesh.push(Line::new(px,py));
-                let tx = (cx-ix ) as f64 / (self.columns as f64);
-                let ty = (cy-iy ) as f64/(self.rows as f64);
+                let tx = (cx-ix ) as f32 / (self.columns as f32);
+                let ty = (cy-iy ) as f32/(self.rows as f32);
                 self.tex_coords.push(Line::new(tx,ty));
 
             }
         }
         self.time =0.0;
+        println!("before strip");
         self.stripify();
+        println!("aft strip");
         self.update_time();
     }
     pub fn stripify(&mut self){
@@ -164,6 +167,7 @@ impl Page{
         let mut radius;
         let mut r;
         let mut beta;
+        println!("n_vertices {}",self.n_vertices);
         for i in 0..self.n_vertices{
             ina = self.in_mesh[i as usize];
             radius = (ina.y-self.translation).powf(2.0).sqrt();
@@ -180,10 +184,12 @@ impl Page{
             let yy = tmp.y;
             let zz = tmp.x * self.rotation.sin() + tmp.z* self.rotation.cos();
             //out = &Triangle::new(xx,yy,zz);
-            self.out_mesh[i as usize] = Triangle::new(xx,yy,zz);
+            self.out_mesh[i as usize] = Vertex{
+                position:(xx,yy,zz)
+            };
         }
     }
 }
-pub fn func_linear(ft:f64,f0:f64,f1:f64)->f64{ //created by genmesh
+pub fn func_linear(ft:f32,f0:f32,f1:f32)->f32{ //created by genmesh
     f0 + (f1-f0)*ft
 }

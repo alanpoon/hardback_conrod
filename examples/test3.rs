@@ -29,7 +29,7 @@ fn main() {
 }
 //let arr_indices = vector_as_u8_4_array(&_page.front_strip);
     let vertex_buffer = glium::VertexBuffer::new(&display, &_page.out_mesh).unwrap();
-let indices = glium::IndexBuffer::new(&display, glium::index::PrimitiveType::TrianglesList,
+let indices = glium::IndexBuffer::new(&display, glium::index::PrimitiveType::TriangleStrip,
                                       &_page.front_strip).unwrap();
     let vertex_shader_src = r#"
         #version 140
@@ -70,7 +70,7 @@ let indices = glium::IndexBuffer::new(&display, glium::index::PrimitiveType::Tri
         let mut target = display.draw();
         target.clear_color(0.0, 0.0, 1.0, 1.0);
 
-        let uniforms = uniform! { scale: 10.0f32 };
+        let uniforms = uniform! { scale: 1.0f32 };
         target.draw(&vertex_buffer,
                     &indices,
                     &program,

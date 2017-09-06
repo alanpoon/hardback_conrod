@@ -1,4 +1,4 @@
-pub fn glsl()->&'static str{
+pub fn glsl() -> &'static str {
     r#"
         #version 140
         in vec2 v_tex_coords;

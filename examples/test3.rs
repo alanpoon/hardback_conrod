@@ -6,7 +6,7 @@ extern crate image;
 
 use std::io::Cursor;
 fn main() {
-    use hardback_conrod::page_curl::{self,page,render};
+    use hardback_conrod::page_curl::{self, page, render};
 
     use conrod::backend::glium::glium::{self, glutin, Surface};
     let mut events_loop = glutin::EventsLoop::new();
@@ -14,21 +14,26 @@ fn main() {
     let context = glutin::ContextBuilder::new();
     let display = glium::Display::new(window, context, &events_loop).unwrap();
     let image = image::load(Cursor::new(&include_bytes!("../assets/images/back512.png")[..]),
-                            image::PNG).unwrap().to_rgba();
+                            image::PNG)
+            .unwrap()
+            .to_rgba();
     let image_dimensions = image.dimensions();
-    let image = glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
+    let image = glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(),
+                                                                   image_dimensions);
     let texture = glium::texture::Texture2d::new(&display, image).unwrap();
-    let mut _page =page::Page::new();
+    let mut _page = page::Page::new();
     {
-         render(&mut _page);
+        render(&mut _page);
     }
-   
 
-//let arr_indices = vector_as_u8_4_array(&_page.front_strip);
-    let vertex_buffer = glium::VertexBuffer::new(&display, &_page.out_mesh).unwrap();
-let indices = glium::IndexBuffer::new(&display, glium::index::PrimitiveType::TriangleStrip,
-                                      &_page.front_strip).unwrap();
-    let vertex_shader_src=page_curl::deform::glsl();
+
+    //let arr_indices = vector_as_u8_4_array(&_page.front_strip);
+    let vertex_buffer = glium::VertexBuffer::new(&display, &_page.in_mesh).unwrap();
+    let indices = glium::IndexBuffer::new(&display,
+                                          glium::index::PrimitiveType::TriangleStrip,
+                                          &_page.front_strip)
+            .unwrap();
+    let vertex_shader_src = page_curl::deform::glsl();
 
     let fragment_shader_src = page_curl::fragment::glsl();
 
@@ -47,12 +52,15 @@ let indices = glium::IndexBuffer::new(&display, glium::index::PrimitiveType::Tri
 
         let mut target = display.draw();
         target.clear_color(0.0, 0.0, 1.0, 1.0);
-
-        let uniforms = uniform! { scale: 1.0f32,tex:&texture };
+        _page.update_time();
+        println!("rotaion{}", _page.rotation);
+        let uniforms = uniform! { scale: 1.0f32,tex:&texture,rotation:_page.rotation,
+        translation:_page.translation,
+        theta:_page.theta };
         target.draw(&vertex_buffer,
                     &indices,
                     &program,
-                     &uniforms,
+                    &uniforms,
                     &Default::default())
             .unwrap();
         target.finish().unwrap();

@@ -2,12 +2,14 @@ pub use genmesh::{Line,Triangle};
 pub use page_curl::vertex::Vertex;
 use std::f32::consts::PI;
 const RAD:f32 = 180.0 / PI;
+const COLUMNS:u16 = 20;
+const ROWS:u16 =20;
+const N_VERTICES:usize = ((COLUMNS+1) * (ROWS+1)) as usize;
+const N_STRIPS: usize =(((COLUMNS+1) * 2) * ((ROWS+1) - 1) + ((ROWS+1) - 2)) as usize;
 
-pub struct Page{
+pub struct Page{    
     width:f32,
     height:f32,
-    columns:u16,
-    rows:u16,
     flipping:bool,
     time:f32,
     theta:f32,
@@ -15,18 +17,15 @@ pub struct Page{
     translation:f32,
     in_mesh:Vec<Line<f32>>,
     pub out_mesh:Vec<Vertex>,
-    tex_coords:Vec<Line<f32>>,
-   pub front_strip:Vec<u16>,
-   pub back_strip:Vec<u16>,
-    n_vertices:u16,
+    tex_coords:[(f32,f32);N_VERTICES],
+   pub front_strip:[u16;N_STRIPS],
+   pub back_strip:[u16;N_STRIPS],
 }
 impl Page{
     pub fn new()->Page{
         Page{
             width:0.8,
             height:1.0,
-            columns:20,
-            rows:25,
             flipping:false,
             time:0.0,
             theta:90.0,
@@ -34,39 +33,35 @@ impl Page{
             translation:0.0,
             in_mesh:vec![],
             out_mesh:vec![],
-            tex_coords:vec![],
-            front_strip:vec![],
-            back_strip:vec![],
-            n_vertices:0,
+            tex_coords:[(0.0f32,0.0f32);N_VERTICES],
+            front_strip:[0u16;N_STRIPS],
+            back_strip:[0u16;N_STRIPS],
         }
     }
     pub fn create_mesh(&mut self){
-        let cx =self.columns +1;
-        let cy = self.rows +1;
-        self.n_vertices = cx * cy;
+        let cx =COLUMNS +1;
+        let cy = ROWS +1;
         if  self.in_mesh.len() >0{
             self.in_mesh = vec![];
         }
         if  self.out_mesh.len() >0{
             self.out_mesh = vec![];
         }
-        if self.tex_coords.len() >0{
-            self.tex_coords = vec![];
-        }
         self.in_mesh = vec![];
         self.out_mesh = vec![];
-        self.tex_coords = vec![];
+        self.tex_coords = [(0.0f32,0.0f32);N_VERTICES];
+        let mut i =0;
         for iy in 0..cy{
             let iiy =iy as f32;
             for ix in 0..cx{
                 let iix = ix as f32;
-                let px = iix* self.width/ (self.columns as f32);
-                let py = iiy  * self.height/ (self.rows as f32);
+                let px = iix* self.width/ (COLUMNS as f32);
+                let py = iiy  * self.height/ (ROWS as f32);
                 self.in_mesh.push(Line::new(px,py));
-                let tx = (cx-ix ) as f32 / (self.columns as f32);
-                let ty = (cy-iy ) as f32/(self.rows as f32);
-                self.tex_coords.push(Line::new(tx,ty));
-
+                let tx = (cx-ix ) as f32 / (COLUMNS as f32);
+                let ty = (cy-iy ) as f32/(ROWS as f32);
+                self.tex_coords[i] = (tx,ty);
+                i+=1;
             }
         }
         self.time =0.0;
@@ -76,40 +71,40 @@ impl Page{
         self.update_time();
     }
     pub fn stripify(&mut self){
-        let cx =self.columns +1 ;
-        if self.front_strip.len()>0{
-            self.front_strip = vec![];
-        }
-        if  self.back_strip.len()>0{
-            self.back_strip = vec![];
-        }
-      
+        let cx =COLUMNS +1 ;      
         let mut offset;
-        for iy in 0..self.rows{
-            let last = iy == (self.rows -1);
+        let mut i = 0;
+        for iy in 0..ROWS{
+            let last = iy == (ROWS -1);
             let odd = iy %2 ==1;
             offset = iy*cx;
-            for ix in 0..(self.columns+1){
+            for ix in 0..(COLUMNS+1){
                 if odd{
-                    self.front_strip.push(offset + self.columns - ix + cx);
-                     self.back_strip.push(offset + ix + cx);
-                     self.front_strip.push(offset + self.columns  - ix);
-                     self.back_strip.push(offset + ix);
+                    self.front_strip[i] = offset + COLUMNS - ix + cx;
+                     self.back_strip[i] = offset + ix + cx;
+                     i+=1;
+                     self.front_strip[i] =offset + COLUMNS  - ix;
+                     self.back_strip[i] =offset + ix;
+                     i+=1;
                 } else{
-                    self.front_strip.push(offset + ix + cx);
-                    self.back_strip.push(offset + self.columns  - ix + cx);
-                    self.front_strip.push(offset + ix);
-                    self.back_strip.push(offset + self.columns  - ix)
+                    self.front_strip[i]= offset + ix + cx;
+                    self.back_strip[i] =offset + COLUMNS  - ix + cx;
+                    i+=1;
+                    self.front_strip[i] =offset + ix;
+                    self.back_strip[i] =offset + COLUMNS  - ix;
+                    i+=1;
                 }
                 
             }
         if !last {
           if odd {
-            self.front_strip.push(offset + cx);
-            self.back_strip.push( offset + cx + self.columns);
+            self.front_strip[i]=offset + cx;
+            self.back_strip[i]= offset + cx + COLUMNS;
+            i+=1;
           } else {
-            self.front_strip.push( offset + cx + self.columns);
-            self.back_strip.push( offset + cx);
+            self.front_strip[i]= offset + cx + COLUMNS;
+            self.back_strip[i]= offset + cx;
+            i+=1;
           }
         }
         }
@@ -167,8 +162,8 @@ impl Page{
         let mut radius;
         let mut r;
         let mut beta;
-        println!("n_vertices {},in_mesh {}",self.n_vertices,self.in_mesh.len());
-        for i in 0..self.n_vertices{
+        println!("n_vertices {},in_mesh {}",N_VERTICES,self.in_mesh.len());
+        for i in 0..N_VERTICES{
             ina = self.in_mesh[i as usize];
             radius = (ina.y-self.translation).powf(2.0).sqrt();
             r = radius * self.theta.sin();
@@ -185,7 +180,8 @@ impl Page{
             let zz = tmp.x * self.rotation.sin() + tmp.z* self.rotation.cos();
             //out = &Triangle::new(xx,yy,zz);
             self.out_mesh.push(Vertex{
-                position:(xx,yy,zz)
+                position:(xx,yy,zz),
+                tex_coords:(self.tex_coords[i].0,self.tex_coords[i].1)
             });
         }
     }

@@ -1,4 +1,6 @@
 extern crate conrod;
+#[macro_use]
+extern crate glium;
 extern crate hardback_conrod;
 fn main() {
     use hardback_conrod::page_curl::{page,render};
@@ -9,17 +11,36 @@ fn main() {
     let context = glutin::ContextBuilder::new();
     let display = glium::Display::new(window, context, &events_loop).unwrap();
     let mut _page =page::Page::new();
-    let shape = render(&mut _page);
+    {
+         render(&mut _page);
+    }
+   
+   // println!("shape {:?}",shape);
+   let cx = 20 + 1;
+    let cy = 25 + 1;
 
-    let vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
-    let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
-
+      let stripLen =1050 + 24;
+   fn vector_as_u8_4_array(vector: &Vec<u16>) -> [u16;1074] {
+    let mut arr = [0u16;1074];
+    for i in 0..1074 {
+        arr[i] = vector[i];
+    }
+    arr
+}
+//let arr_indices = vector_as_u8_4_array(&_page.front_strip);
+    let vertex_buffer = glium::VertexBuffer::new(&display, &_page.out_mesh).unwrap();
+let indices = glium::IndexBuffer::new(&display, glium::index::PrimitiveType::TrianglesList,
+                                      &_page.front_strip).unwrap();
     let vertex_shader_src = r#"
         #version 140
-        in vec2 position;
-
+        in vec3 position;
+        uniform float scale;
             void main() {
-                gl_Position = vec4(position, 0.0, 1.0);
+                vec3 pos = position;
+                pos.x = pos.x *scale;
+                pos.y = pos.y *scale;
+                pos.z = pos.z *scale;
+                gl_Position = vec4(pos, 1.0);
             }
     "#;
 
@@ -48,11 +69,12 @@ fn main() {
 
         let mut target = display.draw();
         target.clear_color(0.0, 0.0, 1.0, 1.0);
-      //  let uniforms = uniform! { t: t };
+
+        let uniforms = uniform! { scale: 10.0f32 };
         target.draw(&vertex_buffer,
                     &indices,
                     &program,
-                     &glium::uniforms::EmptyUniforms,
+                     &uniforms,
                     &Default::default())
             .unwrap();
         target.finish().unwrap();

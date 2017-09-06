@@ -6,8 +6,8 @@ const RAD:f32 = 180.0 / PI;
 pub struct Page{
     width:f32,
     height:f32,
-    columns:i32,
-    rows:i32,
+    columns:u16,
+    rows:u16,
     flipping:bool,
     time:f32,
     theta:f32,
@@ -16,9 +16,9 @@ pub struct Page{
     in_mesh:Vec<Line<f32>>,
     pub out_mesh:Vec<Vertex>,
     tex_coords:Vec<Line<f32>>,
-    front_strip:Vec<i32>,
-    back_strip:Vec<i32>,
-    n_vertices:i32,
+   pub front_strip:Vec<u16>,
+   pub back_strip:Vec<u16>,
+    n_vertices:u16,
 }
 impl Page{
     pub fn new()->Page{
@@ -83,7 +83,7 @@ impl Page{
         if  self.back_strip.len()>0{
             self.back_strip = vec![];
         }
-        let mut i =0;
+      
         let mut offset;
         for iy in 0..self.rows{
             let last = iy == (self.rows -1);
@@ -91,25 +91,25 @@ impl Page{
             offset = iy*cx;
             for ix in 0..(self.columns+1){
                 if odd{
-                     self.front_strip[i]  = offset + self.columns - ix + cx;
-            self.back_strip[i] = offset + ix + cx;
-            self.front_strip[i]  = offset + self.columns  - ix;
-            self.back_strip[i] = offset + ix;
+                    self.front_strip.push(offset + self.columns - ix + cx);
+                     self.back_strip.push(offset + ix + cx);
+                     self.front_strip.push(offset + self.columns  - ix);
+                     self.back_strip.push(offset + ix);
                 } else{
-                     self.front_strip[i]  = offset + ix + cx;
-           self.back_strip[i] = offset + self.columns  - ix + cx;
-            self.front_strip[i]  = offset + ix;
-            self.back_strip[i] = offset + self.columns  - ix;
+                    self.front_strip.push(offset + ix + cx);
+                    self.back_strip.push(offset + self.columns  - ix + cx);
+                    self.front_strip.push(offset + ix);
+                    self.back_strip.push(offset + self.columns  - ix)
                 }
-                i+=1;
+                
             }
         if !last {
           if odd {
-            self.front_strip[i]  = offset + cx;
-            self.back_strip[i] = offset + cx + self.columns;
+            self.front_strip.push(offset + cx);
+            self.back_strip.push( offset + cx + self.columns);
           } else {
-            self.front_strip[i]  = offset + cx + self.columns;
-            self.back_strip[i] = offset + cx;
+            self.front_strip.push( offset + cx + self.columns);
+            self.back_strip.push( offset + cx);
           }
         }
         }
@@ -167,7 +167,7 @@ impl Page{
         let mut radius;
         let mut r;
         let mut beta;
-        println!("n_vertices {}",self.n_vertices);
+        println!("n_vertices {},in_mesh {}",self.n_vertices,self.in_mesh.len());
         for i in 0..self.n_vertices{
             ina = self.in_mesh[i as usize];
             radius = (ina.y-self.translation).powf(2.0).sqrt();
@@ -184,9 +184,9 @@ impl Page{
             let yy = tmp.y;
             let zz = tmp.x * self.rotation.sin() + tmp.z* self.rotation.cos();
             //out = &Triangle::new(xx,yy,zz);
-            self.out_mesh[i as usize] = Vertex{
+            self.out_mesh.push(Vertex{
                 position:(xx,yy,zz)
-            };
+            });
         }
     }
 }

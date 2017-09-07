@@ -58,15 +58,6 @@ mod feature {
         }
         let mut ui = conrod::UiBuilder::new([WIN_W as f64, WIN_H as f64]).build();
         image_map!{
-       (ResourceEnum::Sprite(Sprite::BROWNPAPER),"image",greed_meta::app::get_brownpaper_path()),  
-    (ResourceEnum::Sprite(Sprite::TRANSPARENT),"image",greed_meta::app::get_transparent_path()), 
-       (ResourceEnum::Sprite(Sprite::BOXCLOSURE),"image",greed_meta::app::get_boxclosure_path()), 
-        (ResourceEnum::Sprite(Sprite::FRAME),"image",greed_meta::app::get_frame_path()),     
-     (ResourceEnum::Sprite(Sprite::BUTTON),"image",greed_meta::app::get_button_path()),     
-    (ResourceEnum::Sprite(Sprite::ICONS),"image",greed_meta::app::get_icons_path()),
-    (ResourceEnum::Sprite(Sprite::CARDS),"image",greed_meta::app::get_cards_path()),
-  //    (ResourceEnum::Sprite(Sprite::PAGE2),"image",greed_meta::app::get_page2_path()),
-    (ResourceEnum::Sprite(Sprite::RUST),"image",greed_meta::app::get_rust_path()),
     (ResourceEnum::Font(Font::REGULAR),"font","fonts/NotoSans/NotoSans-Regular.ttf"),
      (ResourceEnum::Font(Font::BEON),"font","fonts/Beon/beon-webfont.ttf")
   }

@@ -9,8 +9,9 @@ extern crate conrod;
 extern crate conrod_derive;
 #[macro_use]
 extern crate glium;
-extern crate genmesh;
+extern crate cardgame_widgets;
+
 pub mod page_curl;
-//pub mod logic;
+pub mod logic;
 //pub mod app;
 //pub mod custom_widget;

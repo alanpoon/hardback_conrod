@@ -1,4 +1,3 @@
-pub use genmesh::{Line, Triangle};
 pub use page_curl::vertex::Vertex;
 use std::f32::consts::PI;
 const RAD: f32 = 180.0 / PI;
@@ -55,7 +54,7 @@ impl Page {
                 let px = iix * self.width / (COLUMNS as f32);
                 let py = iiy * self.height / (ROWS as f32);
                 let tx = (cx - ix) as f32 / (COLUMNS as f32);
-                let ty = (cy - iy) as f32 / (ROWS as f32);
+                let ty = iy as f32 / (ROWS as f32);
                 self.in_mesh.push(Vertex {
                                       position: (px, py, 0.0),
                                       tex_coords: (tx, ty),

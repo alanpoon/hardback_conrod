@@ -1,4 +1,3 @@
-//extern crate hardback_meta;
 extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
@@ -20,5 +19,4 @@ pub mod logic;
 pub mod opengl;
 pub mod backend;
 pub mod app;
-//pub mod on_request;
-//pub mod custom_widget;
+

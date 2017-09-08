@@ -113,9 +113,7 @@ mod feature {
         let jGAME1 = jGAME.clone();
         std::thread::spawn(move || {
             let mut _gamedata = jGAME1.lock().unwrap();
-            let cj = logic::game::GameInstance::new(Box::new(|gamedata,
-                                                              result_map,
-                                                              conrod_msg| {
+            logic::game::GameInstance::new(Box::new(|gamedata, result_map, conrod_msg| {
                 match conrod_msg.clone() {
                     logic::game::ConrodMessage::Socket(j) => {
                         if let websocket::OwnedMessage::Text(z) = websocket::OwnedMessage::from(j) {

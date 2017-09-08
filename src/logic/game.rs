@@ -7,6 +7,10 @@ use std::collections::HashMap;
 use std;
 use futures::sync::mpsc;
 use futures::{Future, Sink};
+use logic;
+use app::{self, GameData, Ids, GameState};
+use backend::Message;
+use backend::SupportIdType;
 const LIB_PATH: &'static str = "target/debug/libtest_shared.so";
 pub struct GameInstance<'a, T>
     where T: Clone
@@ -23,9 +27,7 @@ impl<'a, T> GameInstance<'a, T>
                          &HashMap<ResourceEnum, SupportIdType>,
                          ConrodMessage<T>) + 'a>)
                -> GameInstance<'a, T> {
-        GameInstance {
-            update_closure: y,
-        }
+        GameInstance { update_closure: y }
     }
 
     pub fn run(&self,
@@ -37,15 +39,13 @@ impl<'a, T> GameInstance<'a, T>
                render_tx: std::sync::mpsc::Sender<conrod::render::OwnedPrimitives>,
                events_loop_proxy: glium::glutin::EventsLoopProxy) {
         let mut ids = Ids::new(ui.widget_id_generator());
-        ids.menu_buts.resize(3, &mut ui.widget_id_generator());
-        let anim_num = gamedata.animationids.len();
-        ids.animations.resize(anim_num, &mut ui.widget_id_generator());
+        //   ids.menu_buts.resize(3, &mut ui.widget_id_generator());
+        //  let anim_num = gamedata.animationids.len();
+        //  ids.animations.resize(anim_num, &mut ui.widget_id_generator());
         let mut needs_update = true;
         let mut last_update = std::time::Instant::now();
-        let mut app = application::Application::new(LIB_PATH);
         let appdata = AppData::new(1200, 800, "Hardback");
         'conrod: loop {
-            application::Application::in_loop(&mut app, LIB_PATH, &mut last_update);
             let sixteen_ms = std::time::Duration::from_millis(16);
             let now = std::time::Instant::now();
             let duration_since_last_update = now.duration_since(last_update);
@@ -111,33 +111,18 @@ impl<'a, T> GameInstance<'a, T>
                    result_map: &HashMap<ResourceEnum, SupportIdType>,
                    action_tx: mpsc::Sender<Message>) {
         widget::Canvas::new()
-            .flow_down(&[(ids.body,
-                          widget::Canvas::new()),
+            .color(color::TRANSPARENT)
+            .flow_down(&[(ids.body, widget::Canvas::new()),
                          (ids.footer,
                           widget::Canvas::new().color(color::DARK_GREEN).length(100.0))])
             .set(ids.master, ui);
-        logic::middle::render(ui,
-                                 ids,
-                                 &mut gamedata,
-                                 &appdata,
-                                 result_map,
-                                 action_tx.clone());
-        logic::footer::render(ui,
-                              ids,
-                              &mut gamedata,
-                              &appdata,
-                              result_map,
-                              action_tx.clone());
+
     }
 }
 
 #[derive(Clone,Debug)]
 pub enum ConrodMessage<T: Clone> {
     Event(conrod::event::Input),
-    Socket(T),
-    Animate(app::AnimateMsg),
-}
-pub enum SupportIdType {
-    ImageId(conrod::image::Id),
-    FontId(conrod::text::font::Id),
+    Socket(T), 
+  //  Animate(app::AnimateMsg),
 }

@@ -1,14 +1,17 @@
 #[macro_use]
-extern hardback_conrod;
+extern crate hardback_conrod;
+extern crate conrod;
+
 use hardback_conrod as game_conrod;
-use game_conrod::{app,logic};
-use conrod;
-use glium::{glutin, Surface};
-use glium;
-use std;
+use game_conrod::{app, logic};
+use game_conrod::backend::{OwnedMessage, SupportIdType};
+use game_conrod::backend::meta::app::{Font, ResourceEnum};
+use conrod::backend::glium::glium::{self, glutin, Surface};
+use std::collections::HashMap;
+use std::sync::mpsc::{Sender, Receiver};
 const WIN_W: u32 = 900;
 const WIN_H: u32 = 600;
-pub struct GameApp{}
+pub struct GameApp {}
 
 impl GameApp {
     pub fn new() -> Result<(), String> {
@@ -17,27 +20,43 @@ impl GameApp {
         let mut events_loop = glutin::EventsLoop::new();
         let display = glium::Display::new(window, context, &events_loop).unwrap();
         let mut renderer = conrod::backend::glium::Renderer::new(&display).unwrap();
-            // construct our `Ui`.
-        let mut ui = conrod::UiBuilder::new([WIDTH as f64, HEIGHT as f64]).build();
+        // construct our `Ui`.
+        let mut ui = conrod::UiBuilder::new([WIN_W as f64, WIN_H as f64]).build();
         let mut result_map = HashMap::<ResourceEnum, SupportIdType>::new();
         let mut image_map = conrod::image::Map::new();
-        game_conrod::ui::load_resources_to_result_map(&mut result_map,&mut image_map,&display,&mut ui);
+        game_conrod::ui::load_resources_to_result_map(&mut result_map,
+                                                      &mut image_map,
+                                                      &display,
+                                                      &mut ui);
         let events_loop_proxy = events_loop.create_proxy();
-        let (event_tx, event_rx) = std::sync::mpsc::channel();
+        let (event_tx, event_rx): (Sender<logic::game::ConrodMessage<OwnedMessage>>,
+                                   Receiver<logic::game::ConrodMessage<OwnedMessage>>) =
+            std::sync::mpsc::channel();
         let (render_tx, render_rx) = std::sync::mpsc::channel();
         let mut last_update = std::time::Instant::now();
-        let mut gamedata= app::GameData::new();
+        let mut gamedata = app::GameData::new();
         logic::game::GameInstance::new(Box::new(|gamedata, result_map, conrod_msg| {
-
-            }))
-                    .run(&mut ui,
-                         &mut (gamedata),
-                         &result_map,
-                         event_rx, 
-                         render_tx, 
-                         events_loop_proxy,
-                         None, //proxy_action_tx);
-            let mut closed = false;
+            match conrod_msg.clone() {
+                logic::game::ConrodMessage::Socket(j) => {
+                    if let OwnedMessage::Text(z) = OwnedMessage::from(j) {
+                        /*  if let Ok(s) = app::ReceivedMsg::deserialize_receive(&z) {
+                                println!("s {:?}", s);
+                          //      on_request::update(s, gamedata, result_map);
+                            }
+                            */
+                    }
+                }
+                _ => {}
+            }
+        }))
+                .run(&mut ui,
+                     &mut (gamedata),
+                     &result_map,
+                     event_rx,
+                     render_tx,
+                     events_loop_proxy,
+                     None); //proxy_action_tx
+        let mut closed = false;
         while !closed {
 
             // We don't want to loop any faster than 60 FPS, so wait until it has been at least
@@ -76,7 +95,7 @@ impl GameApp {
                         // resize on macOS.
                         glium::glutin::WindowEvent::Resized(..) => {
                             if let Some(primitives) = render_rx.iter().next() {
-                                draw(&display, &mut renderer, &image_map, &primitives);
+                                game_conrod::ui::draw(&display, &mut renderer, &image_map, &primitives);
                             }
                         },
                         _ => {},
@@ -95,11 +114,11 @@ impl GameApp {
 
             last_update = std::time::Instant::now();
         }
-         Ok(())
+        Ok(())
     }
 }
-fn main(){
-    match app::GameApp::new() {
+fn main() {
+    match GameApp::new() {
         Err(why) => println!("Error while running Hardback:\n{}", why),
         Ok(_) => (),
     }

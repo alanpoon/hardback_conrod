@@ -8,6 +8,7 @@ use game_conrod::backend::{OwnedMessage, SupportIdType};
 use game_conrod::backend::meta::app::{Font, ResourceEnum};
 use conrod::backend::glium::glium::{self, glutin, Surface};
 use std::collections::HashMap;
+use std::sync::mpsc::{Sender, Receiver};
 const WIN_W: u32 = 900;
 const WIN_H: u32 = 600;
 pub struct GameApp {}
@@ -28,7 +29,9 @@ impl GameApp {
                                                       &display,
                                                       &mut ui);
         let events_loop_proxy = events_loop.create_proxy();
-        let (event_tx, event_rx) = std::sync::mpsc::channel();
+        let (event_tx, event_rx): (Sender<logic::game::ConrodMessage<OwnedMessage>>,
+                                   Receiver<logic::game::ConrodMessage<OwnedMessage>>) =
+            std::sync::mpsc::channel();
         let (render_tx, render_rx) = std::sync::mpsc::channel();
         let mut last_update = std::time::Instant::now();
         let mut gamedata = app::GameData::new();

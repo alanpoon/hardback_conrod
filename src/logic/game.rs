@@ -35,9 +35,9 @@ impl<'a, T> GameInstance<'a, T>
                mut gamedata: &mut GameData,
                result_map: &HashMap<ResourceEnum, SupportIdType>,
                event_rx: std::sync::mpsc::Receiver<ConrodMessage<T>>,
-               action_tx: mpsc::Sender<Message>,
                render_tx: std::sync::mpsc::Sender<conrod::render::OwnedPrimitives>,
-               events_loop_proxy: glium::glutin::EventsLoopProxy) {
+               events_loop_proxy: glium::glutin::EventsLoopProxy,
+               action_tx: Option<mpsc::Sender<Message>>) {
         let mut ids = Ids::new(ui.widget_id_generator());
         //   ids.menu_buts.resize(3, &mut ui.widget_id_generator());
         //  let anim_num = gamedata.animationids.len();
@@ -109,7 +109,7 @@ impl<'a, T> GameInstance<'a, T>
                    mut gamedata: &mut GameData,
                    appdata: &AppData,
                    result_map: &HashMap<ResourceEnum, SupportIdType>,
-                   action_tx: mpsc::Sender<Message>) {
+                   action_tx: Option<mpsc::Sender<Message>>) {
         widget::Canvas::new()
             .color(color::TRANSPARENT)
             .flow_down(&[(ids.body, widget::Canvas::new()),

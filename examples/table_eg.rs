@@ -62,8 +62,8 @@ mod feature {
      (ResourceEnum::Font(Font::BEON),"font","fonts/Beon/beon-webfont.ttf")
   }
         let mut image_map = conrod::image::Map::new();
-        let g = ImageIds::new();
         let mut result_map = HashMap::<ResourceEnum, SupportIdType>::new();
+        let g = ImageIds::new();
         g.pump(&mut result_map, &display, &mut ui, &mut image_map);
         let (event_tx, event_rx) = std::sync::mpsc::channel();
         let (render_tx, render_rx) = std::sync::mpsc::channel();

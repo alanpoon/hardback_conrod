@@ -7,6 +7,8 @@ use game_conrod::{app, logic};
 use game_conrod::backend::{OwnedMessage, SupportIdType};
 use game_conrod::backend::meta::app::{Font, ResourceEnum};
 use conrod::backend::glium::glium::{self, glutin, Surface};
+use hardback_conrod::page_curl::{self, page, render};
+use hardback_conrod::opengl;
 use std::collections::HashMap;
 use std::sync::mpsc::{Sender, Receiver};
 const WIN_W: u32 = 900;
@@ -50,9 +52,29 @@ impl GameApp {
                      render_tx,
                      events_loop_proxy,
                      None); //proxy_action_tx
+                     //opengl
+  let mut _page = page::Page::new();
+    {
+        render(&mut _page);
+    }
+
+    let vertex_buffer = glium::VertexBuffer::new(&display, &_page.in_mesh).unwrap();
+    let indices = glium::IndexBuffer::new(&display,
+                                          glium::index::PrimitiveType::TriangleStrip,
+                                          &_page.front_strip)
+            .unwrap();
+    let vertex_shader_src = page_curl::deform::glsl();
+    let fragment_shader_src = page_curl::fragment::glsl();
+    let program =
+        glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
+            .unwrap();
         let mut closed = false;
         while !closed {
-
+            opengl::draw_mutliple(&display,
+                     &vertex_buffer,
+                     &indices,
+                     &program,&mut gamedata.page_vec,&result_map
+                     );
             // We don't want to loop any faster than 60 FPS, so wait until it has been at least
             // 16ms since the last yield.
             let sixteen_ms = std::time::Duration::from_millis(16);

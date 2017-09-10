@@ -38,13 +38,7 @@ impl GameApp {
         logic::game::GameInstance::new(Box::new(|gamedata, result_map, conrod_msg| {
             match conrod_msg.clone() {
                 logic::game::ConrodMessage::Socket(j) => {
-                    if let OwnedMessage::Text(z) = OwnedMessage::from(j) {
-                        /*  if let Ok(s) = app::ReceivedMsg::deserialize_receive(&z) {
-                                println!("s {:?}", s);
-                          //      on_request::update(s, gamedata, result_map);
-                            }
-                            */
-                    }
+                    if let OwnedMessage::Text(z) = OwnedMessage::from(j) {}
                 }
                 _ => {}
             }
@@ -64,9 +58,6 @@ impl GameApp {
             let sixteen_ms = std::time::Duration::from_millis(16);
             let now = std::time::Instant::now();
             let duration_since_last_update = now.duration_since(last_update);
-            println!("!!duration_since_last_update{:?},sixteenms{:?}",
-                     duration_since_last_update,
-                     sixteen_ms);
 
             if duration_since_last_update < sixteen_ms {
                 std::thread::sleep(sixteen_ms - duration_since_last_update);

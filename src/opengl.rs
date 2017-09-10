@@ -29,3 +29,28 @@ pub fn draw(display: &glium::Display,
     }
 
 }
+pub fn draw_mutliple(display: &glium::Display,
+            vertex_buffer: &glium::VertexBuffer<page_curl::page::Vertex>,
+            indices: &glium::IndexBuffer<u16>,
+            program: &glium::Program,_page_vec:&mut Vec<(page_curl::page::Page,Sprite)>, result_map: &HashMap<ResourceEnum, SupportIdType>) {
+                 let mut target = display.draw();
+                  target.clear_color(0.0, 0.0, 1.0, 1.0);
+    for &mut (ref mut _page,ref _sprite) in _page_vec{
+         _page.update_time();
+         
+   if let Some(&SupportIdType::TextureId(ref texture)) =
+        result_map.get(&ResourceEnum::Sprite(_sprite.clone())) {
+   let uniforms = uniform! { scale: 1.0f32,tex:texture,rotation:_page.rotation,
+                translation:_page.translation,
+                theta:_page.theta };
+     target.draw(vertex_buffer,
+                    indices,
+                    program,
+                    &uniforms,
+                    &Default::default())
+            .unwrap();
+        
+        }
+    }
+    target.finish().unwrap();
+}

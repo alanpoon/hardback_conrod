@@ -1,16 +1,22 @@
 #[macro_use]
 extern crate hardback_conrod;
 extern crate conrod;
+extern crate conrod_chat;
+extern crate futures;
 
 use hardback_conrod as game_conrod;
 use game_conrod::{app, logic};
 use game_conrod::backend::{OwnedMessage, SupportIdType};
 use game_conrod::backend::meta::app::{Font, ResourceEnum};
 use conrod::backend::glium::glium::{self, glutin, Surface};
+use conrod_chat::backend::websocket::client;
 use std::collections::HashMap;
 use std::sync::mpsc::{Sender, Receiver};
+use futures::sync::mpsc;
 const WIN_W: u32 = 900;
 const WIN_H: u32 = 600;
+const CONNECTION: &'static str = "ws://ec2-35-157-160-241.eu-central-1.compute.amazonaws.com:8080/greed";
+
 pub struct GameApp {}
 
 impl GameApp {
@@ -33,12 +39,20 @@ impl GameApp {
                                    Receiver<logic::game::ConrodMessage<OwnedMessage>>) =
             std::sync::mpsc::channel();
         let (render_tx, render_rx) = std::sync::mpsc::channel();
+        let (proxy_tx, proxy_rx) = std::sync::mpsc::channel();
+        let (proxy_action_tx, proxy_action_rx) = mpsc::channel(2); //chatview::Message
         let mut last_update = std::time::Instant::now();
         let mut gamedata = app::GameData::new();
         logic::game::GameInstance::new(Box::new(|gamedata, result_map, conrod_msg| {
             match conrod_msg.clone() {
                 logic::game::ConrodMessage::Socket(j) => {
-                    if let OwnedMessage::Text(z) = OwnedMessage::from(j) {}
+                    if let OwnedMessage::Text(z) = OwnedMessage::from(j) {
+                        /*  if let Ok(s) = app::ReceivedMsg::deserialize_receive(&z) {
+                                println!("s {:?}", s);
+                          //      on_request::update(s, gamedata, result_map);
+                            }
+                            */
+                    }
                 }
                 _ => {}
             }
@@ -50,9 +64,17 @@ impl GameApp {
                      render_tx,
                      events_loop_proxy,
                      None); //proxy_action_tx
+        let event_tx_clone_2 = event_tx.clone();
+
+
+        client::run_owned_message(CONNECTION, proxy_tx, proxy_action_rx);
+        while let Ok(s) = proxy_rx.try_recv() {
+            event_tx_clone_2.send(logic::game::ConrodMessage::Socket(s)).unwrap();
+        }
         let mut closed = false;
         while !closed {
 
+  
             // We don't want to loop any faster than 60 FPS, so wait until it has been at least
             // 16ms since the last yield.
             let sixteen_ms = std::time::Duration::from_millis(16);

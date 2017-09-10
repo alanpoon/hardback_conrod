@@ -1,7 +1,7 @@
 use conrod;
 use conrod::backend::glium::glium::{self, Surface};
 use backend::SupportIdType;
-use backend::meta::app::{Font, ResourceEnum};
+use backend::meta::app::{Font, ResourceEnum, Sprite};
 use image;
 use find_folder;
 use std::collections::HashMap;
@@ -21,6 +21,10 @@ pub fn load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, Suppo
                                     display: &glium::Display,
                                     ui: &mut conrod::Ui) {
     CGM_image_map!{
+    (ResourceEnum::Sprite(Sprite::PAGE1_F),"texture","images/characters/player1.jpg"),
+    (ResourceEnum::Sprite(Sprite::PAGE2_F),"texture","images/characters/player2.jpg"),
+    (ResourceEnum::Sprite(Sprite::PAGE3_F),"texture","images/characters/player3.jpg"),
+    (ResourceEnum::Sprite(Sprite::PAGE4_F),"texture","images/characters/player4.jpg"),
     (ResourceEnum::Font(Font::REGULAR),"font","fonts/NotoSans/NotoSans-Regular.ttf"),
      (ResourceEnum::Font(Font::BEON),"font","fonts/Beon/beon-webfont.ttf")
   }

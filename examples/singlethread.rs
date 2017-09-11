@@ -69,14 +69,9 @@ impl GameApp {
             }));
         let mut events = Vec::new();
         'render: loop {
-            opengl::draw_mutliple(&display,
-                                  &vertex_buffer,
-                                  &indices,
-                                  &program,
-                                  &mut gamedata.page_vec,
-                                  &result_map);
+   
 
-            let sixteen_ms = std::time::Duration::from_millis(16);
+            let sixteen_ms = std::time::Duration::from_millis(50);
             let now = std::time::Instant::now();
             let duration_since_last_update = now.duration_since(last_update);
             if duration_since_last_update < sixteen_ms {
@@ -134,13 +129,21 @@ impl GameApp {
             }
 
             // Draw the `Ui` if it has changed.
-            if let Some(primitives) = ui.draw_if_changed() {
+             let primitives = ui.draw(); 
+                     
                 renderer.fill(&display, primitives, &image_map);
                 let mut target = display.draw();
                 target.clear_color(0.0, 0.0, 0.0, 1.0);
+                   opengl::draw_mutliple(&mut target,
+                                  &vertex_buffer,
+                                  &indices,
+                                  &program,
+                                  &mut gamedata.page_vec,
+                                  &result_map); 
                 renderer.draw(&display, &mut target, &image_map).unwrap();
+
                 target.finish().unwrap();
-            }
+            
         }
         Ok(())
     }

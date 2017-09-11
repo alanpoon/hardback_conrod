@@ -175,7 +175,7 @@ impl<'a, T> GameProcess<'a, T>
                    action_tx: Option<mpsc::Sender<Message>>) {
         widget::Canvas::new()
             .color(color::TRANSPARENT)
-            .flow_down(&[(ids.body, widget::Canvas::new()),
+            .flow_down(&[(ids.body, widget::Canvas::new().color(color::TRANSPARENT)),
                          (ids.footer,
                           widget::Canvas::new().color(color::DARK_GREEN).length(100.0))])
             .set(ids.master, ui);

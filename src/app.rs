@@ -23,6 +23,7 @@ pub struct GameData {
     pub page_vec: Vec<(Page, Sprite)>,
 }
 impl GameData {
+
     pub fn new() -> GameData {
         GameData {
             gamestate: GameState::Menu,

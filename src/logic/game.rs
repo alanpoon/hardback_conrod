@@ -97,10 +97,10 @@ impl<'a, T> GameInstance<'a, T>
             }
         }
     }
-    fn update_state(&self,
-                    mut gamedata: &mut GameData,
-                    result_map: &HashMap<ResourceEnum, SupportIdType>,
-                    conrod_msg: ConrodMessage<T>) {
+    pub fn update_state(&self,
+                        mut gamedata: &mut GameData,
+                        result_map: &HashMap<ResourceEnum, SupportIdType>,
+                        conrod_msg: ConrodMessage<T>) {
         (*self.update_closure)(gamedata, result_map, conrod_msg);
     }
     fn set_game_ui(&self,
@@ -110,7 +110,7 @@ impl<'a, T> GameInstance<'a, T>
                    appdata: &AppData,
                    result_map: &HashMap<ResourceEnum, SupportIdType>,
                    action_tx: Option<mpsc::Sender<Message>>) {
-     /*   widget::Canvas::new()
+        /*   widget::Canvas::new()
             .color(color::TRANSPARENT)
             .flow_down(&[(ids.body, widget::Canvas::new()),
                          (ids.footer,
@@ -125,4 +125,66 @@ pub enum ConrodMessage<T: Clone> {
     Event(conrod::event::Input),
     Socket(T), 
   //  Animate(app::AnimateMsg),
+}
+pub struct GameProcess<'a, T>
+    where T: Clone
+{
+    pub update_closure: Box<Fn(&mut GameData,
+                               &HashMap<ResourceEnum, SupportIdType>,
+                               ConrodMessage<T>) + 'a>,
+    pub appdata: AppData,
+}
+
+impl<'a, T> GameProcess<'a, T>
+    where T: Clone
+{
+    pub fn new(y: Box<Fn(&mut GameData,
+                         &HashMap<ResourceEnum, SupportIdType>,
+                         ConrodMessage<T>) + 'a>)
+               -> GameProcess<'a, T> {
+        let appdata = AppData::new(1200, 800, "Hardback");
+        GameProcess {
+            update_closure: y,
+            appdata: appdata,
+        }
+    }
+    pub fn run(&mut self,
+               ui: &mut conrod::Ui,
+               mut gamedata: &mut GameData,
+               result_map: &HashMap<ResourceEnum, SupportIdType>,
+               action_tx: Option<mpsc::Sender<Message>>) {
+        let mut ids = Ids::new(ui.widget_id_generator());
+        match &gamedata.gamestate {
+            &GameState::Start => {
+                self.set_game_ui(&mut ui.set_widgets(),
+                                 &ids,
+                                 &mut gamedata,
+                                 &self.appdata,
+                                 result_map,
+                                 action_tx);
+            }
+            _ => {}
+        }
+    }
+    fn set_game_ui(&self,
+                   mut ui: &mut conrod::UiCell,
+                   ids: &Ids,
+                   mut gamedata: &mut GameData,
+                   appdata: &AppData,
+                   result_map: &HashMap<ResourceEnum, SupportIdType>,
+                   action_tx: Option<mpsc::Sender<Message>>) {
+        widget::Canvas::new()
+            .color(color::TRANSPARENT)
+            .flow_down(&[(ids.body, widget::Canvas::new()),
+                         (ids.footer,
+                          widget::Canvas::new().color(color::DARK_GREEN).length(100.0))])
+            .set(ids.master, ui);
+
+    }
+    pub fn update_state(&self,
+                        mut gamedata: &mut GameData,
+                        result_map: &HashMap<ResourceEnum, SupportIdType>,
+                        conrod_msg: ConrodMessage<T>) {
+        (*self.update_closure)(gamedata, result_map, conrod_msg);
+    }
 }

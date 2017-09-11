@@ -22,8 +22,8 @@ pub fn glsl() -> &'static str {
                 pos.x = (tmp.x * cos (rotation) - tmp.z * sin (rotation));
                 pos.y = tmp.y;
                 pos.z = (tmp.x * sin (rotation) + tmp.z * cos (rotation));
-                pos.x = pos.x *scale;
-                pos.y = pos.y * scale;
+                pos.x = (pos.x-0.8) *scale ;
+                pos.y = (pos.y-0.8) * scale;
                 pos.z = pos.z *scale;
                 gl_Position = vec4(pos, 1.0);
             }

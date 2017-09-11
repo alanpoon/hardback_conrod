@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["alanpoon"]
 
 [dependencies]
-conrod = { path ="0.54", features = ["glium","winit"]}
+conrod = { version ="0.54", features = ["glium","winit"]}
 conrod_derive = "0.1.0"
 conrod_chat = {path ="../conrod_chat", features=["default"]}
 futures ={ version = "0.1.14", features=["use_std"] }

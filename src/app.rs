@@ -5,7 +5,10 @@ widget_ids! {
     pub struct Ids {
          master,
          footer,
+         footerprevious,
+         footernext,
          body,
+         text
     }
 }
 #[derive(Debug,Clone)]
@@ -21,17 +24,20 @@ pub struct GameData {
     pub gamestate: GameState,
     pub footer: Footer,
     pub page_vec: Vec<(Page, Sprite)>,
+    pub page_index: usize,
+    pub player_size: usize,
 }
 impl GameData {
-
     pub fn new() -> GameData {
         GameData {
             gamestate: GameState::Menu,
             footer: Footer::ShowHand,
-            page_vec: vec![(Page::new(), Sprite::PAGE1_F),
-                           (Page::new(), Sprite::PAGE2_F),
-                           (Page::new(), Sprite::PAGE3_F),
-                           (Page::new(), Sprite::PAGE4_F)],
+            page_vec: vec![(Page::new(), Sprite::PAGE1F),
+                           (Page::new(), Sprite::PAGE2F),
+                           (Page::new(), Sprite::PAGE3F),
+                           (Page::new(), Sprite::PAGE4F)],
+            page_index: 0,
+            player_size: 4,
         }
     }
 }

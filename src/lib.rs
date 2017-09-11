@@ -23,5 +23,6 @@ pub mod opengl;
 pub mod backend;
 pub mod app;
 pub mod ui;
+pub mod graphics_match;
 //pub mod on_request;
 //pub mod custom_widget;

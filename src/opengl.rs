@@ -16,7 +16,7 @@ pub fn draw(display: &glium::Display,
     if let Some(&SupportIdType::TextureId(ref texture)) =
         result_map.get(&ResourceEnum::Sprite(Sprite::BUTTON)) {
         target.clear_color(0.0, 0.0, 1.0, 1.0);
-        let uniforms = uniform! { scale: 1.0f32,tex:texture,rotation:_page.rotation,
+        let uniforms = uniform! { scale: 10.0f32,tex:texture,rotation:_page.rotation,
                 translation:_page.translation,
                 theta:_page.theta };
         target.draw(vertex_buffer,
@@ -35,14 +35,12 @@ pub fn draw_mutliple(target: &mut glium::Frame,
                      program: &glium::Program,
                      _page_vec: &mut Vec<(page_curl::page::Page, Sprite)>,
                      result_map: &HashMap<ResourceEnum, SupportIdType>) {
-    let mut i = 0;
-    for &mut (ref mut _page, ref _sprite) in _page_vec {
-        _page.update_time();
-        i += 1;
-        println!("drawing {}", i);
-        if let Some(&SupportIdType::TextureId(ref texture)) =
-            result_map.get(&ResourceEnum::Sprite(_sprite.clone())) {
 
+    for i in (0usize.._page_vec.len()).rev(){
+      if let Some(&mut (ref mut _page, ref _sprite))=  _page_vec.get_mut(i){
+             _page.update_time();
+                  if let Some(&SupportIdType::TextureId(ref texture)) =
+            result_map.get(&ResourceEnum::Sprite(_sprite.clone())) {
             let uniforms = uniform! { scale: 1.0f32,tex:texture,rotation:_page.rotation,
                 translation:_page.translation,
                 theta:_page.theta };
@@ -54,5 +52,7 @@ pub fn draw_mutliple(target: &mut glium::Frame,
                 .unwrap();
 
         }
+      }
     }
+
 }

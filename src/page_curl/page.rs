@@ -18,13 +18,15 @@ pub struct Page {
     pub out_mesh: Vec<Vertex>,
     pub front_strip: [u16; N_STRIPS],
     pub back_strip: [u16; N_STRIPS],
+    pub reverse: bool,
 }
 impl Page {
     pub fn new() -> Page {
         Page {
-            width: 0.8,
-            height: 1.0,
+            width: 1.5,
+            height: 1.5,
             flipping: false,
+            reverse: false,
             time: 0.0,
             theta: 90.0,
             rotation: 0.0,
@@ -53,7 +55,8 @@ impl Page {
                 let iix = ix as f32;
                 let px = iix * self.width / (COLUMNS as f32);
                 let py = iiy * self.height / (ROWS as f32);
-                let tx = (cx - ix) as f32 / (COLUMNS as f32);
+                // let tx = (cx - ix) as f32 / (COLUMNS as f32);
+                let tx = ix as f32 / (COLUMNS as f32);
                 let ty = iy as f32 / (ROWS as f32);
                 self.in_mesh.push(Vertex {
                                       position: (px, py, 0.0),
@@ -109,6 +112,13 @@ impl Page {
     }
     pub fn flip(&mut self) {
         self.flipping = true;
+        self.reverse = false;
+        self.time = 0.0;
+    }
+    pub fn reverse_flip(&mut self) {
+        self.flipping = true;
+        self.reverse = true;
+        self.time = 1.0;
     }
     pub fn update_time(&mut self) {
         if !self.flipping {
@@ -125,12 +135,21 @@ impl Page {
         let theta2 = 0.5;
         let theta3 = 10.0;
         let theta4 = 2.0;
-        self.time += 0.01;
-        if self.time >= 1.0 {
+        if self.reverse {
+            self.time -= 0.01;
+            if self.time<=0.0{
+                self.flipping = false;
+                return;
+            }
+        } else {
+            self.time += 0.01;
+             if self.time >= 1.0 {
             self.time = 0.0;
             self.flipping = false;
             return;
         }
+        }
+      
         let dt;
         let f1;
         let f2;

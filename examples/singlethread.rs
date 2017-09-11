@@ -60,7 +60,7 @@ impl GameApp {
                 .unwrap();
         let mut last_update = std::time::Instant::now();
         let mut game_proc =
-            logic::game::GameProcess::<logic::game::ConrodMessage<OwnedMessage>>::new(Box::new(|gamedata, result_map, conrod_msg| {
+            logic::game::GameProcess::<logic::game::ConrodMessage<OwnedMessage>>::new(&mut ui,Box::new(|gamedata, result_map, conrod_msg| {
                 match conrod_msg.clone() {
                     logic::game::ConrodMessage::Socket(j) => {
                     }
@@ -68,8 +68,8 @@ impl GameApp {
                 }
             }));
         let mut events = Vec::new();
+        let mut needs_update = true;
         'render: loop {
-   
 
             let sixteen_ms = std::time::Duration::from_millis(50);
             let now = std::time::Instant::now();
@@ -83,16 +83,17 @@ impl GameApp {
             events_loop.poll_events(|event| { events.push(event); });
 
             // If there are no new events, wait for one.
-            if events.is_empty() {
+            if events.is_empty() || !needs_update {
                 events_loop.run_forever(|event| {
                                             events.push(event);
                                             glium::glutin::ControlFlow::Break
                                         });
             }
-
+            needs_update = false;
             // Process the events.
             for event in events.drain(..) {
-
+      
+                needs_update = true;
                 // Break from the loop upon `Escape` or closed window.
                 match event.clone() {
 
@@ -117,33 +118,33 @@ impl GameApp {
                     None => continue,
                     Some(input) => input,
                 };
-                game_proc.update_state(&mut gamedata,
+   
+               game_proc.update_state(&mut gamedata,
                                        &result_map,
                                        logic::game::ConrodMessage::Event(input.clone()));
-
-                // Handle the input with the `Ui`.
-                ui.handle_event(input);
-
+            // Handle the input with the `Ui`.
+                ui.handle_event(input);                     
                 // Set the widgets.
                 game_proc.run(&mut ui, &mut (gamedata), &result_map, None);
+    
             }
 
             // Draw the `Ui` if it has changed.
-             let primitives = ui.draw(); 
-                     
-                renderer.fill(&display, primitives, &image_map);
-                let mut target = display.draw();
-                target.clear_color(0.0, 0.0, 0.0, 1.0);
-                   opengl::draw_mutliple(&mut target,
+            let primitives = ui.draw();
+
+            renderer.fill(&display, primitives, &image_map);
+            let mut target = display.draw();
+            target.clear_color(0.0, 0.0, 0.0, 1.0);
+            opengl::draw_mutliple(&mut target,
                                   &vertex_buffer,
                                   &indices,
                                   &program,
                                   &mut gamedata.page_vec,
-                                  &result_map); 
-                renderer.draw(&display, &mut target, &image_map).unwrap();
+                                  &result_map);
+            renderer.draw(&display, &mut target, &image_map).unwrap();
 
-                target.finish().unwrap();
-            
+            target.finish().unwrap();
+      
         }
         Ok(())
     }

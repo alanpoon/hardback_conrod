@@ -1,7 +1,7 @@
 use conrod;
 use conrod::backend::glium::glium::{self, Surface};
 use backend::SupportIdType;
-use backend::meta::app::{self,Font, ResourceEnum, Sprite};
+use backend::meta::app::{self, Font, ResourceEnum, Sprite};
 use image;
 use find_folder;
 use std::collections::HashMap;

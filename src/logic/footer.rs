@@ -44,7 +44,7 @@ fn draw_hand(ui: &mut conrod::UiCell,
                .h(0.3 * wh[1])
                .set(ids.footerprevious, ui)
                .was_clicked() {
-                   println!("aaaa");
+            println!("aaaa");
             page_previous(gamedata);
         }
         if animated_button::AnimatedButton::image(but_logo)
@@ -53,7 +53,7 @@ fn draw_hand(ui: &mut conrod::UiCell,
                .hover_rect(z.src_rect(20.0))
                .press_rect(z.src_rect(20.0))
                .top_right_of(ids.footer)
-                .w(0.2 * wh[0])
+               .w(0.2 * wh[0])
                .h(0.3 * wh[1])
                .set(ids.footernext, ui)
                .was_clicked() {
@@ -64,11 +64,11 @@ fn draw_hand(ui: &mut conrod::UiCell,
 fn page_next(gamedata: &mut GameData) {
     if gamedata.page_index + 1 >= gamedata.player_size {
         gamedata.page_index = 0;
-        for i in (0usize..gamedata.page_vec.len()).rev(){
-            if let Some( &mut(ref mut _page, _)) = gamedata.page_vec.get_mut(i){
-                      if i > 0 {
-                _page.reverse_flip();
-            }
+        for i in (0usize..gamedata.page_vec.len()).rev() {
+            if let Some(&mut (ref mut _page, _)) = gamedata.page_vec.get_mut(i) {
+                if i < gamedata.player_size {
+                    _page.reverse_flip();
+                }
             }
         }
 
@@ -83,13 +83,13 @@ fn page_next(gamedata: &mut GameData) {
 fn page_previous(gamedata: &mut GameData) {
     if gamedata.page_index as f32 - 1.0 < 0.0 {
         gamedata.page_index = gamedata.player_size - 1;
-          for i in 0..gamedata.page_vec.len(){
-                   if let Some( &mut(ref mut _page, _)) = gamedata.page_vec.get_mut(i){
-                      if i < gamedata.player_size - 1 {
-                _page.flip();
+        for i in 0..gamedata.page_vec.len() {
+            if let Some(&mut (ref mut _page, _)) = gamedata.page_vec.get_mut(i) {
+                if i < gamedata.player_size - 1 {
+                    _page.flip();
+                }
             }
-          }
-          }
+        }
     } else {
         gamedata.page_index -= 1;
         if let Some(&mut (ref mut x, _)) = gamedata.page_vec.get_mut(gamedata.page_index) {

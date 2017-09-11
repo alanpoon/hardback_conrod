@@ -23,8 +23,8 @@ pub struct Page {
 impl Page {
     pub fn new() -> Page {
         Page {
-            width: 1.5,
-            height: 1.5,
+            width: 1.8,
+            height: 1.8,
             flipping: false,
             reverse: false,
             time: 0.0,
@@ -137,19 +137,19 @@ impl Page {
         let theta4 = 2.0;
         if self.reverse {
             self.time -= 0.01;
-            if self.time<=0.0{
+            if self.time <= 0.0 {
                 self.flipping = false;
                 return;
             }
         } else {
             self.time += 0.01;
-             if self.time >= 1.0 {
-            self.time = 0.0;
-            self.flipping = false;
-            return;
+            if self.time >= 1.0 {
+                self.time = 0.0;
+                self.flipping = false;
+                return;
+            }
         }
-        }
-      
+
         let dt;
         let f1;
         let f2;

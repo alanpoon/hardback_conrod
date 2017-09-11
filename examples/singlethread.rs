@@ -69,9 +69,9 @@ impl GameApp {
             }));
         let mut events = Vec::new();
         let mut needs_update = true;
+        let mut c = 0;
         'render: loop {
-
-            let sixteen_ms = std::time::Duration::from_millis(50);
+            let sixteen_ms = std::time::Duration::from_millis(200);
             let now = std::time::Instant::now();
             let duration_since_last_update = now.duration_since(last_update);
             if duration_since_last_update < sixteen_ms {
@@ -82,18 +82,9 @@ impl GameApp {
             // Get all the new events since the last frame.
             events_loop.poll_events(|event| { events.push(event); });
 
-            // If there are no new events, wait for one.
-            if events.is_empty() || !needs_update {
-                events_loop.run_forever(|event| {
-                                            events.push(event);
-                                            glium::glutin::ControlFlow::Break
-                                        });
-            }
-            needs_update = false;
             // Process the events.
             for event in events.drain(..) {
-      
-                needs_update = true;
+
                 // Break from the loop upon `Escape` or closed window.
                 match event.clone() {
 
@@ -118,15 +109,15 @@ impl GameApp {
                     None => continue,
                     Some(input) => input,
                 };
-   
-               game_proc.update_state(&mut gamedata,
+
+                game_proc.update_state(&mut gamedata,
                                        &result_map,
                                        logic::game::ConrodMessage::Event(input.clone()));
-            // Handle the input with the `Ui`.
-                ui.handle_event(input);                     
+                // Handle the input with the `Ui`.
+                ui.handle_event(input);
                 // Set the widgets.
                 game_proc.run(&mut ui, &mut (gamedata), &result_map, None);
-    
+
             }
 
             // Draw the `Ui` if it has changed.
@@ -144,7 +135,8 @@ impl GameApp {
             renderer.draw(&display, &mut target, &image_map).unwrap();
 
             target.finish().unwrap();
-      
+            println!("c {}", c);
+            c += 1;
         }
         Ok(())
     }

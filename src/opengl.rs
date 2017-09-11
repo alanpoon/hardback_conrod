@@ -36,23 +36,23 @@ pub fn draw_mutliple(target: &mut glium::Frame,
                      _page_vec: &mut Vec<(page_curl::page::Page, Sprite)>,
                      result_map: &HashMap<ResourceEnum, SupportIdType>) {
 
-    for i in (0usize.._page_vec.len()).rev(){
-      if let Some(&mut (ref mut _page, ref _sprite))=  _page_vec.get_mut(i){
-             _page.update_time();
-                  if let Some(&SupportIdType::TextureId(ref texture)) =
-            result_map.get(&ResourceEnum::Sprite(_sprite.clone())) {
-            let uniforms = uniform! { scale: 1.0f32,tex:texture,rotation:_page.rotation,
+    for i in (0usize.._page_vec.len()).rev() {
+        if let Some(&mut (ref mut _page, ref _sprite)) = _page_vec.get_mut(i) {
+            _page.update_time();
+            if let Some(&SupportIdType::TextureId(ref texture)) =
+                result_map.get(&ResourceEnum::Sprite(_sprite.clone())) {
+                let uniforms = uniform! { scale: 1.0f32,tex:texture,rotation:_page.rotation,
                 translation:_page.translation,
                 theta:_page.theta };
-            target.draw(vertex_buffer,
-                        indices,
-                        program,
-                        &uniforms,
-                        &Default::default())
-                .unwrap();
+                target.draw(vertex_buffer,
+                            indices,
+                            program,
+                            &uniforms,
+                            &Default::default())
+                    .unwrap();
 
+            }
         }
-      }
     }
 
 }

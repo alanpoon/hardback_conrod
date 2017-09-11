@@ -133,15 +133,16 @@ pub struct GameProcess<'a, T>
                                &HashMap<ResourceEnum, SupportIdType>,
                                ConrodMessage<T>) + 'a>,
     pub appdata: AppData,
-    pub ids: Ids
+    pub ids: Ids,
 }
 
 impl<'a, T> GameProcess<'a, T>
     where T: Clone
 {
-    pub fn new(ui: &mut conrod::Ui,y: Box<Fn(&mut GameData,
+    pub fn new(ui: &mut conrod::Ui,
+               y: Box<Fn(&mut GameData,
                          &HashMap<ResourceEnum, SupportIdType>,
-                         ConrodMessage<T>) + 'a> )
+                         ConrodMessage<T>) + 'a>)
                -> GameProcess<'a, T> {
         let appdata = AppData::new(1200, 800, "Hardback");
         GameProcess {
@@ -155,12 +156,12 @@ impl<'a, T> GameProcess<'a, T>
                mut gamedata: &mut GameData,
                result_map: &HashMap<ResourceEnum, SupportIdType>,
                action_tx: Option<mpsc::Sender<Message>>) {
-    //    let mut ids = Ids::new(ui.widget_id_generator());
+        //    let mut ids = Ids::new(ui.widget_id_generator());
 
         match &gamedata.gamestate {
             &GameState::Start => {
                 self.set_game_ui(&mut ui.set_widgets(),
-                               //  &ids,
+                                 //  &ids,
                                  &mut gamedata,
                                  &self.appdata,
                                  result_map,
@@ -171,12 +172,12 @@ impl<'a, T> GameProcess<'a, T>
     }
     fn set_game_ui(&self,
                    mut ui: &mut conrod::UiCell,
-                  // ids: &Ids,
+                   // ids: &Ids,
                    mut gamedata: &mut GameData,
                    appdata: &AppData,
                    result_map: &HashMap<ResourceEnum, SupportIdType>,
                    action_tx: Option<mpsc::Sender<Message>>) {
-                       let ids = &self.ids;
+        let ids = &self.ids;
         widget::Canvas::new()
             .color(color::TRANSPARENT)
             .flow_down(&[(ids.body, widget::Canvas::new().color(color::TRANSPARENT)),

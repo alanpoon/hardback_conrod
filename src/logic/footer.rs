@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use futures::sync::mpsc;
 use futures::{Future, Sink};
 use app::{self, GameData, Ids};
-use backend::Message;
+use backend::OwnedMessage;
 use backend::SupportIdType;
 use graphics_match::button;
 pub fn render(ui: &mut conrod::UiCell,
@@ -17,7 +17,7 @@ pub fn render(ui: &mut conrod::UiCell,
               mut gamedata: &mut GameData,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
-              action_tx: Option<mpsc::Sender<Message>>) {
+              action_tx: mpsc::Sender<OwnedMessage>) {
     match gamedata.footer {
         app::Footer::ShowHand => {
             draw_hand(ui, ids, gamedata, appdata, result_map);

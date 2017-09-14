@@ -38,13 +38,12 @@ impl GameApp {
                                                       &mut ui);
         let events_loop_proxy = events_loop.create_proxy();
         //<logic::game::ConrodMessage<OwnedMessage>>
-        let (proxy_tx, proxy_rx) = std::sync::mpsc::channel();
-        let (proxy_action_tx, proxy_action_rx) = mpsc::channel(2); //chatview::Message
+   let (proxy_tx, proxy_rx) = std::sync::mpsc::channel();
+        let (proxy_action_tx, proxy_action_rx) = mpsc::channel(2);
         let mut last_update = std::time::Instant::now();
         let mut gamedata = app::GameData::new();
-        gamedata.gamestate = app::GameState::Start;
-
-        std::thread::spawn(move || {
+        gamedata.gamestate = app::GameState::Menu;
+         std::thread::spawn(move || {
                                client::run_owned_message(CONNECTION, proxy_tx, proxy_action_rx);
                            });
         let mut _page = page::Page::new();
@@ -64,28 +63,13 @@ impl GameApp {
                 .unwrap();
         let mut last_update = std::time::Instant::now();
         let mut game_proc =
-            logic::game::GameProcess::new(Box::new(|gamedata, result_map, conrod_msg| {
-                match conrod_msg.clone() {
-                    logic::game::ConrodMessage::Socket(j) => {
-                        if let OwnedMessage::Text(z) = OwnedMessage::from(j) {}
-                    }
-                    _ => {}
-                }
+            logic::game::GameProcess::<OwnedMessage>::new(&mut ui,Box::new(|gamedata, result_map, msg| {
+
             }));
         let mut events = Vec::new();
+        let mut c = 0;
         'render: loop {
-            opengl::draw_mutliple(&display,
-                                  &vertex_buffer,
-                                  &indices,
-                                  &program,
-                                  &mut gamedata.page_vec,
-                                  &result_map);
-            while let Ok(s) = proxy_rx.try_recv() {
-                game_proc.update_state(&mut gamedata,
-                                       &result_map,
-                                       logic::game::ConrodMessage::Socket(s));
-            }
-            let sixteen_ms = std::time::Duration::from_millis(16);
+            let sixteen_ms = std::time::Duration::from_millis(500);
             let now = std::time::Instant::now();
             let duration_since_last_update = now.duration_since(last_update);
             if duration_since_last_update < sixteen_ms {
@@ -95,15 +79,9 @@ impl GameApp {
 
             // Get all the new events since the last frame.
             events_loop.poll_events(|event| { events.push(event); });
-
-            // If there are no new events, wait for one.
-            if events.is_empty() {
-                events_loop.run_forever(|event| {
-                                            events.push(event);
-                                            glium::glutin::ControlFlow::Break
-                                        });
-            }
-
+            while let Ok(s) = proxy_rx.try_recv() {
+                        game_proc.update_state(&mut gamedata, &result_map, s);
+                }
             // Process the events.
             for event in events.drain(..) {
 
@@ -131,25 +109,31 @@ impl GameApp {
                     None => continue,
                     Some(input) => input,
                 };
-                game_proc.update_state(&mut gamedata,
-                                       &result_map,
-                                       logic::game::ConrodMessage::Event(input.clone()));
 
                 // Handle the input with the `Ui`.
                 ui.handle_event(input);
-
                 // Set the widgets.
-                game_proc.run(&mut ui, &mut (gamedata), &result_map, None);
+                   game_proc.run(&mut ui, &mut (gamedata), &result_map, proxy_action_tx.clone());
+
             }
 
             // Draw the `Ui` if it has changed.
-            if let Some(primitives) = ui.draw_if_changed() {
-                renderer.fill(&display, primitives, &image_map);
-                let mut target = display.draw();
-                target.clear_color(0.0, 0.0, 0.0, 1.0);
-                renderer.draw(&display, &mut target, &image_map).unwrap();
-                target.finish().unwrap();
-            }
+            let primitives = ui.draw();
+
+            renderer.fill(&display, primitives, &image_map);
+            let mut target = display.draw();
+            target.clear_color(0.0, 0.0, 0.0, 1.0);
+            opengl::draw_mutliple(&mut target,
+                                  &vertex_buffer,
+                                  &indices,
+                                  &program,
+                                  &mut gamedata.page_vec,
+                                  &result_map);
+            renderer.draw(&display, &mut target, &image_map).unwrap();
+
+            target.finish().unwrap();
+            println!("c {}", c);
+            c += 1;
         }
         Ok(())
     }

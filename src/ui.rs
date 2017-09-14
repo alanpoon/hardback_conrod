@@ -21,7 +21,8 @@ pub fn load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, Suppo
                                     display: &glium::Display,
                                     ui: &mut conrod::Ui) {
     CGM_image_map!{
-    (ResourceEnum::Sprite(Sprite::BUTTON),"image",app::get_button_path()),     
+    (ResourceEnum::Sprite(Sprite::BUTTON),"image",app::get_button_path()),
+    (ResourceEnum::Sprite(Sprite::PAGE1F),"texture","images/characters/player1.jpg"),     
     (ResourceEnum::Sprite(Sprite::PAGE1F),"texture","images/characters/player1.jpg"),
     (ResourceEnum::Sprite(Sprite::PAGE2F),"texture","images/characters/player2.jpg"),
     (ResourceEnum::Sprite(Sprite::PAGE3F),"texture","images/characters/player3.jpg"),

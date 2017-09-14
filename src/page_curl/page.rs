@@ -171,7 +171,7 @@ impl Page {
             self.theta = func_linear(f1, angle3, angle1);
             self.translation = func_linear(f2, _a3, _a1);
         }
-
+        // self.theta=0.0;
     }
 }
 pub fn func_linear(ft: f32, f0: f32, f1: f32) -> f32 {

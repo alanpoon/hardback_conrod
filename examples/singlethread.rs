@@ -41,7 +41,7 @@ impl GameApp {
 
         let mut last_update = std::time::Instant::now();
         let mut gamedata = app::GameData::new();
-        gamedata.gamestate = app::GameState::Start;
+        gamedata.gamestate = app::GameState::Menu;
 
         let mut _page = page::Page::new();
         {
@@ -116,7 +116,7 @@ impl GameApp {
                 // Handle the input with the `Ui`.
                 ui.handle_event(input);
                 // Set the widgets.
-                game_proc.run(&mut ui, &mut (gamedata), &result_map, None);
+                //   game_proc.run(&mut ui, &mut (gamedata), &result_map, None);
 
             }
 

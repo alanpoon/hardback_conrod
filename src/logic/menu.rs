@@ -17,7 +17,7 @@ pub fn render(ui: &mut conrod::UiCell,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
               action_tx: mpsc::Sender<OwnedMessage>) {
-    widget::Canvas::new().pad(90.0).color(color::GREEN).set(ids.master, ui);
+    widget::Canvas::new().color(color::TRANSPARENT).set(ids.master, ui);
     if widget::Button::new()
            .w_h(200.0, 50.0)
            .mid_left_of(ids.master)

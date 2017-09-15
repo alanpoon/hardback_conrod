@@ -2,7 +2,7 @@ use conrod::backend::glium::glium;
 use page_curl::page::{self, Page};
 use backend::meta::app::Sprite;
 use conrod_chat::custom_widget::chatview::Message;
-
+use backend::server_lib::codec::*;
 widget_ids! {
     pub struct Ids {
          master,
@@ -23,11 +23,7 @@ widget_ids! {
          text
     }
 }
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct TableInfo {
-    pub numberOfPlayers: i32,
-    pub players: Vec<String>,
-}
+
 #[derive(Debug,Clone)]
 pub enum GameState {
     Menu,
@@ -36,10 +32,7 @@ pub enum GameState {
     Start,
     Tutorial,
 }
-#[derive(Serialize, Deserialize,Debug, Clone)]
-pub struct Player {
-    pub name: String,
-}
+
 pub struct GameData {
     pub gamestate: GameState,
     pub footer: Footer,

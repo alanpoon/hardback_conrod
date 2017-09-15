@@ -1,13 +1,14 @@
-use app::{self, ReceivedMsg, GameData, AnimateMsg, GameState};
-use greed_meta::app::{AppData, ResourceEnum, Font, Sprite};
-use logic::game::SupportIdType;
+use app::{self, GameData, GameState};
+use backend::server_lib::codec::{ServerReceivedMsg,ClientReceivedMsg};
+use backend::meta::app::{AppData, ResourceEnum, Font, Sprite};
+use backend::SupportIdType;
 use std::collections::HashMap;
 use conrod_chat::chat;
 //use animation;
-pub fn update(s: ReceivedMsg,
+pub fn update(s: ClientReceivedMsg,
               mut gamedata: &mut GameData,
               result_map: &HashMap<ResourceEnum, SupportIdType>) {
-    let app::ReceivedMsg { type_name,
+    let ClientReceivedMsg { type_name,
                            tables,
                            tablenumber,
                            players,
@@ -41,7 +42,7 @@ pub fn update(s: ReceivedMsg,
             (players, log, privateInformation) {
             gamedata.gamestate = app::GameState::Start;
             gamedata.players = _players;
-            gamedata.log = _log;
+          //  gamedata.log = _log;
         }
         if let (Some(Some(_request)), Some(Some(_reason)), Some(Some(_optional))) =
             (request, reason, optional) {
@@ -57,16 +58,3 @@ pub fn update(s: ReceivedMsg,
         }
     }
 }
-//animation
-/*
-pub fn animate(s: AnimateMsg,
-               mut gamedata: &mut GameData,
-               result_map: &HashMap<ResourceEnum, SupportIdType>) {
-    match s {
-        AnimateMsg::Loading(z) => {
-            gamedata.frame_index = z;
-        }
-        _ => {}
-    }
-}
-*/

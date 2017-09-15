@@ -11,6 +11,7 @@ futures ={ version = "0.1.14", features=["use_std"] }
 cardgame_widgets = {path ="../cardgame_widgets"}
 cardgame_macros = {path="../cardgame_macros"}
 hardback_meta = {path = "../hardback_meta"}
+hardback_server = {path = "../hardback_server"}
 websocket = { version ="0.20.2",optional = true}
 tokio-core ="0.1.9"
 serde="1.0"

@@ -5,12 +5,14 @@ extern crate conrod_chat;
 extern crate futures;
 
 use hardback_conrod as game_conrod;
+use conrod::backend::glium::glium::{self, glutin, Surface};
 use game_conrod::{app, logic};
 use game_conrod::backend::{OwnedMessage, SupportIdType};
 use game_conrod::backend::meta::app::{Font, ResourceEnum};
-use conrod::backend::glium::glium::{self, glutin, Surface};
-use hardback_conrod::page_curl::{self, page, render};
-use hardback_conrod::opengl;
+use game_conrod::backend::server_lib::codec;
+use game_conrod::page_curl::{self, page, render};
+use game_conrod::opengl;
+use game_conrod::on_request;
 use conrod_chat::backend::websocket::client;
 use std::collections::HashMap;
 use std::sync::mpsc::{Sender, Receiver};
@@ -64,7 +66,12 @@ impl GameApp {
         let mut last_update = std::time::Instant::now();
         let mut game_proc =
             logic::game::GameProcess::<OwnedMessage>::new(&mut ui,Box::new(|gamedata, result_map, msg| {
-
+                 if let OwnedMessage::Text(z) = OwnedMessage::from(msg) {
+                             if let Ok(s) =codec::ClientReceivedMsg::deserialize_receive(&z) {
+                                println!("s {:?}", s);
+                                on_request::update(s, gamedata, result_map);
+                            }
+                 }
             }));
         let mut events = Vec::new();
         let mut c = 0;
@@ -132,7 +139,7 @@ impl GameApp {
             renderer.draw(&display, &mut target, &image_map).unwrap();
 
             target.finish().unwrap();
-            println!("c {}", c);
+         //   println!("c {}", c);
             c += 1;
         }
         Ok(())

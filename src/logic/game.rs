@@ -63,7 +63,7 @@ impl<'a, T> GameProcess<'a, T>
                                     result_map,
                                     action_tx);
             }
-            &GameState::Lobby(_) => {
+            &GameState::Lobby => {
                 logic::lobby::render(&mut ui.set_widgets(),
                                      &ids,
                                     &mut gamedata,

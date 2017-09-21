@@ -38,10 +38,10 @@ pub fn render(ui: &mut conrod::UiCell,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
               action_tx: mpsc::Sender<OwnedMessage>) {
-    widget::Canvas::new().pad(90.0).color(color::GREEN).set(ids.master, ui);
+    widget::Canvas::new().color(color::TRANSPARENT).set(ids.master, ui);
     if let Some(mut items) = tabview::TabView::new(vec![appdata.texts.lobby, appdata.texts.chat])
            .padded_w_of(ids.master, 0.1 * ui.win_h)
-           .padded_h_of(ids.master, 0.2 * ui.win_w)
+           .padded_h_of(ids.master, 0.1 * ui.win_w)
            .middle_of(ids.master)
            .set(ids.middle_tabview, ui) {
         let vec_closure = render_closure();
@@ -98,7 +98,7 @@ pub fn render(ui: &mut conrod::UiCell,
             let card_index = 7.0;
             let wh = ui.wh_of(ids.middle_tabview).unwrap();
             // let wh = [200.0,200.0];
-            if let app::GameState::Lobby(true) = gamedata.gamestate {
+            if let (&app::GameState::Lobby,None) = (&gamedata.gamestate,gamedata.tablenumber) {
                 if animated_button::AnimatedButton::image(rust_logo)
                        .label(appdata.texts.newtable)
                        .label_font_size(14)
@@ -110,24 +110,31 @@ pub fn render(ui: &mut conrod::UiCell,
                        .w_h(wh[0] * 0.3, wh[1] * 0.06)
                        .set(ids.new_table_but, ui)
                        .was_clicked() {
+                          let g = json!({
+                            "newTable": true
+                            }); 
                     action_tx.clone()
-                        .send(OwnedMessage::Text("{'newTable':true}".to_owned()))
+                        .send(OwnedMessage::Text(g.to_string()))
                         .wait()
                         .unwrap();
                 };
                 let button_panel = ui.rect_of(ids.new_table_but).unwrap();
                 widget::Text::new(appdata.texts.playername)
                     .down_from(ids.new_table_but, 2.0)
-                    .w_h(wh[0] * 0.3, wh[1] * 0.04)
+                    .w_h(200.0, wh[1] * 0.06)
                     .set(ids.name_text, ui);
-                widget::Rectangle::fill_with([wh[0] * 0.3, wh[1] * 0.04], color::WHITE)
-                    .right_from(ids.name_text, 0.0)
+                widget::Text::new(&gamedata.name)
+                    .right_from(ids.name_text,0.0)
+                    .w_h(200.0,wh[1]*0.06)
+                    .set(ids.user_name,ui);
+                widget::Rectangle::fill_with([100.0, wh[1] * 0.06], color::WHITE)
+                    .right_from(ids.user_name, 0.0)
                     .set(ids.name_rect, ui);
-                let mut k = &mut gamedata.name_text_edit;
+             let mut k = &mut gamedata.name_text_edit;
                 for edit in widget::TextEdit::new(k)
             .color(color::BLACK)
-            .w_h(wh[0]*0.25, wh[1]* 0.04)
-            .right_from(ids.name_text,wh[0]*0.025)
+            .w_h(98.0, wh[1]* 0.06)
+            .right_from(ids.user_name,wh[0]*0.025)
             .left_justify()
             .line_spacing(2.5)
             .restrict_to_height(true) // Let the height grow infinitely and scroll.
@@ -147,15 +154,19 @@ pub fn render(ui: &mut conrod::UiCell,
                        .w_h(wh[0] * 0.3, wh[1] * 0.06)
                        .set(ids.name_change_but, ui)
                        .was_clicked() {
-                    let f = format!("{{'namechange':'{}'}}", k);
+                           gamedata.name = k.clone();
+                           *k="".to_owned();
+                      let g = json!({
+                            "namechange": k
+                            });
                     action_tx.clone()
-                        .send(OwnedMessage::Text(f))
+                        .send(OwnedMessage::Text(g.to_string()))
                         .wait()
                         .unwrap();
                 }
 
             } else {
-                widget::Rectangle::fill_with([0.0, 0.0], color::WHITE)
+                widget::Text::new("")
                     .top_left_with_margins_on(w_id.parent_id, 0.0, 0.0)
                     .set(ids.name_text, ui);
             }
@@ -171,9 +182,11 @@ pub fn render(ui: &mut conrod::UiCell,
             if let Some(s) = scrollbar {
                 s.set(ui)
             }
+            println!("gamedata.tables.len() {}",gamedata.tables.len());
             let mut table_iter = gamedata.tables.iter();
             let mut c = 0;
             while let (Some(tableinfo), Some(item)) = (table_iter.next(), items.next(ui)) {
+                println!("aaaaaaa");
                 let c_c = c.clone();
                 let j = table_list::TableList::new(&_table_list_texts,
                                                    //ready
@@ -185,9 +198,11 @@ pub fn render(ui: &mut conrod::UiCell,
                                                             }),
                                                    //join
                                                    Box::new(|| {
-                    let f = format!("{{'joinTable':{}}}", c_c);
+                      let g = json!({
+                            "joinTable":c_c,
+                            });
                     let action_tx_c = action_tx.clone();
-                    action_tx_c.send(OwnedMessage::Text(f)).wait().unwrap();
+                    action_tx_c.send(OwnedMessage::Text(g.to_string())).wait().unwrap();
                 }),
                                                    //leave
                                                    Box::new(|| {
@@ -197,8 +212,10 @@ pub fn render(ui: &mut conrod::UiCell,
                                                    //change_player_number
                                                    Box::new(|x| {
                     let action_tx_c = action_tx.clone();
-                    let f = format!("{{'changePlayers':{}}}", x);
-                    action_tx_c.send(OwnedMessage::Text(f)).wait().unwrap();
+                    let g = json!({
+                            "changePlayers":x,
+                            });
+                    action_tx_c.send(OwnedMessage::Text(g.to_string())).wait().unwrap();
                 }),
                                                    &tableinfo.players,
                                                    tableinfo.numberOfPlayers.clone(),

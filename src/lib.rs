@@ -1,8 +1,5 @@
-//extern crate hardback_meta;
-extern crate serde_json;
 #[macro_use]
-extern crate serde_derive;
-extern crate serde;
+extern crate serde_json;
 #[macro_use]
 extern crate conrod;
 #[macro_use]
@@ -14,7 +11,7 @@ extern crate cardgame_macros;
 extern crate conrod_chat;
 extern crate cardgame_widgets;
 pub extern crate hardback_meta;
-pub extern crate hardback_server;
+pub extern crate hardback_server_lib;
 extern crate futures;
 extern crate image;
 extern crate find_folder;

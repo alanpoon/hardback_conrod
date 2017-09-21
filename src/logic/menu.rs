@@ -25,6 +25,6 @@ pub fn render(ui: &mut conrod::UiCell,
            .label("Multiplayer")
            .set(ids.menubut_multiplayer, ui)
            .was_clicked() {
-        gamedata.gamestate = GameState::Lobby(true);
+        gamedata.gamestate = GameState::Lobby;
     }
 }

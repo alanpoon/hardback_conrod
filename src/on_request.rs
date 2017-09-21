@@ -13,6 +13,7 @@ pub fn update(s: ClientReceivedMsg,
                            tablenumber,
                            players,
                            request,
+                           boardstate,
                            reason,
                            optional,
                            location,
@@ -38,6 +39,7 @@ pub fn update(s: ClientReceivedMsg,
             }
             if _location == "table" {}
         }
+            }
         if let (Some(Some(_players)), Some(Some(_log)), Some(Some(_privateInformation))) =
             (players, log, privateInformation) {
             gamedata.gamestate = app::GameState::Start;
@@ -47,14 +49,13 @@ pub fn update(s: ClientReceivedMsg,
         if let (Some(Some(_request)), Some(Some(_reason)), Some(Some(_optional))) =
             (request, reason, optional) {
             //prompt
-        }
-        if let (Some(Some(_type_name)), Some(Some(_tables)), Some(_tablenumber)) =
+        }    
+     if let (Some(Some(_type_name)), Some(Some(_tables)), Some(_tablenumber)) =
             (type_name, tables, tablenumber) {
-            if _type_name == "lobby" {
-                gamedata.gamestate = app::GameState::Lobby(false);
+           if _type_name == "lobby" {
+               println!("_tables{:?}",_tables);
                 gamedata.tables = _tables;
                 gamedata.tablenumber = _tablenumber;
             }
-        }
-    }
+            }
 }

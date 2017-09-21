@@ -14,6 +14,7 @@ widget_ids! {
         middle_tabview,
         new_table_but,
         name_text,
+        user_name,
         name_rect,
         name_text_edit,
         name_change_but,
@@ -27,7 +28,7 @@ widget_ids! {
 #[derive(Debug,Clone)]
 pub enum GameState {
     Menu,
-    Lobby(bool), //true ->new Table
+    Lobby,
     Loading,
     Start,
     Tutorial,
@@ -72,7 +73,7 @@ impl GameData {
         }
     }
 }
-#[derive(Serialize, Deserialize, Debug, Clone,PartialEq)]
+#[derive( Debug, Clone,PartialEq)]
 pub enum Footer {
     ShowHand,
     None,

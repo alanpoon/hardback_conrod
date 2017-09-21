@@ -19,7 +19,7 @@ use std::sync::mpsc::{Sender, Receiver};
 use futures::sync::mpsc;
 const WIN_W: u32 = 900;
 const WIN_H: u32 = 600;
-const CONNECTION: &'static str = "ws://ec2-35-157-160-241.eu-central-1.compute.amazonaws.com:8080/greed";
+const CONNECTION: &'static str = "ws://127.0.0.1:8080";
 
 pub struct GameApp {}
 

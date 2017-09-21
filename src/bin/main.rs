@@ -5,19 +5,21 @@ extern crate conrod_chat;
 extern crate futures;
 
 use hardback_conrod as game_conrod;
+use conrod::backend::glium::glium::{self, glutin, Surface};
 use game_conrod::{app, logic};
 use game_conrod::backend::{OwnedMessage, SupportIdType};
 use game_conrod::backend::meta::app::{Font, ResourceEnum};
-use conrod::backend::glium::glium::{self, glutin, Surface};
-use hardback_conrod::page_curl::{self, page, render};
-use hardback_conrod::opengl;
+use game_conrod::backend::server_lib::codec;
+use game_conrod::page_curl::{self, page, render};
+use game_conrod::opengl;
+use game_conrod::on_request;
 use conrod_chat::backend::websocket::client;
 use std::collections::HashMap;
 use std::sync::mpsc::{Sender, Receiver};
 use futures::sync::mpsc;
 const WIN_W: u32 = 900;
 const WIN_H: u32 = 600;
-const CONNECTION: &'static str = "ws://ec2-35-157-160-241.eu-central-1.compute.amazonaws.com:8080/greed";
+const CONNECTION: &'static str = "ws://127.0.0.1:8080";
 
 pub struct GameApp {}
 
@@ -64,13 +66,17 @@ impl GameApp {
         let mut last_update = std::time::Instant::now();
         let mut game_proc =
             logic::game::GameProcess::<OwnedMessage>::new(&mut ui,Box::new(|gamedata, result_map, msg| {
-
+                 if let OwnedMessage::Text(z) = OwnedMessage::from(msg) {
+                             if let Ok(s) =codec::ClientReceivedMsg::deserialize_receive(&z) {
+                                println!("s {:?}", s);
+                                on_request::update(s, gamedata, result_map);
+                            }
+                 }
             }));
         let mut events = Vec::new();
-        let mut needs_update = true;
         let mut c = 0;
         'render: loop {
-            let sixteen_ms = std::time::Duration::from_millis(200);
+            let sixteen_ms = std::time::Duration::from_millis(500);
             let now = std::time::Instant::now();
             let duration_since_last_update = now.duration_since(last_update);
             if duration_since_last_update < sixteen_ms {
@@ -114,7 +120,7 @@ impl GameApp {
                 // Handle the input with the `Ui`.
                 ui.handle_event(input);
                 // Set the widgets.
-                   game_proc.run(&mut ui, &mut (gamedata), &result_map, proxy_action_tx);
+                   game_proc.run(&mut ui, &mut (gamedata), &result_map, proxy_action_tx.clone());
 
             }
 
@@ -133,7 +139,7 @@ impl GameApp {
             renderer.draw(&display, &mut target, &image_map).unwrap();
 
             target.finish().unwrap();
-            println!("c {}", c);
+         //   println!("c {}", c);
             c += 1;
         }
         Ok(())

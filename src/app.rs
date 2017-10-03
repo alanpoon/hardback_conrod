@@ -48,7 +48,7 @@ pub struct GameData {
     pub name_text_edit: String,
     pub players: Vec<Player>,
     pub tables: Vec<TableInfo>,
-    pub tablenumber: Option<i32>,
+    pub tablenumber: Option<usize>,
 }
 impl GameData {
     pub fn new() -> GameData {

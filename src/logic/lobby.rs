@@ -12,23 +12,23 @@ use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Font, Sprite};
 use graphics_match::button;
 use logic;
-pub struct TableListTex<'a>{
-    appdata:&'a AppData,
+pub struct TableListTex<'a> {
+    appdata: &'a AppData,
 }
-impl<'a> table_list::TableListTexts for TableListTex<'a>{
-    fn text_ready(&self)->&'static str{
+impl<'a> table_list::TableListTexts for TableListTex<'a> {
+    fn text_ready(&self) -> &'static str {
         self.appdata.texts.ready
     }
-    fn text_leave(&self)->&'static str{
+    fn text_leave(&self) -> &'static str {
         self.appdata.texts.leave
     }
-    fn text_join(&self)->&'static str{
+    fn text_join(&self) -> &'static str {
         self.appdata.texts.join
     }
-    fn text_playergame(&self)->&'static str{
+    fn text_playergame(&self) -> &'static str {
         self.appdata.texts.playergame
     }
-    fn text_changeto(&self)->&'static str{
+    fn text_changeto(&self) -> &'static str {
         self.appdata.texts.changeto
     }
 }
@@ -92,13 +92,13 @@ pub fn render(ui: &mut conrod::UiCell,
                   result_map: &HashMap<ResourceEnum, SupportIdType>,
                   action_tx: mpsc::Sender<OwnedMessage>) {
         let _style = button::get_style();
-        let _table_list_texts=TableListTex{appdata:&appdata};
+        let _table_list_texts = TableListTex { appdata: &appdata };
         if let Some(&SupportIdType::ImageId(rust_logo)) =
             result_map.get(&ResourceEnum::Sprite(Sprite::BUTTON)) {
             let card_index = 7.0;
             let wh = ui.wh_of(ids.middle_tabview).unwrap();
             // let wh = [200.0,200.0];
-            if let (&app::GameState::Lobby,None) = (&gamedata.gamestate,gamedata.tablenumber) {
+            if let (&app::GameState::Lobby, None) = (&gamedata.gamestate, gamedata.tablenumber) {
                 if animated_button::AnimatedButton::image(rust_logo)
                        .label(appdata.texts.newtable)
                        .label_font_size(14)
@@ -110,9 +110,9 @@ pub fn render(ui: &mut conrod::UiCell,
                        .w_h(wh[0] * 0.3, wh[1] * 0.06)
                        .set(ids.new_table_but, ui)
                        .was_clicked() {
-                          let g = json!({
+                    let g = json!({
                             "newTable": true
-                            }); 
+                            });
                     action_tx.clone()
                         .send(OwnedMessage::Text(g.to_string()))
                         .wait()
@@ -124,13 +124,13 @@ pub fn render(ui: &mut conrod::UiCell,
                     .w_h(200.0, wh[1] * 0.06)
                     .set(ids.name_text, ui);
                 widget::Text::new(&gamedata.name)
-                    .right_from(ids.name_text,0.0)
-                    .w_h(200.0,wh[1]*0.06)
-                    .set(ids.user_name,ui);
+                    .right_from(ids.name_text, 0.0)
+                    .w_h(200.0, wh[1] * 0.06)
+                    .set(ids.user_name, ui);
                 widget::Rectangle::fill_with([100.0, wh[1] * 0.06], color::WHITE)
                     .right_from(ids.user_name, 0.0)
                     .set(ids.name_rect, ui);
-             let mut k = &mut gamedata.name_text_edit;
+                let mut k = &mut gamedata.name_text_edit;
                 for edit in widget::TextEdit::new(k)
             .color(color::BLACK)
             .w_h(98.0, wh[1]* 0.06)
@@ -154,9 +154,9 @@ pub fn render(ui: &mut conrod::UiCell,
                        .w_h(wh[0] * 0.3, wh[1] * 0.06)
                        .set(ids.name_change_but, ui)
                        .was_clicked() {
-                           gamedata.name = k.clone();
-                           *k="".to_owned();
-                      let g = json!({
+                    gamedata.name = k.clone();
+                    *k = "".to_owned();
+                    let g = json!({
                             "namechange": k
                             });
                     action_tx.clone()
@@ -182,23 +182,23 @@ pub fn render(ui: &mut conrod::UiCell,
             if let Some(s) = scrollbar {
                 s.set(ui)
             }
-            println!("gamedata.tables.len() {}",gamedata.tables.len());
+
             let mut table_iter = gamedata.tables.iter();
             let mut c = 0;
             while let (Some(tableinfo), Some(item)) = (table_iter.next(), items.next(ui)) {
-                println!("aaaaaaa");
                 let c_c = c.clone();
                 let j = table_list::TableList::new(&_table_list_texts,
                                                    //ready
                                                    Box::new(|| {
-                                                                let action_tx_c = action_tx.clone();
-                                                                action_tx_c.send(OwnedMessage::Text("{'ready':true}".to_owned()))
-                    .wait()                                                                                 
-                    .unwrap();
-                                                            }),
+                    let g = json!({
+                            "ready":true,
+                            });
+                    let action_tx_c = action_tx.clone();
+                     action_tx_c.send(OwnedMessage::Text(g.to_string())).wait().unwrap();
+                }),
                                                    //join
                                                    Box::new(|| {
-                      let g = json!({
+                    let g = json!({
                             "joinTable":c_c,
                             });
                     let action_tx_c = action_tx.clone();
@@ -206,9 +206,12 @@ pub fn render(ui: &mut conrod::UiCell,
                 }),
                                                    //leave
                                                    Box::new(|| {
-                                                                let action_tx_c = action_tx.clone();
-                                                                action_tx_c.send(OwnedMessage::Text("{'leavetable':false}".to_owned())).wait().unwrap();
-                                                            }),
+                    let g = json!({
+                            "leavetable":false,
+                            });
+                    let action_tx_c = action_tx.clone();
+                    action_tx_c.send(OwnedMessage::Text(g.to_string())).wait().unwrap();
+                }),
                                                    //change_player_number
                                                    Box::new(|x| {
                     let action_tx_c = action_tx.clone();
@@ -219,10 +222,9 @@ pub fn render(ui: &mut conrod::UiCell,
                 }),
                                                    &tableinfo.players,
                                                    tableinfo.numberOfPlayers.clone(),
+                                                   4,
                                                    Some(c) == gamedata.tablenumber);
-
                 item.set(j, ui);
-
                 c += 1;
             }
 

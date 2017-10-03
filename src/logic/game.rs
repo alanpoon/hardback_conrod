@@ -16,9 +16,7 @@ const LIB_PATH: &'static str = "target/debug/libtest_shared.so";
 pub struct GameProcess<'a, T>
     where T: Clone
 {
-    pub update_closure: Box<Fn(&mut GameData,
-                               &HashMap<ResourceEnum, SupportIdType>,
-                               T) + 'a>,
+    pub update_closure: Box<Fn(&mut GameData, &HashMap<ResourceEnum, SupportIdType>, T) + 'a>,
     pub appdata: AppData,
     pub ids: Ids,
 }
@@ -27,9 +25,7 @@ impl<'a, T> GameProcess<'a, T>
     where T: Clone
 {
     pub fn new(ui: &mut conrod::Ui,
-               y: Box<Fn(&mut GameData,
-                         &HashMap<ResourceEnum, SupportIdType>,
-                         T) + 'a>)
+               y: Box<Fn(&mut GameData, &HashMap<ResourceEnum, SupportIdType>, T) + 'a>)
                -> GameProcess<'a, T> {
         let appdata = AppData::new(1200, 800, "Hardback");
         GameProcess {
@@ -44,20 +40,20 @@ impl<'a, T> GameProcess<'a, T>
                result_map: &HashMap<ResourceEnum, SupportIdType>,
                action_tx: mpsc::Sender<OwnedMessage>) {
         //    let mut ids = Ids::new(ui.widget_id_generator());
-            let ids = &self.ids;
+        let ids = &self.ids;
         match &gamedata.gamestate {
             &GameState::Start => {
                 self.set_game_ui(&mut ui.set_widgets(),
-                                  &ids,
+                                 &ids,
                                  &mut gamedata,
                                  &self.appdata,
                                  result_map,
                                  action_tx);
             }
             &GameState::Menu => {
-                
+
                 logic::menu::render(&mut ui.set_widgets(),
-                                     &ids,
+                                    &ids,
                                     &mut gamedata,
                                     &self.appdata,
                                     result_map,
@@ -66,22 +62,22 @@ impl<'a, T> GameProcess<'a, T>
             &GameState::Lobby => {
                 logic::lobby::render(&mut ui.set_widgets(),
                                      &ids,
-                                    &mut gamedata,
-                                    &self.appdata,
-                                    result_map,
-                                    action_tx);
+                                     &mut gamedata,
+                                     &self.appdata,
+                                     result_map,
+                                     action_tx);
             }
             _ => {}
         }
     }
     fn set_game_ui(&self,
                    mut ui: &mut conrod::UiCell,
-                    ids: &Ids,
+                   ids: &Ids,
                    mut gamedata: &mut GameData,
                    appdata: &AppData,
                    result_map: &HashMap<ResourceEnum, SupportIdType>,
                    action_tx: mpsc::Sender<OwnedMessage>) {
-      
+
         widget::Canvas::new()
             .color(color::TRANSPARENT)
             .flow_down(&[(ids.body, widget::Canvas::new().color(color::TRANSPARENT)),

@@ -40,12 +40,12 @@ impl GameApp {
                                                       &mut ui);
         let events_loop_proxy = events_loop.create_proxy();
         //<logic::game::ConrodMessage<OwnedMessage>>
-   let (proxy_tx, proxy_rx) = std::sync::mpsc::channel();
+        let (proxy_tx, proxy_rx) = std::sync::mpsc::channel();
         let (proxy_action_tx, proxy_action_rx) = mpsc::channel(2);
         let mut last_update = std::time::Instant::now();
         let mut gamedata = app::GameData::new();
         gamedata.gamestate = app::GameState::Menu;
-         std::thread::spawn(move || {
+        std::thread::spawn(move || {
                                client::run_owned_message(CONNECTION, proxy_tx, proxy_action_rx);
                            });
         let mut _page = page::Page::new();
@@ -87,8 +87,8 @@ impl GameApp {
             // Get all the new events since the last frame.
             events_loop.poll_events(|event| { events.push(event); });
             while let Ok(s) = proxy_rx.try_recv() {
-                        game_proc.update_state(&mut gamedata, &result_map, s);
-                }
+                game_proc.update_state(&mut gamedata, &result_map, s);
+            }
             // Process the events.
             for event in events.drain(..) {
 
@@ -120,7 +120,10 @@ impl GameApp {
                 // Handle the input with the `Ui`.
                 ui.handle_event(input);
                 // Set the widgets.
-                   game_proc.run(&mut ui, &mut (gamedata), &result_map, proxy_action_tx.clone());
+                game_proc.run(&mut ui,
+                              &mut (gamedata),
+                              &result_map,
+                              proxy_action_tx.clone());
 
             }
 
@@ -139,7 +142,7 @@ impl GameApp {
             renderer.draw(&display, &mut target, &image_map).unwrap();
 
             target.finish().unwrap();
-         //   println!("c {}", c);
+            //   println!("c {}", c);
             c += 1;
         }
         Ok(())

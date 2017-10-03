@@ -1,5 +1,5 @@
 use app::{self, GameData, GameState};
-use backend::server_lib::codec::{ServerReceivedMsg,ClientReceivedMsg};
+use backend::server_lib::codec::{ServerReceivedMsg, ClientReceivedMsg};
 use backend::meta::app::{AppData, ResourceEnum, Font, Sprite};
 use backend::SupportIdType;
 use std::collections::HashMap;
@@ -9,18 +9,18 @@ pub fn update(s: ClientReceivedMsg,
               mut gamedata: &mut GameData,
               result_map: &HashMap<ResourceEnum, SupportIdType>) {
     let ClientReceivedMsg { type_name,
-                           tables,
-                           tablenumber,
-                           players,
-                           request,
-                           boardstate,
-                           reason,
-                           optional,
-                           location,
-                           privateInformation,
-                           sender,
-                           message,
-                           log } = s;
+                            tables,
+                            tablenumber,
+                            players,
+                            request,
+                            boardstate,
+                            reason,
+                            optional,
+                            location,
+                            privateInformation,
+                            sender,
+                            message,
+                            log } = s;
     if let (Some(Some(_type_name)),
             Some(Some(_location)),
             Some(Some(_sender)),
@@ -39,23 +39,22 @@ pub fn update(s: ClientReceivedMsg,
             }
             if _location == "table" {}
         }
-            }
-        if let (Some(Some(_players)), Some(Some(_log)), Some(Some(_privateInformation))) =
-            (players, log, privateInformation) {
-            gamedata.gamestate = app::GameState::Start;
-            gamedata.players = _players;
-          //  gamedata.log = _log;
+    }
+    if let (Some(Some(_players)), Some(Some(_log)), Some(Some(_privateInformation))) =
+        (players, log, privateInformation) {
+        gamedata.gamestate = app::GameState::Start;
+        gamedata.players = _players;
+        //  gamedata.log = _log;
+    }
+    if let (Some(Some(_request)), Some(Some(_reason)), Some(Some(_optional))) =
+        (request, reason, optional) {
+        //prompt
+    }
+    if let (Some(Some(_type_name)), Some(Some(_tables)), Some(_tablenumber)) =
+        (type_name, tables, tablenumber) {
+        if _type_name == "lobby" {
+            gamedata.tables = _tables;
+            gamedata.tablenumber = _tablenumber;
         }
-        if let (Some(Some(_request)), Some(Some(_reason)), Some(Some(_optional))) =
-            (request, reason, optional) {
-            //prompt
-        }    
-     if let (Some(Some(_type_name)), Some(Some(_tables)), Some(_tablenumber)) =
-            (type_name, tables, tablenumber) {
-           if _type_name == "lobby" {
-               println!("_tables{:?}",_tables);
-                gamedata.tables = _tables;
-                gamedata.tablenumber = _tablenumber;
-            }
-            }
+    }
 }

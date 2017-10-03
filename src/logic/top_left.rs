@@ -24,23 +24,23 @@ pub fn draw_lobby_chat(w_id: tabview::Item,
                        result_map: &HashMap<ResourceEnum, SupportIdType>,
                        action_tx: mpsc::Sender<OwnedMessage>,
                        mut ui: &mut conrod::UiCell) {
-                             if let Some(&SupportIdType::ImageId(rust_img)) =
-   result_map.get(&ResourceEnum::Sprite(Sprite::RUST)) {
-    let k = chatview_futures::ChatView::new(&mut gamedata.lobby_history,
-                                            &mut gamedata.lobby_textedit,
-                                            get_chat_styles(),
-                                            Some(rust_img),
-                                            &gamedata.name,
-                                            action_tx,
-                                            Box::new(process));
-    w_id.set(k, &mut ui);
-        }
+    if let Some(&SupportIdType::ImageId(rust_img)) =
+        result_map.get(&ResourceEnum::Sprite(Sprite::RUST)) {
+        let k = chatview_futures::ChatView::new(&mut gamedata.lobby_history,
+                                                &mut gamedata.lobby_textedit,
+                                                get_chat_styles(),
+                                                Some(rust_img),
+                                                &gamedata.name,
+                                                action_tx,
+                                                Box::new(process));
+        w_id.set(k, &mut ui);
+    }
 }
 fn get_chat_styles() -> c_app::Static_Style {
     c_app::Application::default().get_static_styles()
 }
 fn process(name: &String, text: &String) -> OwnedMessage {
-       let g = json!({
+    let g = json!({
     "type":"chat",
   "chat": text,
   "location":"lobby"

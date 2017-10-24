@@ -15,6 +15,7 @@ use game_conrod::page_curl::{self, page, render};
 use game_conrod::opengl;
 use game_conrod::on_request;
 use conrod_chat::backend::websocket::client;
+use support;
 use std::collections::HashMap;
 use std::sync::mpsc::{Sender, Receiver};
 use std::sync::{Arc,Mutex};

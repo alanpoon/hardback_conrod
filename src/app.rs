@@ -35,6 +35,7 @@ pub enum GameState {
     Loading,
     Start,
     Tutorial,
+    InsideGame,
 }
 
 pub struct GameData {

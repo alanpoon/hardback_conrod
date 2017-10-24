@@ -1,5 +1,5 @@
 use app::{self, GameData, GameState};
-use backend::server_lib::codec::{ServerReceivedMsg, ClientReceivedMsg};
+use backend::codec_lib::codec::*;
 use backend::meta::app::{AppData, ResourceEnum, Font, Sprite};
 use backend::SupportIdType;
 use std::collections::HashMap;
@@ -14,13 +14,14 @@ pub fn update(s: ClientReceivedMsg,
                             players,
                             request,
                             boardstate,
+                            turn_index,
                             reason,
                             optional,
                             location,
                             privateInformation,
                             sender,
                             message,
-                            log } = s;
+                            log,.. } = s;
     if let (Some(Some(_type_name)),
             Some(Some(_location)),
             Some(Some(_sender)),

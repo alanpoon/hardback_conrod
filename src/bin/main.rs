@@ -3,19 +3,21 @@ extern crate hardback_conrod;
 extern crate conrod;
 extern crate conrod_chat;
 extern crate futures;
+extern crate toa_ping;
 
 use hardback_conrod as game_conrod;
 use conrod::backend::glium::glium::{self, glutin, Surface};
 use game_conrod::{app, logic};
 use game_conrod::backend::{OwnedMessage, SupportIdType};
 use game_conrod::backend::meta::app::{Font, ResourceEnum};
-use game_conrod::backend::server_lib::codec;
+use game_conrod::backend::codec_lib::codec;
 use game_conrod::page_curl::{self, page, render};
 use game_conrod::opengl;
 use game_conrod::on_request;
 use conrod_chat::backend::websocket::client;
 use std::collections::HashMap;
 use std::sync::mpsc::{Sender, Receiver};
+use std::sync::{Arc,Mutex};
 use futures::sync::mpsc;
 const WIN_W: u32 = 900;
 const WIN_H: u32 = 600;
@@ -42,12 +44,46 @@ impl GameApp {
         //<logic::game::ConrodMessage<OwnedMessage>>
         let (proxy_tx, proxy_rx) = std::sync::mpsc::channel();
         let (proxy_action_tx, proxy_action_rx) = mpsc::channel(2);
+        let s_tx = Arc::new(Mutex::new(proxy_action_tx));
+        let s_rx = Arc::new(Mutex::new(proxy_action_rx));
+        let (ss_tx,ss_rx) = (s_tx.clone(),s_rx.clone());
         let mut last_update = std::time::Instant::now();
         let mut gamedata = app::GameData::new();
         gamedata.gamestate = app::GameState::Menu;
-        std::thread::spawn(move || {
-                               client::run_owned_message(CONNECTION, proxy_tx, proxy_action_rx);
-                           });
+      std::thread::spawn(move || {
+            let mut connected = false;
+            let mut last_update = std::time::Instant::now();
+            let mut c =0;
+            while !connected {
+                let sixteen_ms = std::time::Duration::new(10, 0);
+                let now = std::time::Instant::now();
+                let duration_since_last_update = now.duration_since(last_update);
+                if (duration_since_last_update < sixteen_ms) & (c>0) {
+                    std::thread::sleep(sixteen_ms - duration_since_last_update);
+                }
+                match toa_ping::run("www.google.com") {
+                    Ok(_) => {
+                        let (tx, rx) = mpsc::channel(3);
+                        let mut ss_tx = ss_tx.lock().unwrap();
+                        *ss_tx = tx;
+                         drop(ss_tx);
+                        match client::run_owned_message(CONNECTION, proxy_tx.clone(), rx) {
+                            Ok(_) => connected = true,
+                            Err(err) => {
+                                println!("reconnecting");
+                                connected = false;
+                            }
+                        }
+                    }
+                    _ => {
+                        connected = false;
+                    }
+                }
+                last_update = std::time::Instant::now();
+                c+=1;
+            }
+
+        });
         let mut _page = page::Page::new();
         {
             render(&mut _page);
@@ -76,6 +112,8 @@ impl GameApp {
         let mut events = Vec::new();
         let mut c = 0;
         'render: loop {
+            let ss_tx = s_tx.lock().unwrap();
+            let proxy_action_tx = ss_tx.clone();
             let sixteen_ms = std::time::Duration::from_millis(500);
             let now = std::time::Instant::now();
             let duration_since_last_update = now.duration_since(last_update);
@@ -89,6 +127,7 @@ impl GameApp {
             while let Ok(s) = proxy_rx.try_recv() {
                 game_proc.update_state(&mut gamedata, &result_map, s);
             }
+
             // Process the events.
             for event in events.drain(..) {
 

@@ -9,9 +9,10 @@ extern crate glium;
 #[macro_use]
 extern crate cardgame_macros;
 extern crate conrod_chat;
+extern crate conrod_keypad;
 extern crate cardgame_widgets;
 pub extern crate hardback_meta;
-pub extern crate hardback_server_lib;
+pub extern crate hardback_codec;
 extern crate futures;
 extern crate image;
 extern crate find_folder;

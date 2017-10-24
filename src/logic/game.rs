@@ -51,7 +51,6 @@ impl<'a, T> GameProcess<'a, T>
                                  action_tx);
             }
             &GameState::Menu => {
-
                 logic::menu::render(&mut ui.set_widgets(),
                                     &ids,
                                     &mut gamedata,
@@ -98,4 +97,5 @@ impl<'a, T> GameProcess<'a, T>
                         msg: T) {
         (*self.update_closure)(gamedata, result_map, msg);
     }
+
 }

@@ -28,6 +28,7 @@ pub fn load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, Suppo
     (ResourceEnum::Sprite(Sprite::PAGE3F),"texture","images/characters/player3.jpg"),
     (ResourceEnum::Sprite(Sprite::PAGE4F),"texture","images/characters/player4.jpg"),
     (ResourceEnum::Sprite(Sprite::RUST),"image","images/rust.png"),
+    (ResourceEnum::Sprite(Sprite::KEYPAD),"image","images/keypad.png"),
     (ResourceEnum::Font(Font::REGULAR),"font","fonts/NotoSans/NotoSans-Regular.ttf"),
      (ResourceEnum::Font(Font::BEON),"font","fonts/Beon/beon-webfont.ttf")
   }

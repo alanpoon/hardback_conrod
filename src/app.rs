@@ -2,7 +2,7 @@ use conrod::backend::glium::glium;
 use page_curl::page::{self, Page};
 use backend::meta::app::Sprite;
 use conrod_chat::custom_widget::chatview::Message;
-use backend::server_lib::codec::*;
+use backend::codec_lib::codec::*;
 widget_ids! {
     pub struct Ids {
          master,
@@ -21,7 +21,10 @@ widget_ids! {
         table_list,
 
          body,
-         text
+         text,
+         prompt_rect,
+         prompt_header,
+         prompt_logo
     }
 }
 
@@ -49,6 +52,8 @@ pub struct GameData {
     pub players: Vec<Player>,
     pub tables: Vec<TableInfo>,
     pub tablenumber: Option<usize>,
+    pub connected:bool,
+    pub error_str:Option<String>
 }
 impl GameData {
     pub fn new() -> GameData {
@@ -70,6 +75,8 @@ impl GameData {
             players: vec![],
             tables: vec![],
             tablenumber: None,
+            connected:false,
+            error_str:None
         }
     }
 }

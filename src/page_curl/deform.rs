@@ -1,6 +1,7 @@
 pub fn glsl() -> &'static str {
     r#"
-        #version 140
+        #version 300 es
+        precision mediump float;
         in vec3 position;
         in vec2 tex_coords;
         out vec2 v_tex_coords;
@@ -11,7 +12,7 @@ pub fn glsl() -> &'static str {
             void main() {
                 v_tex_coords = tex_coords;
                 vec3 pos = position;
-                float R = sqrt(pos.x*pos.x +pow(pos.y-translation,2));
+                float R = sqrt(pos.x*pos.x +pow(pos.y-translation,2.0));
                 float r = R * sin (theta);
                 float beta = asin (pos.x / R) / sin (theta);
                 

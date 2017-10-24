@@ -27,8 +27,11 @@ pub struct GameApp {}
 
 impl GameApp {
     pub fn new() -> Result<(), String> {
-        let window = glutin::WindowBuilder::new();
-        let context = glutin::ContextBuilder::new();
+            let window = glutin::WindowBuilder::new();
+    let context =
+        glium::glutin::ContextBuilder::new()
+            .with_gl(glium::glutin::GlRequest::Specific(glium::glutin::Api::OpenGlEs, (3, 0)))
+           ;
         let mut events_loop = glutin::EventsLoop::new();
         let display = glium::Display::new(window, context, &events_loop).unwrap();
         let mut renderer = conrod::backend::glium::Renderer::new(&display).unwrap();

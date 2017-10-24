@@ -17,7 +17,7 @@ pub fn draw(display: &glium::Display,
 }
 
 pub fn load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, SupportIdType>,
-                                    image_map: &mut conrod::image::Map<glium::texture::Texture2d>,
+                                    image_map: &mut conrod::image::Map<glium::Texture2d>,
                                     display: &glium::Display,
                                     ui: &mut conrod::Ui) {
     CGM_image_map!{

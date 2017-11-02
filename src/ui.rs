@@ -3,6 +3,7 @@ use conrod::backend::glium::glium::{self, Surface};
 use backend::SupportIdType;
 use backend::meta::app::{self, Font, ResourceEnum, Sprite};
 use image;
+use support;
 use find_folder;
 use std::collections::HashMap;
 pub fn draw(display: &glium::Display,
@@ -49,6 +50,14 @@ pub fn load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, Suppo
     (ResourceEnum::Sprite(Sprite::CARDS18),"image","images/cards/p18-1.jpg"),
     (ResourceEnum::Sprite(Sprite::CARDS19),"image","images/cards/p19-1.jpg"),
     (ResourceEnum::Sprite(Sprite::CARDS20),"image","images/cards/p20-1.jpg"),
+    (ResourceEnum::Sprite(Sprite::CARDS21),"image90","images/cards/p03-1.jpg"),
+    (ResourceEnum::Sprite(Sprite::CARDS22),"image90","images/cards/p06-1.jpg"),
+    (ResourceEnum::Sprite(Sprite::CARDS23),"image90","images/cards/p07-1.jpg"),
+    (ResourceEnum::Sprite(Sprite::CARDS24),"image90","images/cards/p10-1.jpg"),
+    (ResourceEnum::Sprite(Sprite::CARDS25),"image90","images/cards/p11-1.jpg"),
+    (ResourceEnum::Sprite(Sprite::CARDS26),"image90","images/cards/p14-1.jpg"),
+    (ResourceEnum::Sprite(Sprite::CARDS27),"image90","images/cards/p15-1.jpg"),
+    (ResourceEnum::Sprite(Sprite::DOWNLOAD),"image","images/download.png"),
     (ResourceEnum::Font(Font::REGULAR),"font","fonts/NotoSans/NotoSans-Regular.ttf"),
      (ResourceEnum::Font(Font::BEON),"font","fonts/Beon/beon-webfont.ttf")
   }

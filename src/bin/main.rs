@@ -15,10 +15,9 @@ use game_conrod::page_curl::{self, page, render};
 use game_conrod::opengl;
 use game_conrod::on_request;
 use conrod_chat::backend::websocket::client;
-use support;
 use std::collections::HashMap;
 use std::sync::mpsc::{Sender, Receiver};
-use std::sync::{Arc,Mutex};
+use std::sync::{Arc, Mutex};
 use futures::sync::mpsc;
 const WIN_W: u32 = 900;
 const WIN_H: u32 = 600;
@@ -28,11 +27,10 @@ pub struct GameApp {}
 
 impl GameApp {
     pub fn new() -> Result<(), String> {
-            let window = glutin::WindowBuilder::new();
-    let context =
-        glium::glutin::ContextBuilder::new()
-            .with_gl(glium::glutin::GlRequest::Specific(glium::glutin::Api::OpenGlEs, (3, 0)))
-           ;
+        let window = glutin::WindowBuilder::new();
+        let context =
+            glium::glutin::ContextBuilder::new()
+                .with_gl(glium::glutin::GlRequest::Specific(glium::glutin::Api::OpenGlEs, (3, 0)));
         let mut events_loop = glutin::EventsLoop::new();
         let display = glium::Display::new(window, context, &events_loop).unwrap();
         let mut renderer = conrod::backend::glium::Renderer::new(&display).unwrap();
@@ -50,19 +48,19 @@ impl GameApp {
         let (proxy_action_tx, proxy_action_rx) = mpsc::channel(2);
         let s_tx = Arc::new(Mutex::new(proxy_action_tx));
         let s_rx = Arc::new(Mutex::new(proxy_action_rx));
-        let (ss_tx,ss_rx) = (s_tx.clone(),s_rx.clone());
+        let (ss_tx, ss_rx) = (s_tx.clone(), s_rx.clone());
         let mut last_update = std::time::Instant::now();
         let mut gamedata = app::GameData::new();
         gamedata.gamestate = app::GameState::Menu;
-      std::thread::spawn(move || {
+        std::thread::spawn(move || {
             let mut connected = false;
             let mut last_update = std::time::Instant::now();
-            let mut c =0;
+            let mut c = 0;
             while !connected {
                 let sixteen_ms = std::time::Duration::new(10, 0);
                 let now = std::time::Instant::now();
                 let duration_since_last_update = now.duration_since(last_update);
-                if (duration_since_last_update < sixteen_ms) & (c>0) {
+                if (duration_since_last_update < sixteen_ms) & (c > 0) {
                     std::thread::sleep(sixteen_ms - duration_since_last_update);
                 }
                 match toa_ping::run("www.google.com") {
@@ -70,7 +68,7 @@ impl GameApp {
                         let (tx, rx) = mpsc::channel(3);
                         let mut ss_tx = ss_tx.lock().unwrap();
                         *ss_tx = tx;
-                         drop(ss_tx);
+                        drop(ss_tx);
                         match client::run_owned_message(CONNECTION, proxy_tx.clone(), rx) {
                             Ok(_) => connected = true,
                             Err(err) => {
@@ -80,11 +78,23 @@ impl GameApp {
                         }
                     }
                     _ => {
-                        connected = false;
+                        /*for test*/
+                         let (tx, rx) = mpsc::channel(3);
+                        let mut ss_tx = ss_tx.lock().unwrap();
+                        *ss_tx = tx;
+                        drop(ss_tx);
+                        match client::run_owned_message(CONNECTION, proxy_tx.clone(), rx) {
+                            Ok(_) => connected = true,
+                            Err(err) => {
+                                println!("reconnecting");
+                                connected = false;
+                            }
+                        }
+                        //connected = false;
                     }
                 }
                 last_update = std::time::Instant::now();
-                c+=1;
+                c += 1;
             }
 
         });

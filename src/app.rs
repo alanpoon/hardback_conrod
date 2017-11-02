@@ -1,4 +1,3 @@
-use conrod::backend::glium::glium;
 use page_curl::page::{self, Page};
 use backend::meta::app::Sprite;
 use conrod_chat::custom_widget::chatview::Message;
@@ -19,6 +18,9 @@ widget_ids! {
         name_text_edit,
         name_change_but,
         table_list,
+        //submitword
+        arranged_view,
+        hand_view,
 
          body,
          text,
@@ -35,7 +37,8 @@ pub enum GameState {
     Loading,
     Start,
     Tutorial,
-    InsideGame,
+    SubmitWord,
+    BuyWord,
 }
 
 pub struct GameData {
@@ -53,8 +56,9 @@ pub struct GameData {
     pub players: Vec<Player>,
     pub tables: Vec<TableInfo>,
     pub tablenumber: Option<usize>,
-    pub connected:bool,
-    pub error_str:Option<String>
+    pub connected: bool,
+    pub error_str: Option<String>,
+    pub boardcodec: Option<BoardCodec>,
 }
 impl GameData {
     pub fn new() -> GameData {
@@ -76,8 +80,9 @@ impl GameData {
             players: vec![],
             tables: vec![],
             tablenumber: None,
-            connected:false,
-            error_str:None
+            connected: false,
+            error_str: None,
+            boardcodec: None,
         }
     }
 }

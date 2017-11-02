@@ -2,11 +2,8 @@ use hardback_meta::app::{AppData, ResourceEnum, Font, Sprite};
 use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable};
 use conrod::backend::glium::glium;
 use conrod::backend::glium::glium::Surface;
-use conrod::widget::list::{Right, Dynamic};
 use std::collections::HashMap;
-use std;
 use futures::sync::mpsc;
-use futures::{Future, Sink};
 use logic;
 use app::{self, GameData, Ids, GameState};
 use backend::OwnedMessage;
@@ -97,5 +94,4 @@ impl<'a, T> GameProcess<'a, T>
                         msg: T) {
         (*self.update_closure)(gamedata, result_map, msg);
     }
-
 }

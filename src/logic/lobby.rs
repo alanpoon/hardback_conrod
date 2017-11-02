@@ -99,6 +99,7 @@ pub fn render(ui: &mut conrod::UiCell,
             let wh = ui.wh_of(ids.middle_tabview).unwrap();
             // let wh = [200.0,200.0];
             if let (&app::GameState::Lobby, None) = (&gamedata.gamestate, gamedata.tablenumber) {
+
                 if animated_button::AnimatedButton::image(rust_logo)
                        .label(appdata.texts.newtable)
                        .label_font_size(14)
@@ -194,7 +195,7 @@ pub fn render(ui: &mut conrod::UiCell,
                             "ready":true,
                             });
                     let action_tx_c = action_tx.clone();
-                     action_tx_c.send(OwnedMessage::Text(g.to_string())).wait().unwrap();
+                    action_tx_c.send(OwnedMessage::Text(g.to_string())).wait().unwrap();
                 }),
                                                    //join
                                                    Box::new(|| {
@@ -220,10 +221,11 @@ pub fn render(ui: &mut conrod::UiCell,
                             });
                     action_tx_c.send(OwnedMessage::Text(g.to_string())).wait().unwrap();
                 }),
-                                                   &tableinfo.players,
-                                                   tableinfo.numberOfPlayers.clone(),
-                                                   4,
-                                                   Some(c) == gamedata.tablenumber);
+                                                   &tableinfo.players,//players
+                                                   tableinfo.numberOfPlayers.clone(),//table_space
+                                                   4,//max_space
+                                                   Some(c) == gamedata.tablenumber//joined
+                                                   );
                 item.set(j, ui);
                 c += 1;
             }

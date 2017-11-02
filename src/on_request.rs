@@ -21,7 +21,8 @@ pub fn update(s: ClientReceivedMsg,
                             privateInformation,
                             sender,
                             message,
-                            log,.. } = s;
+                            log,
+                            .. } = s;
     if let (Some(Some(_type_name)),
             Some(Some(_location)),
             Some(Some(_sender)),

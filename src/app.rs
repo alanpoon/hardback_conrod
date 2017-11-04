@@ -18,31 +18,28 @@ widget_ids! {
         name_text_edit,
         name_change_but,
         table_list,
-        //submitword
-        arranged_view,
-        hand_view,
-
          body,
          text,
          prompt_rect,
          prompt_header,
          prompt_logo
+         //in_game
+         arrangedview,
+         handview,
+         listview
     }
 }
 
 #[derive(Debug,Clone)]
-pub enum GameState {
+pub enum GuiState {
     Menu,
     Lobby,
     Loading,
-    Start,
-    Tutorial,
-    SubmitWord,
-    BuyWord,
+    Game(GameState),
 }
 
 pub struct GameData {
-    pub gamestate: GameState,
+    pub guistate: GuiState,
     pub footer: Footer,
     pub page_vec: Vec<(Page, Sprite)>,
     pub page_index: usize,
@@ -53,17 +50,17 @@ pub struct GameData {
     pub game_textedit: String,
     pub name: String,
     pub name_text_edit: String,
-    pub players: Vec<Player>,
     pub tables: Vec<TableInfo>,
     pub tablenumber: Option<usize>,
     pub connected: bool,
     pub error_str: Option<String>,
     pub boardcodec: Option<BoardCodec>,
+    pub player_index: Option<usize>,
 }
 impl GameData {
     pub fn new() -> GameData {
         GameData {
-            gamestate: GameState::Menu,
+            guistate: GuiState::Menu,
             footer: Footer::ShowHand,
             page_vec: vec![(Page::new(), Sprite::PAGE1F),
                            (Page::new(), Sprite::PAGE2F),
@@ -77,12 +74,12 @@ impl GameData {
             game_textedit: "".to_owned(),
             name: "".to_owned(),
             name_text_edit: "".to_owned(),
-            players: vec![],
             tables: vec![],
             tablenumber: None,
             connected: false,
             error_str: None,
             boardcodec: None,
+            player_index: None,
         }
     }
 }

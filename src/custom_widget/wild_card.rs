@@ -16,7 +16,7 @@ pub struct Image<'a> {
     /// The image overlay on the mouse while is held for more than 1/16 seconds
     pub spinner_image_id: Option<image::Id>,
     /// Alphaphet
-    pub wild:Option<&'a mut String>
+    pub wild: Option<&'a mut String>,
 }
 /// A pressable button widget whose reaction is triggered upon release.
 #[derive(WidgetCommon)]
@@ -87,12 +87,12 @@ impl<S> WildCard<S> {
 }
 impl<'a> WildCard<Image<'a>> {
     /// Begin building a button displaying the given `Image` on top.
-    pub fn image(img: image::Id,wild:Option<&'a mut String>) -> Self {
+    pub fn image(img: image::Id, wild: Option<&'a mut String>) -> Self {
         let image = Image {
             image_id: img,
             toggle_image_id: None,
             spinner_image_id: None,
-            wild:wild
+            wild: wild,
         };
         Self::new_internal(image)
     }

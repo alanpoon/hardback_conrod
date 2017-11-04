@@ -4,7 +4,6 @@ use backend::SupportIdType;
 use backend::meta::app::{self, Font, ResourceEnum, Sprite};
 use image;
 use support;
-use find_folder;
 use std::collections::HashMap;
 pub fn draw(display: &glium::Display,
             renderer: &mut conrod::backend::glium::Renderer,
@@ -59,7 +58,7 @@ pub fn load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, Suppo
     (ResourceEnum::Sprite(Sprite::CARDS27),"image90","images/cards/p15-1.jpg"),
     (ResourceEnum::Sprite(Sprite::DOWNLOAD),"image","images/download.png"),
     (ResourceEnum::Font(Font::REGULAR),"font","fonts/NotoSans/NotoSans-Regular.ttf"),
-     (ResourceEnum::Font(Font::BEON),"font","fonts/Beon/beon-webfont.ttf")
+    // (ResourceEnum::Font(Font::BEON),"font","fonts/Beon/beon-webfont.ttf")
   }
     let g = ImageIds::new();
     g.pump(result_map, display, ui, image_map);

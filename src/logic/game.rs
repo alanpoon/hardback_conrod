@@ -5,9 +5,10 @@ use conrod::backend::glium::glium::Surface;
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use logic;
-use app::{self, GameData, Ids, GameState};
+use app::{self, GameData, Ids, GuiState};
 use backend::OwnedMessage;
 use backend::SupportIdType;
+use backend::codec_lib::codec::GameState;
 const LIB_PATH: &'static str = "target/debug/libtest_shared.so";
 
 pub struct GameProcess<'a, T>
@@ -38,8 +39,8 @@ impl<'a, T> GameProcess<'a, T>
                action_tx: mpsc::Sender<OwnedMessage>) {
         //    let mut ids = Ids::new(ui.widget_id_generator());
         let ids = &self.ids;
-        match &gamedata.gamestate {
-            &GameState::Start => {
+        match &gamedata.guistate {
+            &GuiState::Game(_) => {
                 self.set_game_ui(&mut ui.set_widgets(),
                                  &ids,
                                  &mut gamedata,
@@ -47,7 +48,7 @@ impl<'a, T> GameProcess<'a, T>
                                  result_map,
                                  action_tx);
             }
-            &GameState::Menu => {
+            &GuiState::Menu => {
                 logic::menu::render(&mut ui.set_widgets(),
                                     &ids,
                                     &mut gamedata,
@@ -55,7 +56,7 @@ impl<'a, T> GameProcess<'a, T>
                                     result_map,
                                     action_tx);
             }
-            &GameState::Lobby => {
+            &GuiState::Lobby => {
                 logic::lobby::render(&mut ui.set_widgets(),
                                      &ids,
                                      &mut gamedata,
@@ -80,6 +81,13 @@ impl<'a, T> GameProcess<'a, T>
                          (ids.footer,
                           widget::Canvas::new().color(color::DARK_GREEN).length(100.0))])
             .set(ids.master, ui);
+        logic::body::render(ui,
+                            ids,
+                            &mut gamedata,
+                            &appdata,
+                            result_map,
+                            action_tx.clone());
+
         logic::footer::render(ui,
                               ids,
                               &mut gamedata,

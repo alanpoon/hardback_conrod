@@ -8,7 +8,7 @@ use futures::{Future, Sink};
 use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Font, Sprite};
-use app::{self, GameData, Ids, GameState};
+use app::{self, GameData, Ids, GuiState};
 pub fn render(ui: &mut conrod::UiCell,
               ids: &Ids,
               mut gamedata: &mut GameData,

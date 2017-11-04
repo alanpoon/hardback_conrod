@@ -98,7 +98,7 @@ pub fn render(ui: &mut conrod::UiCell,
             let card_index = 7.0;
             let wh = ui.wh_of(ids.middle_tabview).unwrap();
             // let wh = [200.0,200.0];
-            if let (&app::GameState::Lobby, None) = (&gamedata.gamestate, gamedata.tablenumber) {
+            if let (&app::GuiState::Lobby, None) = (&gamedata.guistate, gamedata.tablenumber) {
 
                 if animated_button::AnimatedButton::image(rust_logo)
                        .label(appdata.texts.newtable)
@@ -225,7 +225,8 @@ pub fn render(ui: &mut conrod::UiCell,
                                                    tableinfo.numberOfPlayers.clone(),//table_space
                                                    4,//max_space
                                                    Some(c) == gamedata.tablenumber//joined
-                                                   );
+                                                   )
+                        .label_color(color::GREEN);
                 item.set(j, ui);
                 c += 1;
             }

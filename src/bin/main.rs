@@ -51,7 +51,7 @@ impl GameApp {
         let (ss_tx, ss_rx) = (s_tx.clone(), s_rx.clone());
         let mut last_update = std::time::Instant::now();
         let mut gamedata = app::GameData::new();
-        gamedata.gamestate = app::GameState::Menu;
+        gamedata.guistate = app::GuiState::Menu;
         std::thread::spawn(move || {
             let mut connected = false;
             let mut last_update = std::time::Instant::now();
@@ -79,7 +79,7 @@ impl GameApp {
                     }
                     _ => {
                         /*for test*/
-                         let (tx, rx) = mpsc::channel(3);
+                        let (tx, rx) = mpsc::channel(3);
                         let mut ss_tx = ss_tx.lock().unwrap();
                         *ss_tx = tx;
                         drop(ss_tx);

@@ -1,4 +1,4 @@
-use app::{self, GameData, GameState};
+use app::{self, GameData, GuiState};
 use backend::codec_lib::codec::*;
 use backend::meta::app::{AppData, ResourceEnum, Font, Sprite};
 use backend::SupportIdType;
@@ -11,9 +11,7 @@ pub fn update(s: ClientReceivedMsg,
     let ClientReceivedMsg { type_name,
                             tables,
                             tablenumber,
-                            players,
                             request,
-                            boardstate,
                             turn_index,
                             reason,
                             optional,
@@ -21,6 +19,8 @@ pub fn update(s: ClientReceivedMsg,
                             privateInformation,
                             sender,
                             message,
+                            boardstate,
+                            player_index,
                             log,
                             .. } = s;
     if let (Some(Some(_type_name)),
@@ -42,11 +42,17 @@ pub fn update(s: ClientReceivedMsg,
             if _location == "table" {}
         }
     }
-    if let (Some(Some(_players)), Some(Some(_log)), Some(Some(_privateInformation))) =
-        (players, log, privateInformation) {
-        gamedata.gamestate = app::GameState::Start;
-        gamedata.players = _players;
-        //  gamedata.log = _log;
+
+    if let Some(Some(_player_index)) = player_index {
+        gamedata.player_index = Some(_player_index);
+    }
+    if let (Some(_player_index), Some(Some(Ok(_boardcodec)))) =
+        (gamedata.player_index.clone(), boardstate) {
+        gamedata.guistate = GuiState::Game(_boardcodec.gamestates
+                                               .get(_player_index)
+                                               .unwrap()
+                                               .clone());
+
     }
     if let (Some(Some(_request)), Some(Some(_reason)), Some(Some(_optional))) =
         (request, reason, optional) {

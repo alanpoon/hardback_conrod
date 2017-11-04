@@ -6,7 +6,7 @@ use cardgame_widgets::custom_widget::animated_button;
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use futures::{Future, Sink};
-use app::{self, GameData, Ids, GameState};
+use app::{self, GameData, Ids, GuiState};
 use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Font, Sprite};

@@ -1,4 +1,4 @@
-use page_curl::page::{self, Page};
+use page_curl::page::Page;
 use backend::meta::app::Sprite;
 use conrod_chat::custom_widget::chatview::Message;
 use backend::codec_lib::codec::*;
@@ -22,11 +22,12 @@ widget_ids! {
          text,
          prompt_rect,
          prompt_header,
-         prompt_logo
+         prompt_logo,
          //in_game
          arrangedview,
          handview,
-         listview
+         listview,
+         instructionview
     }
 }
 
@@ -56,6 +57,7 @@ pub struct GameData {
     pub error_str: Option<String>,
     pub boardcodec: Option<BoardCodec>,
     pub player_index: Option<usize>,
+    pub print_instruction_set: Vec<bool>,
 }
 impl GameData {
     pub fn new() -> GameData {
@@ -80,6 +82,7 @@ impl GameData {
             error_str: None,
             boardcodec: None,
             player_index: None,
+            print_instruction_set: vec![true],
         }
     }
 }

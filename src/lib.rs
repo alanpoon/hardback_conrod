@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 #[macro_use]
 extern crate serde_json;
 #[macro_use]
@@ -26,3 +27,4 @@ pub mod graphics_match;
 pub mod on_request;
 pub mod support;
 pub mod custom_widget;
+pub mod instruction;

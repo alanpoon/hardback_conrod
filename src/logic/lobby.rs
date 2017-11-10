@@ -1,7 +1,4 @@
 use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable};
-use conrod::widget::list_select::Event;
-use conrod::widget::list::Right;
-use conrod::widget::list::Fixed;
 use cardgame_widgets::custom_widget::{tabview, animated_button, table_list};
 use std::collections::HashMap;
 use futures::sync::mpsc;
@@ -9,7 +6,7 @@ use futures::{Future, Sink};
 use app::{self, GameData, Ids};
 use backend::OwnedMessage;
 use backend::SupportIdType;
-use backend::meta::app::{AppData, ResourceEnum, Font, Sprite};
+use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use graphics_match::button;
 use logic;
 pub struct TableListTex<'a> {
@@ -32,9 +29,10 @@ impl<'a> table_list::TableListTexts for TableListTex<'a> {
         self.appdata.texts.changeto
     }
 }
+#[allow(unused_mut)]
 pub fn render(ui: &mut conrod::UiCell,
               ids: &Ids,
-              mut gamedata: &mut GameData,
+              gamedata: &mut GameData,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
               action_tx: mpsc::Sender<OwnedMessage>) {
@@ -79,11 +77,12 @@ pub fn render(ui: &mut conrod::UiCell,
                        result_map,
                        action_tx);
         }),
-             Box::new(|w_id, ids, mut gamedata, appdata, result_map, action_tx, ui| {
+             Box::new(|w_id, ids, mut gamedata, _appdata, result_map, action_tx, ui| {
             //Chat
             logic::top_left::draw_lobby_chat(w_id, ids, &mut gamedata, result_map, action_tx, ui);
         })]
     }
+    #[allow(unused_mut)]
     fn draw_lobby(ui: &mut conrod::UiCell,
                   w_id: tabview::Item,
                   ids: &Ids,
@@ -119,7 +118,7 @@ pub fn render(ui: &mut conrod::UiCell,
                         .wait()
                         .unwrap();
                 };
-                let button_panel = ui.rect_of(ids.new_table_but).unwrap();
+                let _button_panel = ui.rect_of(ids.new_table_but).unwrap();
                 widget::Text::new(appdata.texts.playername)
                     .down_from(ids.new_table_but, 2.0)
                     .w_h(200.0, wh[1] * 0.06)
@@ -131,7 +130,7 @@ pub fn render(ui: &mut conrod::UiCell,
                 widget::Rectangle::fill_with([100.0, wh[1] * 0.06], color::WHITE)
                     .right_from(ids.user_name, 0.0)
                     .set(ids.name_rect, ui);
-                let mut k = &mut gamedata.name_text_edit;
+                let k = &mut gamedata.name_text_edit;
                 for edit in widget::TextEdit::new(k)
             .color(color::BLACK)
             .w_h(98.0, wh[1]* 0.06)
@@ -171,7 +170,7 @@ pub fn render(ui: &mut conrod::UiCell,
                     .top_left_with_margins_on(w_id.parent_id, 0.0, 0.0)
                     .set(ids.name_text, ui);
             }
-            let name_text_panel = ui.rect_of(ids.name_text).unwrap();
+            let _name_text_panel = ui.rect_of(ids.name_text).unwrap();
             let item_h = wh[1] * 0.2;
             let (mut items, scrollbar) = widget::List::flow_down(gamedata.tables.len())
            // .item_size(wh[0])

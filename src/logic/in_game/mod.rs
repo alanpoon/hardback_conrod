@@ -1,9 +1,8 @@
 use std::collections::HashMap;
 use backend::SupportIdType;
-use backend::meta::app::{AppData, ResourceEnum, Font, Sprite};
+use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use backend::meta::cards;
 use conrod;
-use conrod::widget::primitive::image::Image;
 use conrod::{Rect, image};
 pub fn card_images(result_map: &HashMap<ResourceEnum, SupportIdType>)
                    -> [Option<conrod::image::Id>; 27] {
@@ -94,36 +93,39 @@ pub fn card_images(result_map: &HashMap<ResourceEnum, SupportIdType>)
 }
 pub fn get_card_widget_image_portrait(card_index: usize,
                                       card_images: &[Option<image::Id>; 27],
-                                      appdata: &Appdata)
-                                      -> Image {
+                                      appdata: &AppData)
+                                      -> (image::Id, Rect) {
     let crop = appdata.blowupcards
-        .get(card_index)
+        .get(&card_index)
         .unwrap()
         .crop[0]; //0:portrait
-    let rect = Rect::from_xy_dim([crop[0], crop[1]], [crop[2], crop[3]]);
-    widget::Image::new(card_images[card_index].clone().unwrap()).source_rectangle(rect)
+    let rect = Rect::from_xy_dim([crop.0, crop.1], [crop.2, crop.3]);
+    (card_images[card_index].clone().unwrap(), rect)
 }
 pub fn get_card_widget_image_flexible(card_index: usize,
                                       card_images: &[Option<image::Id>; 27],
-                                      appdata: &Appdata)
-                                      -> Image {
-    let crop = match appdata.blowupcards.get(card_index).unwrap() {
+                                      appdata: &AppData)
+                                      -> (image::Id, Rect) {
+    let crop = match appdata.blowupcards
+              .get(&card_index)
+              .unwrap()
+              .theme {
         cards::CardType::Normal(_, _) => {
             appdata.blowupcards
-                .get(card_index)
+                .get(&card_index)
                 .unwrap()
                 .crop
                 [0] //0:portrait
         }
         _ => {
             appdata.blowupcards
-                .get(card_index)
+                .get(&card_index)
                 .unwrap()
                 .crop
                 [1]
         }
     };
 
-    let rect = Rect::from_xy_dim([crop[0], crop[1]], [crop[2], crop[3]]);
-    widget::Image::new(card_images[card_index].clone().unwrap()).source_rectangle(rect)
+    let rect = Rect::from_xy_dim([crop.0, crop.1], [crop.2, crop.3]);
+    (card_images[card_index].clone().unwrap(), rect)
 }

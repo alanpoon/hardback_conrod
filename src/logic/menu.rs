@@ -1,22 +1,17 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable};
-use conrod::widget::list_select::Event;
-use conrod::widget::list::Right;
-use conrod::widget::list::Fixed;
-use cardgame_widgets::custom_widget::animated_button;
+use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, Labelable};
 use std::collections::HashMap;
 use futures::sync::mpsc;
-use futures::{Future, Sink};
-use app::{self, GameData, Ids, GuiState};
+use app::{GameData, Ids, GuiState};
 use backend::OwnedMessage;
 use backend::SupportIdType;
-use backend::meta::app::{AppData, ResourceEnum, Font, Sprite};
-use graphics_match::button;
+use backend::meta::app::{AppData, ResourceEnum};
+#[allow(unused_mut)]
 pub fn render(ui: &mut conrod::UiCell,
               ids: &Ids,
               mut gamedata: &mut GameData,
-              appdata: &AppData,
-              result_map: &HashMap<ResourceEnum, SupportIdType>,
-              action_tx: mpsc::Sender<OwnedMessage>) {
+              _appdata: &AppData,
+              _result_map: &HashMap<ResourceEnum, SupportIdType>,
+              _action_tx: mpsc::Sender<OwnedMessage>) {
     widget::Canvas::new().color(color::TRANSPARENT).set(ids.master, ui);
     if widget::Button::new()
            .w_h(200.0, 50.0)

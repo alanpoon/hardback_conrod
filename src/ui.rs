@@ -2,7 +2,6 @@ use conrod;
 use conrod::backend::glium::glium::{self, Surface};
 use backend::SupportIdType;
 use backend::meta::app::{self, Font, ResourceEnum, Sprite};
-use image;
 use support;
 use std::collections::HashMap;
 pub fn draw(display: &glium::Display,

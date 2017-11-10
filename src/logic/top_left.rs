@@ -1,26 +1,25 @@
 use conrod;
-use cardgame_widgets::custom_widget::{list_select, tabview, instructionview};
+use cardgame_widgets::custom_widget::tabview;
 use conrod_chat::custom_widget::chatview_futures;
 use conrod_chat::chat::{english, sprite};
 use std::collections::HashMap;
 use futures::sync::mpsc;
-use futures::{Future, Sink};
 use backend::OwnedMessage;
 use backend::SupportIdType;
-use backend::meta::app::{AppData, ResourceEnum, Font, Sprite};
-use app::{self, GameData, Ids, GuiState};
-pub fn render(ui: &mut conrod::UiCell,
-              ids: &Ids,
-              mut gamedata: &mut GameData,
-              appdata: &AppData,
-              result_map: &HashMap<ResourceEnum, SupportIdType>,
-              action_tx: mpsc::Sender<OwnedMessage>) {
+use backend::meta::app::{AppData, ResourceEnum, Sprite};
+use app::{GameData, Ids};
+pub fn render(_ui: &mut conrod::UiCell,
+              _ids: &Ids,
+              mut _gamedata: &mut GameData,
+              _appdata: &AppData,
+              _result_map: &HashMap<ResourceEnum, SupportIdType>,
+              _action_tx: mpsc::Sender<OwnedMessage>) {
 
 
 }
 pub fn draw_lobby_chat(w_id: tabview::Item,
                        ids: &Ids,
-                       mut gamedata: &mut GameData,
+                       gamedata: &mut GameData,
                        result_map: &HashMap<ResourceEnum, SupportIdType>,
                        action_tx: mpsc::Sender<OwnedMessage>,
                        mut ui: &mut conrod::UiCell) {
@@ -40,10 +39,10 @@ pub fn draw_lobby_chat(w_id: tabview::Item,
     }
 }
 
-fn process(name: &String, text: &String) -> OwnedMessage {
+fn process(_name: &String, text: &String) -> OwnedMessage {
     let g = json!({
     "type":"chat",
-  "chat": text,
+  "message": text,
   "location":"lobby"
 });
     OwnedMessage::Text(g.to_string())

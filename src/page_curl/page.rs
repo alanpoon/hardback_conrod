@@ -3,7 +3,7 @@ use std::f32::consts::PI;
 const RAD: f32 = 180.0 / PI;
 const COLUMNS: u16 = 20;
 const ROWS: u16 = 20;
-const N_VERTICES: usize = ((COLUMNS + 1) * (ROWS + 1)) as usize;
+//const N_VERTICES: usize = ((COLUMNS + 1) * (ROWS + 1)) as usize;
 const N_STRIPS: usize = (((COLUMNS + 1) * 2) * ((ROWS + 1) - 1) + ((ROWS + 1) - 2)) as usize;
 
 pub struct Page {
@@ -48,7 +48,7 @@ impl Page {
         }
         self.in_mesh = vec![];
         self.out_mesh = vec![];
-        let mut i = 0;
+        let mut _i = 0;
         for iy in 0..cy {
             let iiy = iy as f32;
             for ix in 0..cx {
@@ -62,7 +62,7 @@ impl Page {
                                       position: (px, py, 0.0),
                                       tex_coords: (tx, ty),
                                   });
-                i += 1;
+                _i += 1;
             }
         }
         self.time = 0.0;

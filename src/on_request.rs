@@ -1,12 +1,13 @@
-use app::{self, GameData, GuiState};
+use app::{GameData, GuiState};
 use backend::codec_lib::codec::*;
-use backend::meta::app::{AppData, ResourceEnum, Font, Sprite};
+use backend::meta::app::{ResourceEnum, Sprite};
 use backend::SupportIdType;
 use std::collections::HashMap;
 use conrod_chat::chat;
 //use animation;
+#[allow(unused_variables,non_snake_case)]
 pub fn update(s: ClientReceivedMsg,
-              mut gamedata: &mut GameData,
+              gamedata: &mut GameData,
               result_map: &HashMap<ResourceEnum, SupportIdType>) {
     let ClientReceivedMsg { type_name,
                             tables,
@@ -29,6 +30,7 @@ pub fn update(s: ClientReceivedMsg,
             Some(Some(_message))) = (type_name.clone(), location, sender, message) {
         if _type_name == "chat" {
             if _location == "lobby" {
+                println!("message received {:?}", _message);
                 if let Some(&SupportIdType::ImageId(rust_logo)) =
                     result_map.get(&ResourceEnum::Sprite(Sprite::RUST)) {
                     gamedata.lobby_history.push(chat::message::Message {
@@ -37,7 +39,6 @@ pub fn update(s: ClientReceivedMsg,
                                                     text: _message,
                                                 });
                 }
-
             }
             if _location == "table" {}
         }

@@ -1,15 +1,11 @@
-use hardback_meta::app::{AppData, ResourceEnum, Font, Sprite};
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable};
-use conrod::backend::glium::glium;
-use conrod::backend::glium::glium::Surface;
+use hardback_meta::app::{AppData, ResourceEnum};
+use conrod::{self, color, widget, Colorable, Widget};
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use logic;
-use app::{self, GameData, Ids, GuiState};
+use app::{GameData, Ids, GuiState};
 use backend::OwnedMessage;
 use backend::SupportIdType;
-use backend::codec_lib::codec::GameState;
-const LIB_PATH: &'static str = "target/debug/libtest_shared.so";
 
 pub struct GameProcess<'a, T>
     where T: Clone
@@ -68,7 +64,7 @@ impl<'a, T> GameProcess<'a, T>
         }
     }
     fn set_game_ui(&self,
-                   mut ui: &mut conrod::UiCell,
+                   ui: &mut conrod::UiCell,
                    ids: &Ids,
                    mut gamedata: &mut GameData,
                    appdata: &AppData,
@@ -96,6 +92,7 @@ impl<'a, T> GameProcess<'a, T>
                               action_tx.clone());
 
     }
+    #[allow(unused_mut)]
     pub fn update_state(&self,
                         mut gamedata: &mut GameData,
                         result_map: &HashMap<ResourceEnum, SupportIdType>,

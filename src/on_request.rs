@@ -53,6 +53,7 @@ pub fn update(s: ClientReceivedMsg,
                                                .get(_player_index)
                                                .unwrap()
                                                .clone());
+        gamedata.boardcodec = Some(_boardcodec);
 
     }
     if let (Some(Some(_request)), Some(Some(_reason)), Some(Some(_optional))) =

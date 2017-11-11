@@ -95,37 +95,30 @@ pub fn get_card_widget_image_portrait(card_index: usize,
                                       card_images: &[Option<image::Id>; 27],
                                       appdata: &AppData)
                                       -> (image::Id, Rect) {
-    let crop = appdata.blowupcards
-        .get(&card_index)
-        .unwrap()
-        .crop[0]; //0:portrait
-    let rect = Rect::from_xy_dim([crop.0, crop.1], [crop.2, crop.3]);
-    (card_images[card_index].clone().unwrap(), rect)
+    let &cards::BlowupCard { ref theme, ref crop, .. } =
+        appdata.blowupcards.get(&card_index).unwrap(); //0:portrait
+    let meta_image_index = match theme {
+        &cards::CardType::Normal(ref _mi, _) => _mi.clone(),
+        &cards::CardType::Rotatable(ref _mi, _, _, _) => _mi.clone(),
+    };
+    let rect = Rect::from_xy_dim(crop[0].0, crop[0].1);
+    (card_images[meta_image_index].clone().unwrap(), rect)
 }
 pub fn get_card_widget_image_flexible(card_index: usize,
                                       card_images: &[Option<image::Id>; 27],
                                       appdata: &AppData)
                                       -> (image::Id, Rect) {
-    let crop = match appdata.blowupcards
-              .get(&card_index)
-              .unwrap()
-              .theme {
-        cards::CardType::Normal(_, _) => {
-            appdata.blowupcards
-                .get(&card_index)
-                .unwrap()
-                .crop
-                [0] //0:portrait
-        }
-        _ => {
-            appdata.blowupcards
-                .get(&card_index)
-                .unwrap()
-                .crop
-                [1]
-        }
-    };
+    let &cards::BlowupCard { ref theme, ref crop, .. } =
+        appdata.blowupcards.get(&card_index).unwrap(); //0:portrait
 
-    let rect = Rect::from_xy_dim([crop.0, crop.1], [crop.2, crop.3]);
-    (card_images[card_index].clone().unwrap(), rect)
+    match (theme, crop.clone()) {
+        (&cards::CardType::Normal(ref _mi, _), _crop) => {
+            let rect = Rect::from_xy_dim(crop[0].0, crop[0].1);
+            (card_images[_mi.clone()].clone().unwrap(), rect)
+        }
+        (&cards::CardType::Rotatable(_, _, ref _mi, _), _crop) => {
+            let rect = Rect::from_xy_dim(crop[1].0, crop[1].1);
+            (card_images[_mi.clone()].clone().unwrap(), rect)
+        }
+    }
 }

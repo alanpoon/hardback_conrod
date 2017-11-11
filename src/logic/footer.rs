@@ -21,7 +21,9 @@ pub fn render(ui: &mut conrod::UiCell,
               _action_tx: mpsc::Sender<OwnedMessage>) {
     let GameData { ref page_index, ref mut boardcodec, ref mut print_instruction_set, .. } =
         *gamedata;
+
     if let &mut Some(ref mut boardcodec) = boardcodec {
+        println!("show_draft boardcodec, {:?}",page_index.clone());
         let card_images = in_game::card_images(result_map);
         if let Some(ref mut _player) = boardcodec.players.get_mut(*page_index) {
             match gamedata.guistate {
@@ -54,7 +56,9 @@ fn show_draft(ui: &mut conrod::UiCell,
              })
         .collect::<Vec<Instruction>>();
     if let Some(_pi) = print_instruction_set.get_mut(0) {
+        println!("print_instruction0");
         if *_pi {
+            println!("print_instruction");
             *_pi = InstructionSet::new(&g_vec, (*app).texts.next)
                 .parent_id(ids.footer)
                 .set(ids.instructionview, ui);

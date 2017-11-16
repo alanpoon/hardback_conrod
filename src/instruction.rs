@@ -13,7 +13,7 @@ impl<'a> Instructable<'a> for Instruction<'a> {
                 .top_left_with_margins_on(self.3, self.1[1] * wh[1], self.1[0] * wh[0])
 
     }
-    fn button(&self, wh: [f64; 2]) -> Button<Flat> {
+    fn button(&self, _wh: [f64; 2]) -> Button<Flat> {
         widget::Button::new().w_h(100.0, 50.0).mid_bottom()
     }
     fn oval_one(&self, wh: [f64; 2]) -> Option<Oval> {

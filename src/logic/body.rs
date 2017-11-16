@@ -1,7 +1,10 @@
 use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable};
+use conrod::position::rect::Rect;
+use conrod::widget::primitive::image::Image;
+use conrod::widget::envelope_editor::EnvelopePoint;
 use cardgame_widgets::custom_widget::dragdrop_list::DragDropList;
 use cardgame_widgets::custom_widget::sample_drag_image;
-use cardgame_widgets::custom_widget::image_hover;
+use cardgame_widgets::custom_widget::image_hover::{Hoverable, ImageHover};
 use backend::codec_lib::codec::*;
 use backend::OwnedMessage;
 use backend::SupportIdType;
@@ -10,10 +13,18 @@ use std::collections::HashMap;
 use futures::sync::mpsc;
 use app::{self, GameData, Ids};
 use logic::in_game;
-enum Interaction {
-    Idle,
-    Hover,
-    Press,
+
+pub struct ImageHoverable(Image, Option<Image>, Option<Image>);
+impl Hoverable for ImageHoverable {
+    fn idle(&self) -> Image {
+        self.0
+    }
+    fn hover(&self) -> Option<Image> {
+        self.1
+    }
+    fn press(&self) -> Option<Image> {
+        self.2
+    }
 }
 pub fn render(ui: &mut conrod::UiCell,
               ids: &Ids,
@@ -45,12 +56,12 @@ fn show_draft(ui: &mut conrod::UiCell,
               card_images: &[Option<image::Id>; 27],
               appdata: &AppData,
               _result_map: &HashMap<ResourceEnum, SupportIdType>) {
-    let item_h = 160.0;
+    let item_h = 180.0;
     println!("draft {:?}",player.draft.clone());
     let (mut items, scrollbar) = widget::List::flow_right(player.draft.len())
         .item_size(item_h)
         .middle_of(ids.body)
-        .h(200.0)
+        .h(220.0)
         .padded_w_of(ids.body, 20.0)
         .scrollbar_next_to()
         .set(ids.listview, ui);
@@ -61,9 +72,16 @@ fn show_draft(ui: &mut conrod::UiCell,
     while let (Some(item), Some(card_index)) = (items.next(ui), draft_iter.next()) {
         let (_image_id, _rect) =
             in_game::get_card_widget_image_portrait(card_index.clone(), card_images, appdata);
-        //     let j= image_hover::ImageHover::new(_image_id,_rect);
-        let j = widget::Image::new(_image_id).source_rectangle(_rect);
-        //.w_h(220.0,260.0);
+        //zoom rect
+        let mut top_left_c = _rect.top_left().clone();
+        top_left_c.set_x(_rect.top_left().get_x() + 100.0);
+        top_left_c.set_y(_rect.top_left().get_y() + 80.0);
+        let btm_right = _rect.bottom_right().clone();
+        let _zoom_rect = Rect::from_corners(top_left_c, btm_right);
+        let _ih = ImageHoverable(Image::new(_image_id).source_rectangle(_rect),
+                                 Some(Image::new(_image_id).source_rectangle(_zoom_rect)),
+                                 None);
+        let j = ImageHover::new(_ih);
         item.set(j, ui);
     }
 

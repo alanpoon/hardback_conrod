@@ -6,7 +6,7 @@ extern crate conrod;
 #[macro_use]
 extern crate conrod_derive;
 #[macro_use]
-extern crate glium;
+pub extern crate glium;
 #[macro_use]
 extern crate cardgame_macros;
 extern crate conrod_chat;

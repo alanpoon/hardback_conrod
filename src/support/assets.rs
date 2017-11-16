@@ -27,3 +27,11 @@ pub fn load_90image(filename: &str) -> DynamicImage {
         Err(_) => panic!("Can't load image."),
     }
 }
+pub fn load_270image(filename: &str) -> DynamicImage {
+    let assets = find_folder::Search::ParentsThenKids(3, 3).for_folder("assets").unwrap();
+    let path = assets.join(filename);
+    match image::open(&std::path::Path::new(&path)) {
+        Ok(data) => data.rotate270(),
+        Err(_) => panic!("Can't load image."),
+    }
+}

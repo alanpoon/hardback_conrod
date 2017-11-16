@@ -66,9 +66,7 @@ impl Page {
             }
         }
         self.time = 0.0;
-        println!("before strip");
         self.stripify();
-        println!("aft strip");
         self.update_time();
     }
     pub fn stripify(&mut self) {

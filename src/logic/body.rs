@@ -1,6 +1,7 @@
 use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable};
 use cardgame_widgets::custom_widget::dragdrop_list::DragDropList;
 use cardgame_widgets::custom_widget::sample_drag_image;
+use cardgame_widgets::custom_widget::image_hover;
 use backend::codec_lib::codec::*;
 use backend::OwnedMessage;
 use backend::SupportIdType;
@@ -9,6 +10,11 @@ use std::collections::HashMap;
 use futures::sync::mpsc;
 use app::{self, GameData, Ids};
 use logic::in_game;
+enum Interaction {
+    Idle,
+    Hover,
+    Press,
+}
 pub fn render(ui: &mut conrod::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
@@ -39,18 +45,25 @@ fn show_draft(ui: &mut conrod::UiCell,
               card_images: &[Option<image::Id>; 27],
               appdata: &AppData,
               _result_map: &HashMap<ResourceEnum, SupportIdType>) {
-    let item_h = 300.0;
-    let (mut items, _) = widget::List::flow_down(player.draft.len())
+    let item_h = 160.0;
+    println!("draft {:?}",player.draft.clone());
+    let (mut items, scrollbar) = widget::List::flow_right(player.draft.len())
         .item_size(item_h)
         .middle_of(ids.body)
-        .wh_of(ids.body)
+        .h(200.0)
+        .padded_w_of(ids.body, 20.0)
         .scrollbar_next_to()
         .set(ids.listview, ui);
+    if let Some(s) = scrollbar {
+        s.set(ui)
+    }
     let mut draft_iter = player.draft.iter();
     while let (Some(item), Some(card_index)) = (items.next(ui), draft_iter.next()) {
         let (_image_id, _rect) =
             in_game::get_card_widget_image_portrait(card_index.clone(), card_images, appdata);
-        let j = widget::Image::new(_image_id).source_rectangle(_rect).w_h(400.0, 800.0);
+        //     let j= image_hover::ImageHover::new(_image_id,_rect);
+        let j = widget::Image::new(_image_id).source_rectangle(_rect);
+        //.w_h(220.0,260.0);
         item.set(j, ui);
     }
 

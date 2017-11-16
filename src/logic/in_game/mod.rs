@@ -101,7 +101,7 @@ pub fn get_card_widget_image_portrait(card_index: usize,
         &cards::CardType::Normal(ref _mi, _) => _mi.clone(),
         &cards::CardType::Rotatable(ref _mi, _, _, _) => _mi.clone(),
     };
-    let rect = Rect::from_xy_dim(crop[0].0, crop[0].1);
+    let rect = Rect::from_corners(crop[0].0, crop[0].1);
     (card_images[meta_image_index].clone().unwrap(), rect)
 }
 pub fn get_card_widget_image_flexible(card_index: usize,
@@ -113,11 +113,11 @@ pub fn get_card_widget_image_flexible(card_index: usize,
 
     match (theme, crop.clone()) {
         (&cards::CardType::Normal(ref _mi, _), _crop) => {
-            let rect = Rect::from_xy_dim(crop[0].0, crop[0].1);
+            let rect = Rect::from_corners(crop[0].0, crop[0].1);
             (card_images[_mi.clone()].clone().unwrap(), rect)
         }
         (&cards::CardType::Rotatable(_, _, ref _mi, _), _crop) => {
-            let rect = Rect::from_xy_dim(crop[1].0, crop[1].1);
+            let rect = Rect::from_corners(crop[1].0, crop[1].1);
             (card_images[_mi.clone()].clone().unwrap(), rect)
         }
     }

@@ -23,7 +23,6 @@ pub fn render(ui: &mut conrod::UiCell,
         *gamedata;
 
     if let &mut Some(ref mut boardcodec) = boardcodec {
-        println!("show_draft boardcodec, {:?}",page_index.clone());
         let card_images = in_game::card_images(result_map);
         if let Some(ref mut _player) = boardcodec.players.get_mut(*page_index) {
             match gamedata.guistate {
@@ -52,7 +51,7 @@ fn show_draft(ui: &mut conrod::UiCell,
         .filter(|&(index, _)| if index < 4 { true } else { false })
         .zip((*app).texts.instructions2.iter())
         .map(|((_index, ref label), &(ref rect_tuple, ref oval_option))| {
-                 Instruction(label, rect_tuple, oval_option)
+                 Instruction(label, rect_tuple, oval_option, ids.footer)
              })
         .collect::<Vec<Instruction>>();
     if let Some(_pi) = print_instruction_set.get_mut(0) {

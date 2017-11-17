@@ -37,10 +37,16 @@ pub fn render(ui: &mut conrod::UiCell,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
               action_tx: mpsc::Sender<OwnedMessage>) {
     widget::Canvas::new().color(color::TRANSPARENT).set(ids.master, ui);
+    let screen_h = ui.h_of(ids.master).unwrap();
+    let tab_height = if gamedata.keypad_on {
+        0.6 * screen_h
+    } else {
+        0.86 * screen_h
+    };
     if let Some(mut items) = tabview::TabView::new(vec![appdata.texts.lobby, appdata.texts.chat])
-           .padded_w_of(ids.master, 0.1 * ui.win_h)
-           .padded_h_of(ids.master, 0.1 * ui.win_w)
-           .middle_of(ids.master)
+           .padded_w_of(ids.master, 0.0)
+           .h(tab_height)
+           .mid_top_of(ids.master)
            .set(ids.middle_tabview, ui) {
         let vec_closure = render_closure();
         let mut it_j = vec_closure.iter();

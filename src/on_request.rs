@@ -67,4 +67,5 @@ pub fn update(s: ClientReceivedMsg,
             gamedata.tablenumber = _tablenumber;
         }
     }
+
 }

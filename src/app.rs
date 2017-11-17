@@ -24,14 +24,20 @@ widget_ids! {
          prompt_header,
          prompt_logo,
          //in_game
-         arrangedview,
          handview,
          listview,
-         instructionview
+         shuffleview,
+         instructionview,
+         //spell
+         bodydragdroplistview,
+         footerdragdroplistview,
+         footeruseink_but,
+         //turn to submit
+         submit_but
     }
 }
 
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,PartialEq)]
 pub enum GuiState {
     Menu,
     Lobby,
@@ -56,8 +62,10 @@ pub struct GameData {
     pub connected: bool,
     pub error_str: Option<String>,
     pub boardcodec: Option<BoardCodec>,
+    pub personal: Option<Personal>,
     pub player_index: Option<usize>,
     pub print_instruction_set: Vec<bool>,
+    pub keypad_on: bool,
 }
 impl GameData {
     pub fn new() -> GameData {
@@ -81,8 +89,10 @@ impl GameData {
             connected: false,
             error_str: None,
             boardcodec: None,
+            personal: None,
             player_index: None,
             print_instruction_set: vec![true],
+            keypad_on: false,
         }
     }
 }
@@ -90,4 +100,10 @@ impl GameData {
 pub enum Footer {
     ShowHand,
     None,
+}
+#[derive( Debug, Clone)]
+pub struct Personal {
+    //Can change independently
+    pub hand: Vec<usize>,
+    pub arranged: Vec<(usize, bool, Option<String>)>,
 }

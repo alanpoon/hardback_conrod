@@ -5,7 +5,8 @@ use cardgame_widgets::custom_widget::instructionset::InstructionSet;
 use backend::codec_lib::codec::*;
 use std::collections::HashMap;
 use futures::sync::mpsc;
-use app::{self, GameData, Ids};
+use futures::{Future, Sink};
+use app::{self, GameData, Ids, Personal};
 use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
@@ -19,15 +20,27 @@ pub fn render(ui: &mut conrod::UiCell,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
               _action_tx: mpsc::Sender<OwnedMessage>) {
-    let GameData { ref page_index, ref mut boardcodec, ref mut print_instruction_set, .. } =
-        *gamedata;
-
+    let GameData { ref page_index,
+                   ref mut boardcodec,
+                   ref mut print_instruction_set,
+                   ref mut personal,
+                   .. } = *gamedata;
     if let &mut Some(ref mut boardcodec) = boardcodec {
         let card_images = in_game::card_images(result_map);
         if let Some(ref mut _player) = boardcodec.players.get_mut(*page_index) {
             match gamedata.guistate {
                 app::GuiState::Game(GameState::ShowDraft) => {
                     show_draft(ui, ids, print_instruction_set, &appdata);
+                }
+                app::GuiState::Game(GameState::Spell) => {
+                    spell(ui,
+                          ids,
+                          _player,
+                          &card_images,
+                          &appdata,
+                          personal,
+                          result_map,
+                          _action_tx);
                 }
                 app::GuiState::Game(GameState::TurnToSubmit) => {
                     turn_to_submit(ui, ids, _player, &card_images, &appdata, result_map);
@@ -38,6 +51,69 @@ pub fn render(ui: &mut conrod::UiCell,
     }
 
     //  draw_hand(ui, ids, gamedata, appdata, result_map);
+}
+fn spell(ui: &mut conrod::UiCell,
+         ids: &Ids,
+         player: &mut Player,
+         card_images: &[Option<image::Id>; 27],
+         appdata: &AppData,
+         personal: &mut Option<Personal>,
+         result_map: &HashMap<ResourceEnum, SupportIdType>,
+         _action_tx: mpsc::Sender<OwnedMessage>) {
+    if let &mut Some(ref mut _personal) = personal {
+        let mut handvec =
+            _personal.hand
+                .clone()
+                .iter()
+                .map(|ref x| {
+                    let (_image_id, _rect) =
+                        in_game::get_card_widget_image_portrait(x.clone().clone(),
+                                                                card_images,
+                                                                appdata);
+                    (x.clone().clone(), _image_id, _rect)
+                })
+                .collect::<Vec<(usize, image::Id, conrod::Rect)>>();
+        if let (Some(&SupportIdType::ImageId(spinner_image)),
+                Some(&SupportIdType::ImageId(rust_image))) =
+            (result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)),
+             result_map.get(&ResourceEnum::Sprite(Sprite::RUST))) {
+            let exitid = DragDropList::new(&mut handvec,
+                                           Box::new(move |(_v_index, v_blowup, v_rect)| {
+                sample_drag_image::Button::image(v_blowup)
+                    .source_rectangle(v_rect)
+                    .toggle_image(rust_image.clone())
+                    .spinner_image(spinner_image.clone())
+                    .w_h(100.0, 300.0)
+            }),
+                                           50.0)
+                    .padded_h_of(ids.footer, 10.0)
+                    .padded_w_of(ids.footer, 150.0)
+                    .top_left_of(ids.footer)
+                    .exit_id(Some(Some(ids.bodydragdroplistview)))
+                    .set(ids.footerdragdroplistview, ui);
+            if let Some((v_index, _, _)) = exitid {
+                _personal.arranged.push((v_index, false, None));
+            }
+            _personal.hand = handvec.iter().map(|&(x_index, _, _)| x_index).collect::<Vec<usize>>();
+        }
+    }
+    if player.ink > 0 {
+        for _ in widget::Button::new()
+                .label(&appdata.texts.draw_extra_card)
+                .right_from(ids.footerdragdroplistview, 0.0)
+                .set(ids.footeruseink_but, ui) {
+            let action_tx_c = _action_tx.clone();
+            let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
+            let mut g = GameCommand::new();
+            g.take_card_use_ink = Some(true);
+            h.set_gamecommand(g);
+            action_tx_c.send(OwnedMessage::Text(ServerReceivedMsg::serialize_send(h).unwrap()))
+                .wait()
+                .unwrap();
+        }
+    }
+
+
 }
 fn show_draft(ui: &mut conrod::UiCell,
               ids: &Ids,
@@ -55,11 +131,10 @@ fn show_draft(ui: &mut conrod::UiCell,
              })
         .collect::<Vec<Instruction>>();
     if let Some(_pi) = print_instruction_set.get_mut(0) {
-        println!("print_instruction0");
         if *_pi {
-            println!("print_instruction");
             *_pi = InstructionSet::new(&g_vec, (*app).texts.next)
                 .parent_id(ids.footer)
+                .label_color(color::WHITE)
                 .set(ids.instructionview, ui);
         }
     }
@@ -97,49 +172,13 @@ fn turn_to_submit(ui: &mut conrod::UiCell,
                 .exit_id(Some(Some(ids.body)))
                 .set(ids.handview, ui);
         if let Some((v_index, _, _)) = exitid {
-            player.arranged.push((v_index, None));
+            player.arranged.push((v_index, false, None));
         }
         player.hand = handvec.iter().map(|&(x_index, _, _)| x_index).collect::<Vec<usize>>();
     }
 }
-/*           
-fn draw_hand(ui: &mut conrod::UiCell,
-             ids: &Ids,
-             mut gamedata: &mut GameData,
-             appdata: &AppData,
-             result_map: &HashMap<ResourceEnum, SupportIdType>) {
-    let wh = ui.wh_of(ids.footer).unwrap();
-    let z = button::get_style();
-    if let Some(&SupportIdType::ImageId(but_logo)) =
-        result_map.get(&ResourceEnum::Sprite(Sprite::BUTTON)) {
-        if animated_button::AnimatedButton::image(but_logo)
-               .label(appdata.texts.previous)
-               .normal_rect(z.src_rect(19.0))
-               .hover_rect(z.src_rect(20.0))
-               .press_rect(z.src_rect(20.0))
-               .top_left_of(ids.footer)
-               .w(0.2 * wh[0])
-               .h(0.3 * wh[1])
-               .set(ids.footerprevious, ui)
-               .was_clicked() {
-            println!("aaaa");
-            page_previous(gamedata);
-        }
-        if animated_button::AnimatedButton::image(but_logo)
-               .label(appdata.texts.next)
-               .normal_rect(z.src_rect(19.0))
-               .hover_rect(z.src_rect(20.0))
-               .press_rect(z.src_rect(20.0))
-               .top_right_of(ids.footer)
-               .w(0.2 * wh[0])
-               .h(0.3 * wh[1])
-               .set(ids.footernext, ui)
-               .was_clicked() {
-            page_next(gamedata);
-        };
-    }
-}
-*/
+
+
 #[allow(dead_code)]
 fn page_next(gamedata: &mut GameData) {
     if gamedata.page_index + 1 >= gamedata.player_size {

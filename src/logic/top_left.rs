@@ -35,7 +35,7 @@ pub fn draw_lobby_chat(w_id: tabview::Item,
                                                 &gamedata.name,
                                                 action_tx,
                                                 Box::new(process));
-        w_id.set(k, &mut ui);
+        gamedata.keypad_on = w_id.set(k, &mut ui);
     }
 }
 

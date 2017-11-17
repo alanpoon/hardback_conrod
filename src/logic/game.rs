@@ -6,7 +6,7 @@ use logic;
 use app::{GameData, Ids, GuiState};
 use backend::OwnedMessage;
 use backend::SupportIdType;
-
+use cardgame_widgets::custom_widget::animated_canvas;
 pub struct GameProcess<'a, T>
     where T: Clone
 {
@@ -71,11 +71,14 @@ impl<'a, T> GameProcess<'a, T>
                    result_map: &HashMap<ResourceEnum, SupportIdType>,
                    action_tx: mpsc::Sender<OwnedMessage>) {
 
-        widget::Canvas::new()
+        animated_canvas::Canvas::new()
             .color(color::TRANSPARENT)
-            .flow_down(&[(ids.body, widget::Canvas::new().color(color::TRANSPARENT)),
+            .flow_down(&[(ids.body, animated_canvas::Canvas::new().color(color::TRANSPARENT)),
                          (ids.footer,
-                          widget::Canvas::new().color(color::DARK_GREEN).length(100.0))])
+                          animated_canvas::Canvas::new().color(color::DARK_GREEN).length(300.0))])
+            .watch_state(gamedata.guistate.clone())
+            // .close_icon(rust_logo)
+            .frame_rate(30)
             .set(ids.master, ui);
         logic::body::render(ui,
                             ids,

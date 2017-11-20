@@ -1,7 +1,10 @@
 use page_curl::page::Page;
 use backend::meta::app::Sprite;
+use backend::meta::cards;
 use conrod_chat::custom_widget::chatview::Message;
 use backend::codec_lib::codec::*;
+use conrod::{image, Rect};
+
 widget_ids! {
     pub struct Ids {
          master,
@@ -31,9 +34,19 @@ widget_ids! {
          //spell
          bodydragdroplistview,
          footerdragdroplistview,
-         footeruseink_but,
+         spell_tab_view,
          //turn to submit
-         submit_but
+         submit_but,
+         //overlay
+         overlay,
+         overlaytop,
+         overlaybody,
+         overlaybody_tabview,
+         overlay_explainlist,
+         overlay_explainink,
+         overlay_explainlistselect,
+         overlay_okbut,
+         overlay_receivedimage,
     }
 }
 
@@ -44,7 +57,12 @@ pub enum GuiState {
     Loading,
     Game(GameState),
 }
-
+#[derive(Debug,Clone,PartialEq)]
+pub enum OverlayStatus {
+    Loading,
+    Received(image::Id, Rect, cards::CardType),
+    None,
+}
 pub struct GameData {
     pub guistate: GuiState,
     pub footer: Footer,
@@ -66,6 +84,8 @@ pub struct GameData {
     pub player_index: Option<usize>,
     pub print_instruction_set: Vec<bool>,
     pub keypad_on: bool,
+    pub overlay_receivedimage: [OverlayStatus; 3],
+    pub overlay_index: Option<usize>,
 }
 impl GameData {
     pub fn new() -> GameData {
@@ -93,6 +113,8 @@ impl GameData {
             player_index: None,
             print_instruction_set: vec![true],
             keypad_on: false,
+            overlay_receivedimage: [OverlayStatus::None, OverlayStatus::None, OverlayStatus::None],
+            overlay_index: None,
         }
     }
 }

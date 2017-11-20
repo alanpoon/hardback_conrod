@@ -94,7 +94,7 @@ fn show_draft(ui: &mut conrod::UiCell,
             s.set(ui)
         }
         while let (Some(item), Some(card_index)) = (items.next(ui), draft_iter.next()) {
-            let (_image_id, _rect) =
+            let (_image_id, _rect, _) =
                 in_game::get_card_widget_image_portrait(card_index.clone(), card_images, appdata);
             //zoom rect
             let mut top_left_c = _rect.top_left().clone();
@@ -112,7 +112,7 @@ fn show_draft(ui: &mut conrod::UiCell,
         if let Some(&SupportIdType::ImageId(back_logo)) =
             _result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)) {
             let card_vec = draft_iter.map(|x| {
-                                              let (_image_id, _rect) =
+                                              let (_image_id, _rect, _) =
                         in_game::get_card_widget_image_portrait(x.clone(), card_images, appdata);
                                               Image::new(_image_id).source_rectangle(_rect)
                                           })
@@ -167,7 +167,7 @@ fn spell(ui: &mut conrod::UiCell,
                 .clone()
                 .iter()
                 .map(|&(ref x, ref ink, ref op_string)| {
-                         let (_image_id, _rect) =
+                         let (_image_id, _rect, _) =
                         in_game::get_card_widget_image_portrait(x.clone(), card_images, appdata);
                          (x.clone(), _image_id, _rect, ink.clone(), op_string.clone())
                      })

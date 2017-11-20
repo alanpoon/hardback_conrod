@@ -94,7 +94,7 @@ pub fn card_images(result_map: &HashMap<ResourceEnum, SupportIdType>)
 pub fn get_card_widget_image_portrait(card_index: usize,
                                       card_images: &[Option<image::Id>; 27],
                                       appdata: &AppData)
-                                      -> (image::Id, Rect) {
+                                      -> (image::Id, Rect, cards::CardType) {
     let &cards::BlowupCard { ref theme, ref crop, .. } =
         appdata.blowupcards.get(&card_index).unwrap(); //0:portrait
     let meta_image_index = match theme {
@@ -102,23 +102,23 @@ pub fn get_card_widget_image_portrait(card_index: usize,
         &cards::CardType::Rotatable(ref _mi, _, _, _) => _mi.clone(),
     };
     let rect = Rect::from_corners(crop[0].0, crop[0].1);
-    (card_images[meta_image_index].clone().unwrap(), rect)
+    (card_images[meta_image_index].clone().unwrap(), rect, theme.clone())
 }
 pub fn get_card_widget_image_flexible(card_index: usize,
                                       card_images: &[Option<image::Id>; 27],
                                       appdata: &AppData)
-                                      -> (image::Id, Rect) {
+                                      -> (image::Id, Rect, cards::CardType) {
     let &cards::BlowupCard { ref theme, ref crop, .. } =
         appdata.blowupcards.get(&card_index).unwrap(); //0:portrait
 
     match (theme, crop.clone()) {
         (&cards::CardType::Normal(ref _mi, _), _crop) => {
             let rect = Rect::from_corners(crop[0].0, crop[0].1);
-            (card_images[_mi.clone()].clone().unwrap(), rect)
+            (card_images[_mi.clone()].clone().unwrap(), rect, theme.clone())
         }
         (&cards::CardType::Rotatable(_, _, ref _mi, _), _crop) => {
             let rect = Rect::from_corners(crop[1].0, crop[1].1);
-            (card_images[_mi.clone()].clone().unwrap(), rect)
+            (card_images[_mi.clone()].clone().unwrap(), rect, theme.clone())
         }
     }
 }

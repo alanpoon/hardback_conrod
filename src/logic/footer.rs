@@ -2,6 +2,7 @@ use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, ima
 use cardgame_widgets::custom_widget::dragdrop_list::DragDropList;
 use cardgame_widgets::custom_widget::sample_drag_image;
 use cardgame_widgets::custom_widget::instructionset::InstructionSet;
+use cardgame_widgets::custom_widget::animated_canvas;
 use backend::codec_lib::codec::*;
 use std::collections::HashMap;
 use futures::sync::mpsc;
@@ -10,7 +11,7 @@ use app::{self, GameData, Ids, Personal};
 use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
-use backend::meta::cards;
+use backend::meta::{cards, gameicon};
 use backend::meta::local;
 use logic::in_game;
 use instruction::Instruction;
@@ -24,6 +25,7 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref mut boardcodec,
                    ref mut print_instruction_set,
                    ref mut personal,
+                   ref mut overlay,
                    .. } = *gamedata;
     if let &mut Some(ref mut boardcodec) = boardcodec {
         let card_images = in_game::card_images(result_map);
@@ -39,6 +41,7 @@ pub fn render(ui: &mut conrod::UiCell,
                           &card_images,
                           &appdata,
                           personal,
+                          overlay,
                           result_map,
                           _action_tx);
                 }
@@ -58,6 +61,7 @@ fn spell(ui: &mut conrod::UiCell,
          card_images: &[Option<image::Id>; 27],
          appdata: &AppData,
          personal: &mut Option<Personal>,
+         overlay: &mut bool,
          result_map: &HashMap<ResourceEnum, SupportIdType>,
          _action_tx: mpsc::Sender<OwnedMessage>) {
     if let &mut Some(ref mut _personal) = personal {
@@ -74,9 +78,11 @@ fn spell(ui: &mut conrod::UiCell,
                 })
                 .collect::<Vec<(usize, image::Id, conrod::Rect)>>();
         if let (Some(&SupportIdType::ImageId(spinner_image)),
-                Some(&SupportIdType::ImageId(rust_image))) =
+                Some(&SupportIdType::ImageId(rust_image)),
+                Some(&SupportIdType::ImageId(icon_image))) =
             (result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)),
-             result_map.get(&ResourceEnum::Sprite(Sprite::RUST))) {
+             result_map.get(&ResourceEnum::Sprite(Sprite::RUST)),
+             result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
             let exitid = DragDropList::new(&mut handvec,
                                            Box::new(move |(_v_index, v_blowup, v_rect)| {
                 sample_drag_image::Button::image(v_blowup)
@@ -95,21 +101,13 @@ fn spell(ui: &mut conrod::UiCell,
                 _personal.arranged.push((v_index, false, None));
             }
             _personal.hand = handvec.iter().map(|&(x_index, _, _)| x_index).collect::<Vec<usize>>();
-        }
-    }
-    if player.ink > 0 {
-        for _ in widget::Button::new()
-                .label(&appdata.texts.draw_extra_card)
-                .right_from(ids.footerdragdroplistview, 0.0)
-                .set(ids.footeruseink_but, ui) {
-            let action_tx_c = _action_tx.clone();
-            let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
-            let mut g = GameCommand::new();
-            g.take_card_use_ink = Some(true);
-            h.set_gamecommand(g);
-            action_tx_c.send(OwnedMessage::Text(ServerReceivedMsg::serialize_send(h).unwrap()))
-                .wait()
-                .unwrap();
+            let icon_rect = gameicon::sprite().src_rect(0.0);
+            for _ in widget::Button::image(icon_image)
+                    .source_rectangle(Rect::from_corners(icon_rect.0, icon_rect.1))
+                    .right_from(ids.footerdragdroplistview, 0.0)
+                    .set(ids.tab_but, ui) {
+                overlay = true;
+            }
         }
     }
 

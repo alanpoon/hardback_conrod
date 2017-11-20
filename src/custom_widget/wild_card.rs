@@ -5,16 +5,20 @@ use conrod::{Color, Colorable, Borderable, Positionable, UiCell, Widget, event, 
 use conrod::position::{self, Rect, Scalar, Dimensions, Point};
 use conrod::widget;
 use cardgame_widgets::custom_widget::dragdrop_list::Draggable;
+use cardgame_widgets::sprite::{Spriteable, spriteable_rect};
 use conrod_keypad::custom_widget::text_edit;
+
 /// The `WildCard` displays an `Image` on top.
 
-pub struct Image<'a> {
+pub struct Image<'a, H>
+    where H: Spriteable
+{
     /// The id of the `Image` to be used.
     pub image_id: image::Id,
     /// The image displayed when the button is held for 1 seconds.
     pub toggle_image_id: Option<image::Id>,
     /// The image overlay on the mouse while is held for more than 1/16 seconds
-    pub spinner_image_id: Option<image::Id>,
+    pub spinner_image_id: Option<(image::Id, H)>,
     /// Alphaphet
     pub wild: Option<&'a mut String>,
 }
@@ -85,7 +89,9 @@ impl<S> WildCard<S> {
         }
     }
 }
-impl<'a> WildCard<Image<'a>> {
+impl<'a, H> WildCard<Image<'a, H>>
+    where H: Spriteable
+{
     /// Begin building a button displaying the given `Image` on top.
     pub fn image(img: image::Id, wild: Option<&'a mut String>) -> Self {
         let image = Image {
@@ -102,12 +108,14 @@ impl<'a> WildCard<Image<'a>> {
         self
     }
     /// The spinner image overlay displayed when the button is held for 2 seconds.
-    pub fn spinner_image(mut self, id: image::Id) -> Self {
-        self.show.spinner_image_id = Some(id);
+    pub fn spinner_image(mut self, id: image::Id, sprite: H) -> Self {
+        self.show.spinner_image_id = Some((id, sprite));
         self
     }
 }
-impl<'a> Widget for WildCard<Image<'a>> {
+impl<'a, H> Widget for WildCard<Image<'a, H>>
+    where H: Spriteable
+{
     type State = ImageState;
     type Style = Style;
     type Event = ();
@@ -248,9 +256,10 @@ fn draw_spinner_op(button_id: widget::Id,
                    spinner_image: Option<image::Id>,
                    spinner_index: usize,
                    ui: &mut UiCell) {
-    if let Some(spinner_image) = spinner_image {
+    if let Some((spinner_image, sprite)) = spinner_image {
+        let r = spriteable_rect(sprite, spinner_index as f64);
         widget::Image::new(spinner_image)
-            .source_rectangle(get_spriteinfo().src_rect(spinner_index as f64))
+            .source_rectangle(Rect::from_corners(r.0, r.1))
             .w_h(40.0, 40.0)
             .middle_of(button_id)
             .set(spinner_id, ui);
@@ -291,32 +300,5 @@ impl<S> Borderable for WildCard<S> {
 impl<S> Draggable for WildCard<S> {
     builder_methods!{
         draggable { style.draggable = Some(bool) }
-    }
-}
-
-#[derive(Clone,Copy,PartialEq,Debug)]
-pub struct SpriteInfo {
-    pub first: (f64, f64), //left corner of first
-    pub num_in_row: f64,
-    pub w_h: (f64, f64),
-    pub pad: (f64, f64, f64, f64),
-}
-pub fn get_spriteinfo() -> SpriteInfo {
-    SpriteInfo {
-        first: (0.0, 206.0),
-        num_in_row: 12.0,
-        w_h: (51.8333, 51.5),
-        pad: (0.0, 0.0, 0.0, 0.0),
-    }
-}
-impl SpriteInfo {
-    pub fn src_rect(&self, index: f64) -> Rect {
-        let s = self;
-        let (x, y) = (index % s.num_in_row as f64, (index / (s.num_in_row)).floor());
-        let r = position::rect::Rect::from_corners([s.first.0 + x * s.w_h.0 + s.pad.0,
-                                                    s.first.1 - y * s.w_h.1 - s.pad.2],
-                                                   [s.first.0 + (x + 1.0) * s.w_h.0 - s.pad.1,
-                                                    s.first.1 - (y + 1.0) * s.w_h.1 + s.pad.3]);
-        r
     }
 }

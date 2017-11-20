@@ -137,7 +137,6 @@ impl GameApp {
             // Get all the new events since the last frame.
             events_loop.poll_events(|event| { events.push(event); });
             while let Ok(s) = proxy_rx.try_recv() {
-                println!("zz");
                 game_proc.update_state(&mut gamedata, &result_map, s);
             }
 

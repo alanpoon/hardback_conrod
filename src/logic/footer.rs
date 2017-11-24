@@ -58,7 +58,7 @@ pub fn render(ui: &mut conrod::UiCell,
 }
 fn spell(ui: &mut conrod::UiCell,
          ids: &Ids,
-         player: &mut Player,
+         _player: &mut Player,
          card_images: &[Option<image::Id>; 27],
          appdata: &AppData,
          personal: &mut Option<Personal>,

@@ -90,6 +90,7 @@ pub struct GameData {
     pub overlay: bool,
     pub overlay_receivedimage: [OverlayStatus; 3],
     pub overlay_index: Option<usize>,
+    pub overlay_remover_selected: HashSet<usize, RandomState>,
     pub overlay_timeless_selected: Vec<HashSet<usize, RandomState>>,
 }
 impl GameData {
@@ -121,6 +122,7 @@ impl GameData {
             overlay: false,
             overlay_receivedimage: [OverlayStatus::None, OverlayStatus::None, OverlayStatus::None],
             overlay_index: None,
+            overlay_remover_selected: HashSet::new(),
             overlay_timeless_selected: vec![HashSet::new(),
                                             HashSet::new(),
                                             HashSet::new(),

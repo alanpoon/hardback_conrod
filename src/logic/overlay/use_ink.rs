@@ -16,21 +16,18 @@ use logic::in_game;
 use instruction::Instruction;
 pub fn render(w_id: tabview::Item,
               ids: &Ids,
-              mut gamedata: &mut GameData,
+              gamedata: &mut GameData,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
               action_tx: mpsc::Sender<OwnedMessage>,
               ui: &mut conrod::UiCell) {
-    let GameData { ref mut boardcodec,
-                   ref player_index,
-                   ref mut personal,
-                   ref mut overlay_receivedimage,
-                   .. } = *gamedata;
+    let GameData { ref mut boardcodec, ref player_index, ref mut overlay_receivedimage, .. } =
+        *gamedata;
     //explanation pictures
     let (mut items, _) = widget::List::flow_right(3)
         .item_size(220.0)
-        .middle_of(ids.overlaybody)
-        .w_of(ids.overlaybody)
+        .middle_of(w_id.parent_id)
+        .w_of(w_id.parent_id)
         .set(ids.overlay_explainlist, ui);
     if let (Some(&SupportIdType::ImageId(back_image)),
             Some(&SupportIdType::ImageId(icon_image))) =
@@ -40,8 +37,9 @@ pub fn render(w_id: tabview::Item,
         let back_rect = Rect::from_corners([670.0, 70.0], [1130.0, 850.0]);
         let arrow_rect = spriteable_rect(game_icon_sprite, 4.0);
         let question_rect = spriteable_rect(game_icon_sprite, 5.0);
-        let image_vec =
-            vec![(back_image,back_rect),(icon_image,Rect::from_corners(arrow_rect.0,arrow_rect.1)),(icon_image,Rect::from_corners(question_rect.0,question_rect.1))];
+        let image_vec = vec![(back_image, back_rect),
+                             (icon_image, Rect::from_corners(arrow_rect.0, arrow_rect.1)),
+                             (icon_image, Rect::from_corners(question_rect.0, question_rect.1))];
         let mut image_iter = image_vec.iter();
         while let (Some(item), Some(&(imageid, imagerect))) = (items.next(ui), image_iter.next()) {
             let j = widget::Image::new(imageid).source_rectangle(imagerect);
@@ -56,7 +54,7 @@ pub fn render(w_id: tabview::Item,
                         .source_rectangle(_rect.clone())
                         .w(150.0)
                         .h(150.0)
-                        .mid_bottom_with_margin_on(ids.overlaybody, 20.0)
+                        .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
                         .set(ids.overlay_receivedimage, ui);
                 }
                 OverlayStatus::Loading => {
@@ -64,7 +62,7 @@ pub fn render(w_id: tabview::Item,
                         result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)) {
                         let spin_sprite = graphics_match::spinner_sprite();
                         FullCycleSprite::new(dwn_img, spin_sprite)
-                            .mid_bottom_with_margin_on(ids.overlaybody, 20.0)
+                            .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
                             .w(100.0)
                             .h(100.0)
                             .set(ids.overlay_receivedimage, ui);
@@ -74,7 +72,7 @@ pub fn render(w_id: tabview::Item,
                     if _player.ink > 0 {
                         for _c in widget::Button::new()
                                 .label(&appdata.texts.use_ink)
-                                .mid_bottom_with_margin_on(ids.overlaybody, 20.0)
+                                .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
                                 .set(ids.overlay_okbut, ui) {
                             overlay_receivedimage[0] = OverlayStatus::Loading;
                             let action_tx_c = action_tx.clone();
@@ -91,14 +89,5 @@ pub fn render(w_id: tabview::Item,
 
             }
         }
-    }
-}
-fn get_spinner_spriteinfo() -> SpriteInfo {
-    SpriteInfo {
-        first: (0.0, 400.0),
-        num_in_row: 12,
-        num_in_col: 4,
-        w_h: (100.0, 100.0),
-        pad: (0.0, 0.0, 0.0, 0.0),
     }
 }

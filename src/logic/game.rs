@@ -10,7 +10,10 @@ use cardgame_widgets::custom_widget::animated_canvas;
 pub struct GameProcess<'a, T>
     where T: Clone
 {
-    pub update_closure: Box<Fn(&mut GameData, &HashMap<ResourceEnum, SupportIdType>, T) + 'a>,
+    pub update_closure: Box<Fn(&mut GameData,
+                               &AppData,
+                               &HashMap<ResourceEnum, SupportIdType>,
+                               T) + 'a>,
     pub appdata: AppData,
     pub ids: Ids,
 }
@@ -19,7 +22,10 @@ impl<'a, T> GameProcess<'a, T>
     where T: Clone
 {
     pub fn new(ui: &mut conrod::Ui,
-               y: Box<Fn(&mut GameData, &HashMap<ResourceEnum, SupportIdType>, T) + 'a>)
+               y: Box<Fn(&mut GameData,
+                         &AppData,
+                         &HashMap<ResourceEnum, SupportIdType>,
+                         T) + 'a>)
                -> GameProcess<'a, T> {
         let appdata = AppData::new(1200, 800, "Hardback");
         GameProcess {
@@ -105,6 +111,6 @@ impl<'a, T> GameProcess<'a, T>
                         mut gamedata: &mut GameData,
                         result_map: &HashMap<ResourceEnum, SupportIdType>,
                         msg: T) {
-        (*self.update_closure)(gamedata, result_map, msg);
+        (*self.update_closure)(gamedata, &self.appdata, result_map, msg);
     }
 }

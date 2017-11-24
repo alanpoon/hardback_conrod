@@ -111,15 +111,19 @@ impl GameApp {
                 .unwrap();
         let last_update = std::time::Instant::now();
         let mut game_proc =
-            logic::game::GameProcess::<OwnedMessage>::new(&mut ui,Box::new(|gamedata, result_map, msg| {
-                 if let OwnedMessage::Text(z) = OwnedMessage::from(msg) {
-                             if let Ok(s) =codec::ClientReceivedMsg::deserialize_receive(&z) {
-                                println!("s {:?}", s);
-                                on_request::update(s, gamedata, result_map);
-                            } else{
-                                println!("err");
-                            }
-                 }
+            logic::game::GameProcess::<OwnedMessage>::new(&mut ui,
+                                                          Box::new(|gamedata,
+                                                                    appdata,
+                                                                    result_map,
+                                                                    msg| {
+                if let OwnedMessage::Text(z) = OwnedMessage::from(msg) {
+                    if let Ok(s) = codec::ClientReceivedMsg::deserialize_receive(&z) {
+                        println!("s {:?}", s);
+                        on_request::update(s, gamedata, appdata, result_map);
+                    } else {
+                        println!("err");
+                    }
+                }
             }));
         let mut events = Vec::new();
 

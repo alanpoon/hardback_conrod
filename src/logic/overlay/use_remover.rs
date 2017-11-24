@@ -1,6 +1,7 @@
 use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable};
 use cardgame_widgets::custom_widget::tabview;
 use cardgame_widgets::custom_widget::full_cycle_sprite::FullCycleSprite;
+use cardgame_widgets::custom_widget::bordered_image::BorderedImage;
 use cardgame_widgets::sprite::SpriteInfo;
 use backend::codec_lib::codec::*;
 use std::collections::HashMap;
@@ -16,15 +17,15 @@ use logic::in_game;
 use instruction::Instruction;
 pub fn render(w_id: tabview::Item,
               ids: &Ids,
-              mut gamedata: &mut GameData,
+              gamedata: &mut GameData,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
               action_tx: mpsc::Sender<OwnedMessage>,
               ui: &mut conrod::UiCell) {
     let GameData { ref mut boardcodec,
                    ref player_index,
-                   ref mut personal,
                    ref mut overlay_receivedimage,
+                   ref mut overlay_remover_selected,
                    .. } = *gamedata;
     //choose from the inked cards
 
@@ -32,54 +33,46 @@ pub fn render(w_id: tabview::Item,
         if let Some(ref _player) = boardcodec.players.get(_player_index.clone()) {
             let arranged = _player.arranged.clone();
             let inked = arranged.iter()
-                .filter(|&&(_ci, _inked, _optstr)| _inked)
+                .filter(|&&(ref _ci, ref _inked, ref _optstr)| _inked.clone())
                 .map(|&(_ci, _, _)| _ci.clone())
                 .collect::<Vec<usize>>();
             let item_h = 230.0;
-            let (mut events, scrollbar) = widget::ListSelect::single(inked.len())
+            let (mut events, scrollbar) = widget::ListSelect::multiple(inked.len())
                 .flow_down()
                 .item_size(item_h)
                 .scrollbar_next_to()
                 .w_h(700.0, 260.0)
-                .middle_of(ids.overlaybody)
+                .middle_of(w_id.parent_id)
                 .set(ids.overlay_explainlistselect, ui);
             let card_images = in_game::card_images(result_map);
-            let mut card_index_sel = None;
             // Handle the `ListSelect`s events.
-            while let Some(event) = events.next(ui, |i| if let Some(_ci) = card_index_sel {
-                if _ci == inked.get(i).unwrap() {
-                    true
-                } else {
-                    false
-                }
-            } else {
-                false
-            }) {
+            while let Some(event) = events.next(ui, |i| overlay_remover_selected.contains(&i)) {
                 use conrod::widget::list_select::Event;
                 match event {
                     // For the `Item` events we instantiate the `List`'s items.
                     Event::Item(item) => {
                         let card_index = inked.get(item.i).unwrap();
-                        let color = if let Some(_ci) = card_index_sel {
-                            if _ci == inked.get(item.i).unwrap() {
-                                conrod::color::YELLOW
-                            } else {
-                                conrod::color::LIGHT_GREY
-                            }
-                        } else {
-                            conrod::color::LIGHT_GREY
-                        };
+                        let selected = overlay_remover_selected.contains(&item.i);
                         let (_image_id, _rect, _) =
                             in_game::get_card_widget_image_portrait(card_index.clone(),
                                                                     &card_images,
                                                                     appdata);
-                        let button =
-                            widget::Button::image(_image_id).source_rectangle(_rect).color(color);
+                        let mut button = BorderedImage::new(_image_id)
+                            .source_rectangle(_rect)
+                            .border_color(color::YELLOW)
+                            .border(20.0);
+                        if selected {
+                            button = button.bordered();
+                        }
                         item.set(button, ui);
                     }
 
                     // The selection has changed.
-                    Event::Selection(idx) => card_index_sel = Some(inked.get(idx).unwrap()),
+                    Event::Selection(selection) => {
+                        if overlay_remover_selected.len() < _player.remover {
+                            selection.update_index_set(overlay_remover_selected);
+                        }
+                    }
 
                     // The remaining events indicate interactions with the `ListSelect` widget.
                     event => println!("{:?}", &event),
@@ -90,11 +83,6 @@ pub fn render(w_id: tabview::Item,
             if let Some(s) = scrollbar {
                 s.set(ui);
             }
-        }
-    }
-
-    if let (&mut Some(ref mut boardcodec), &Some(ref _player_index)) = (boardcodec, player_index) {
-        if let Some(_player) = boardcodec.players.get_mut(_player_index.clone()) {
 
             match overlay_receivedimage[1] {
                 OverlayStatus::Received(ref _img, ref _rect, ref _theme) => {
@@ -102,31 +90,34 @@ pub fn render(w_id: tabview::Item,
                         .source_rectangle(_rect.clone())
                         .w(150.0)
                         .h(150.0)
-                        .mid_bottom_with_margin_on(ids.overlaybody, 20.0)
+                        .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
                         .set(ids.overlay_receivedimage, ui);
                 }
                 OverlayStatus::Loading => {
                     if let Some(&SupportIdType::ImageId(dwn_img)) =
                         result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)) {
-                        let spin_info = get_spinner_spriteinfo();
-                        FullCycleSprite::new(dwn_img, spin_info)
-                            .mid_bottom_with_margin_on(ids.overlaybody, 20.0)
+                        let spinner_sprite = graphics_match::spinner_sprite();
+                        FullCycleSprite::new(dwn_img, spinner_sprite)
+                            .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
                             .w(100.0)
                             .h(100.0)
                             .set(ids.overlay_receivedimage, ui);
                     }
                 }
                 OverlayStatus::None => {
-                    if _player.remover > 0 {
+                    if overlay_remover_selected.len() > 0 {
                         for _c in widget::Button::new()
                                 .label(&appdata.texts.use_remover)
-                                .mid_bottom_with_margin_on(ids.overlaybody, 20.0)
+                                .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
                                 .set(ids.overlay_okbut, ui) {
                             overlay_receivedimage[0] = OverlayStatus::Loading;
                             let action_tx_c = action_tx.clone();
                             let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                             let mut g = GameCommand::new();
-                            g.use_remover = Some(true);
+                            let selected_vec = overlay_remover_selected.iter()
+                                .map(|x| inked.get(x.clone()).unwrap().clone())
+                                .collect::<Vec<usize>>();
+                            g.use_remover = Some(selected_vec);
                             h.set_gamecommand(g);
                             action_tx_c.send(OwnedMessage::Text(ServerReceivedMsg::serialize_send(h).unwrap()))
                             .wait()
@@ -138,13 +129,5 @@ pub fn render(w_id: tabview::Item,
             }
         }
     }
-}
-fn get_spinner_spriteinfo() -> SpriteInfo {
-    SpriteInfo {
-        first: (0.0, 400.0),
-        num_in_row: 12,
-        num_in_col: 4,
-        w_h: (100.0, 100.0),
-        pad: (0.0, 0.0, 0.0, 0.0),
-    }
+
 }

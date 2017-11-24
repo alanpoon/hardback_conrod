@@ -5,7 +5,7 @@ use backend::SupportIdType;
 use std::collections::HashMap;
 use conrod_chat::chat;
 use logic::in_game;
-//use animation;
+
 #[allow(unused_variables,non_snake_case)]
 pub fn update(s: ClientReceivedMsg,
               gamedata: &mut GameData,
@@ -16,8 +16,6 @@ pub fn update(s: ClientReceivedMsg,
                             tablenumber,
                             request,
                             turn_index,
-                            reason,
-                            optional,
                             location,
                             privateInformation,
                             sender,
@@ -58,18 +56,18 @@ pub fn update(s: ClientReceivedMsg,
         gamedata.boardcodec = Some(_boardcodec);
 
     }
-    if let (Some(Some(ref _request)), &mut Some(ref _overlay_index)) =
+    if let (Some(Some(ref _request)), Some(ref _overlay_index)) =
         (request, gamedata.overlay_index) {
         //request
         let card_images = in_game::card_images(result_map);
         let (ref _p_i, ref _c_i, ref _string, ref _vecstring, ref _opt) = *_request;
         let (_image_id, _rect, _theme) = if _overlay_index.clone() <= 1 {
-            in_game::get_card_widget_image_portrait(_c_i.clone(), card_images, appdata);
+            in_game::get_card_widget_image_portrait(_c_i.clone(), &card_images, appdata)
         } else {
-            in_game::get_card_widget_image_flexible(_c_i.clone(), card_images, appdata);
+            in_game::get_card_widget_image_flexible(_c_i.clone(), &card_images, appdata)
         };
         gamedata.overlay_receivedimage[_overlay_index.clone()] =
-            OverlayStatus::Received((_image_id, _rect, _theme));
+            OverlayStatus::Received(_image_id, _rect, _theme);
     }
     if let (Some(Some(_type_name)), Some(Some(_tables)), Some(_tablenumber)) =
         (type_name, tables, tablenumber) {

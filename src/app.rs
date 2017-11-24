@@ -4,13 +4,15 @@ use backend::meta::cards;
 use conrod_chat::custom_widget::chatview::Message;
 use backend::codec_lib::codec::*;
 use conrod::{image, Rect};
-
+use std::collections::hash_map::RandomState;
+use std::collections::HashSet;
 widget_ids! {
     pub struct Ids {
          master,
          footer,
          footerprevious,
          footernext,
+         footer_overlay_but,
          menubut_multiplayer,
         //lobby
         middle_tabview,
@@ -45,6 +47,7 @@ widget_ids! {
          overlay_explainlist,
          overlay_explainink,
          overlay_explainlistselect,
+         overlay_image_panels,
          overlay_okbut,
          overlay_receivedimage,
     }
@@ -84,8 +87,10 @@ pub struct GameData {
     pub player_index: Option<usize>,
     pub print_instruction_set: Vec<bool>,
     pub keypad_on: bool,
+    pub overlay: bool,
     pub overlay_receivedimage: [OverlayStatus; 3],
     pub overlay_index: Option<usize>,
+    pub overlay_timeless_selected: Vec<HashSet<usize, RandomState>>,
 }
 impl GameData {
     pub fn new() -> GameData {
@@ -113,8 +118,13 @@ impl GameData {
             player_index: None,
             print_instruction_set: vec![true],
             keypad_on: false,
+            overlay: false,
             overlay_receivedimage: [OverlayStatus::None, OverlayStatus::None, OverlayStatus::None],
             overlay_index: None,
+            overlay_timeless_selected: vec![HashSet::new(),
+                                            HashSet::new(),
+                                            HashSet::new(),
+                                            HashSet::new()],
         }
     }
 }

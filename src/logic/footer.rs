@@ -1,8 +1,9 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable};
+use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
 use cardgame_widgets::custom_widget::dragdrop_list::DragDropList;
 use cardgame_widgets::custom_widget::sample_drag_image;
 use cardgame_widgets::custom_widget::instructionset::InstructionSet;
 use cardgame_widgets::custom_widget::animated_canvas;
+use cardgame_widgets::sprite::spriteable_rect;
 use backend::codec_lib::codec::*;
 use std::collections::HashMap;
 use futures::sync::mpsc;
@@ -11,8 +12,8 @@ use app::{self, GameData, Ids, Personal};
 use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
-use backend::meta::{cards, gameicon};
-use backend::meta::local;
+use backend::meta::{cards, local};
+use graphics_match;
 use logic::in_game;
 use instruction::Instruction;
 pub fn render(ui: &mut conrod::UiCell,
@@ -65,18 +66,17 @@ fn spell(ui: &mut conrod::UiCell,
          result_map: &HashMap<ResourceEnum, SupportIdType>,
          _action_tx: mpsc::Sender<OwnedMessage>) {
     if let &mut Some(ref mut _personal) = personal {
-        let mut handvec =
-            _personal.hand
-                .clone()
-                .iter()
-                .map(|ref x| {
-                    let (_image_id, _rect) =
-                        in_game::get_card_widget_image_portrait(x.clone().clone(),
-                                                                card_images,
-                                                                appdata);
-                    (x.clone().clone(), _image_id, _rect)
-                })
-                .collect::<Vec<(usize, image::Id, conrod::Rect)>>();
+        let mut handvec = _personal.hand
+            .clone()
+            .iter()
+            .map(|ref x| {
+                let (_image_id, _rect, _theme) =
+                    in_game::get_card_widget_image_portrait(x.clone().clone(),
+                                                            card_images,
+                                                            appdata);
+                (x.clone().clone(), _image_id, _rect)
+            })
+            .collect::<Vec<(usize, image::Id, conrod::Rect)>>();
         if let (Some(&SupportIdType::ImageId(spinner_image)),
                 Some(&SupportIdType::ImageId(rust_image)),
                 Some(&SupportIdType::ImageId(icon_image))) =
@@ -85,10 +85,11 @@ fn spell(ui: &mut conrod::UiCell,
              result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
             let exitid = DragDropList::new(&mut handvec,
                                            Box::new(move |(_v_index, v_blowup, v_rect)| {
+                let spinner_sprite = graphics_match::spinner_sprite();
                 sample_drag_image::Button::image(v_blowup)
                     .source_rectangle(v_rect)
                     .toggle_image(rust_image.clone())
-                    .spinner_image(spinner_image.clone())
+                    .spinner_image(spinner_image.clone(), spinner_sprite)
                     .w_h(100.0, 300.0)
             }),
                                            50.0)
@@ -101,12 +102,12 @@ fn spell(ui: &mut conrod::UiCell,
                 _personal.arranged.push((v_index, false, None));
             }
             _personal.hand = handvec.iter().map(|&(x_index, _, _)| x_index).collect::<Vec<usize>>();
-            let icon_rect = gameicon::sprite().src_rect(0.0);
+            let icon_rect = spriteable_rect(graphics_match::gameicon_sprite(), 1.0);
             for _ in widget::Button::image(icon_image)
                     .source_rectangle(Rect::from_corners(icon_rect.0, icon_rect.1))
                     .right_from(ids.footerdragdroplistview, 0.0)
-                    .set(ids.tab_but, ui) {
-                overlay = true;
+                    .set(ids.footer_overlay_but, ui) {
+                *overlay = true;
             }
         }
     }
@@ -147,7 +148,7 @@ fn turn_to_submit(ui: &mut conrod::UiCell,
     let mut handvec = player.hand
         .iter()
         .map(|x| {
-                 let (_image_id, _rect) =
+                 let (_image_id, _rect, _) =
                 in_game::get_card_widget_image_portrait(x.clone(), card_images, appdata);
                  (x.clone(), _image_id, _rect)
              })
@@ -158,10 +159,11 @@ fn turn_to_submit(ui: &mut conrod::UiCell,
          result_map.get(&ResourceEnum::Sprite(Sprite::RUST))) {
         let exitid = DragDropList::new(&mut handvec,
                                        Box::new(move |(_v_index, v_blowup, v_rect)| {
+            let spinner_sprite = graphics_match::spinner_sprite();
             sample_drag_image::Button::image(v_blowup)
                 .source_rectangle(v_rect)
                 .toggle_image(rust_image.clone())
-                .spinner_image(spinner_image.clone())
+                .spinner_image(spinner_image.clone(), spinner_sprite)
                 .w_h(100.0, 300.0)
         }),
                                        50.0)

@@ -14,7 +14,7 @@ use std::collections::HashMap;
 use futures::sync::mpsc;
 use app::{self, GameData, Ids, Personal, GuiState};
 use logic::in_game;
-
+use graphics_match;
 pub struct ImageHoverable(Image, Option<Image>, Option<Image>);
 impl Hoverable for ImageHoverable {
     fn idle(&self) -> Image {
@@ -176,13 +176,14 @@ fn spell(ui: &mut conrod::UiCell,
                 Some(&SupportIdType::ImageId(rust_image))) =
             (result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)),
              result_map.get(&ResourceEnum::Sprite(Sprite::RUST))) {
+            let spinner_rect = graphics_match::spinner_sprite();
             let exitid =
                 DragDropList::new(&mut arrangedvec,
                                   Box::new(move |(_v_index, v_blowup, v_rect, _, _)| {
                     sample_drag_image::Button::image(v_blowup)
                         .source_rectangle(v_rect)
                         .toggle_image(rust_image.clone())
-                        .spinner_image(spinner_image.clone())
+                        .spinner_image(spinner_image, spinner_rect)
                         .w_h(100.0, 300.0)
                 }),
                                   50.0)

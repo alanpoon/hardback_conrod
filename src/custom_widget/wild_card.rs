@@ -251,11 +251,11 @@ fn bordered_rectangle(button_id: widget::Id,
         .set(rectangle_id, ui);
 }
 
-fn draw_spinner_op(button_id: widget::Id,
-                   spinner_id: widget::Id,
-                   spinner_image: Option<image::Id>,
-                   spinner_index: usize,
-                   ui: &mut UiCell) {
+fn draw_spinner_op<H: Spriteable>(button_id: widget::Id,
+                                  spinner_id: widget::Id,
+                                  spinner_image: Option<(image::Id, H)>,
+                                  spinner_index: usize,
+                                  ui: &mut UiCell) {
     if let Some((spinner_image, sprite)) = spinner_image {
         let r = spriteable_rect(sprite, spinner_index as f64);
         widget::Image::new(spinner_image)

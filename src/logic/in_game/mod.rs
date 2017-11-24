@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use cardgame_widgets::sprite::SpriteInfo;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use backend::meta::cards;

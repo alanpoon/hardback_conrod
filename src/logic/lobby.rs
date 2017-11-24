@@ -1,5 +1,6 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable};
+use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
 use cardgame_widgets::custom_widget::{tabview, animated_button, table_list};
+use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use futures::{Future, Sink};
@@ -8,6 +9,8 @@ use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use graphics_match::button;
+use graphics_match;
+use logic::in_game;
 use logic;
 pub struct TableListTex<'a> {
     appdata: &'a AppData,
@@ -104,14 +107,17 @@ pub fn render(ui: &mut conrod::UiCell,
             let wh = ui.wh_of(ids.middle_tabview).unwrap();
             // let wh = [200.0,200.0];
             if let (&app::GuiState::Lobby, None) = (&gamedata.guistate, gamedata.tablenumber) {
-
+                let game_icon_sprite = graphics_match::gameicon_sprite();
+                let hover_rect = spriteable_rect(game_icon_sprite, card_index + 1.0);
+                let press_rect = spriteable_rect(game_icon_sprite, card_index + 2.0);
+                let normal_rect = spriteable_rect(game_icon_sprite, card_index);
                 if animated_button::AnimatedButton::image(rust_logo)
                        .label(appdata.texts.newtable)
                        .label_font_size(14)
                        .label_color(color::LIGHT_BLUE)
-                       .normal_rect(_style.src_rect(card_index))
-                       .hover_rect(_style.src_rect(card_index + 1.0))
-                       .press_rect(_style.src_rect(card_index + 2.0))
+                       .normal_rect(Rect::from_corners(normal_rect.0, normal_rect.1))
+                       .hover_rect(Rect::from_corners(hover_rect.0, hover_rect.1))
+                       .press_rect(Rect::from_corners(press_rect.0, press_rect.1))
                        .top_left_with_margins_on(w_id.parent_id, 0.0, 0.0)
                        .w_h(wh[0] * 0.3, wh[1] * 0.06)
                        .set(ids.new_table_but, ui)
@@ -147,15 +153,18 @@ pub fn render(ui: &mut conrod::UiCell,
             .set(ids.name_text_edit, ui) {
                     *k = edit;
                 }
-
                 let change_name_index = 9.0;
+                let game_icon_sprite = graphics_match::gameicon_sprite();
+                let hover_rect = spriteable_rect(game_icon_sprite, change_name_index + 1.0);
+                let press_rect = spriteable_rect(game_icon_sprite, change_name_index + 2.0);
+                let normal_rect = spriteable_rect(game_icon_sprite, change_name_index);
                 if animated_button::AnimatedButton::image(rust_logo)
                        .label(appdata.texts.changename)
                        .label_font_size(14)
                        .label_color(color::LIGHT_BLUE)
-                       .normal_rect(_style.src_rect(change_name_index))
-                       .hover_rect(_style.src_rect(change_name_index + 1.0))
-                       .press_rect(_style.src_rect(change_name_index + 2.0))
+                       .normal_rect(Rect::from_corners(normal_rect.0, normal_rect.1))
+                       .hover_rect(Rect::from_corners(hover_rect.0, hover_rect.1))
+                       .press_rect(Rect::from_corners(press_rect.0, press_rect.1))
                        .right_from(ids.name_rect, 2.0)
                        .w_h(wh[0] * 0.3, wh[1] * 0.06)
                        .set(ids.name_change_but, ui)

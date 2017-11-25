@@ -166,12 +166,12 @@ fn spell(ui: &mut conrod::UiCell,
             _personal.arranged
                 .clone()
                 .iter()
-                .map(|&(ref x, ref ink, ref op_string)| {
-                         let (_image_id, _rect, _) =
+                .map(|&(ref x, ref ink, ref op_string, ref _timeless)| {
+                    let (_image_id, _rect, _) =
                         in_game::get_card_widget_image_portrait(x.clone(), card_images, appdata);
-                         (x.clone(), _image_id, _rect, ink.clone(), op_string.clone())
-                     })
-                .collect::<Vec<(usize, image::Id, conrod::Rect, bool, Option<String>)>>();
+                    (x.clone(), _image_id, _rect, ink.clone(), op_string.clone(), _timeless.clone())
+                })
+                .collect::<Vec<(usize, image::Id, conrod::Rect, bool, Option<String>, bool)>>();
         if let (Some(&SupportIdType::ImageId(spinner_image)),
                 Some(&SupportIdType::ImageId(rust_image))) =
             (result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)),
@@ -179,7 +179,7 @@ fn spell(ui: &mut conrod::UiCell,
             let spinner_rect = graphics_match::spinner_sprite();
             let exitid =
                 DragDropList::new(&mut arrangedvec,
-                                  Box::new(move |(_v_index, v_blowup, v_rect, _, _)| {
+                                  Box::new(move |(_v_index, v_blowup, v_rect, _, _, _)| {
                     sample_drag_image::Button::image(v_blowup)
                         .source_rectangle(v_rect)
                         .toggle_image(rust_image.clone())
@@ -191,14 +191,14 @@ fn spell(ui: &mut conrod::UiCell,
                         .top_left_of(ids.body)
                         .exit_id(Some(Some(ids.footerdragdroplistview)))
                         .set(ids.bodydragdroplistview, ui);
-            if let Some((v_index, _, _, _, _)) = exitid {
+            if let Some((v_index, _, _, _, _, _)) = exitid {
                 _personal.hand.push(v_index);
             }
             _personal.arranged = arrangedvec.iter()
-                .map(|&(ref x_index, _, _, ref ink, ref op_string)| {
-                         (x_index.clone(), ink.clone(), op_string.clone())
+                .map(|&(ref x_index, _, _, ref ink, ref op_string, ref timeless)| {
+                         (x_index.clone(), ink.clone(), op_string.clone(), timeless.clone())
                      })
-                .collect::<Vec<(usize, bool, Option<String>)>>();
+                .collect::<Vec<(usize, bool, Option<String>, bool)>>();
         }
     }
 

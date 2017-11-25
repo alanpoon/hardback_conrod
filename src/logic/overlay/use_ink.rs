@@ -37,7 +37,8 @@ pub fn render(w_id: tabview::Item,
         let back_rect = Rect::from_corners([670.0, 70.0], [1130.0, 850.0]);
         let arrow_rect = spriteable_rect(game_icon_sprite, 4.0);
         let question_rect = spriteable_rect(game_icon_sprite, 5.0);
-        let image_vec = vec![(back_image, back_rect),
+        let image_vec =
+            vec![(back_image, back_rect),
                              (icon_image, Rect::from_corners(arrow_rect.0, arrow_rect.1)),
                              (icon_image, Rect::from_corners(question_rect.0, question_rect.1))];
         let mut image_iter = image_vec.iter();

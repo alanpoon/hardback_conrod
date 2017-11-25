@@ -33,8 +33,8 @@ pub fn render(w_id: tabview::Item,
         if let Some(ref _player) = boardcodec.players.get(_player_index.clone()) {
             let arranged = _player.arranged.clone();
             let inked = arranged.iter()
-                .filter(|&&(ref _ci, ref _inked, ref _optstr)| _inked.clone())
-                .map(|&(_ci, _, _)| _ci.clone())
+                .filter(|&&(ref _ci, ref _inked, ref _optstr, _)| _inked.clone())
+                .map(|&(_ci, _, _, _)| _ci.clone())
                 .collect::<Vec<usize>>();
             let item_h = 230.0;
             let (mut events, scrollbar) = widget::ListSelect::multiple(inked.len())

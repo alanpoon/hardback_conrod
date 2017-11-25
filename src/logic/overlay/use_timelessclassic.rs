@@ -50,9 +50,18 @@ pub fn render(w_id: tabview::Item,
               ui: &mut conrod::UiCell) {
     let GameData { ref mut boardcodec,
                    ref player_index,
-                   ref personal,
+                   ref mut personal,
                    ref mut overlay_timeless_selected,
                    .. } = *gamedata;
+    //remove all timelessclassic from personal's arranged
+    if let &mut Some(ref mut _personal) = personal {
+        _personal.arranged = _personal.arranged
+            .iter()
+            .filter(|&&(ref _c, _, ref _optstr,ref _t)| !_t.clone())
+            .map(|x|x.clone())
+            .collect::<Vec<(usize, bool, Option<String>, bool)>>();
+    }
+
     //normal_stuff don't need mut borrow
     let mut normal_stuff: Vec<(Option<String>, Option<ImageRectType>, Vec<ImageRectType>)> = vec![];
     let card_images = in_game::card_images(result_map);
@@ -65,8 +74,8 @@ pub fn render(w_id: tabview::Item,
                     .iter()
                     .map(|x| {
                         let mut r = None;
-                        if let &Some(ref _personal) = personal {
-                            for (_ci, _inkbool, _) in _personal.arranged.clone() {
+                        if let &mut Some(ref _personal) = personal {
+                            for (_ci, _inkbool, _, _timeless) in _personal.arranged.clone() {
                                 if *x != _ci {
                                     let (_image_id, _rect, _) =
                                         in_game::get_card_widget_image_flexible(x.clone(),

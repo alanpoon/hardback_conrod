@@ -99,7 +99,7 @@ fn spell(ui: &mut conrod::UiCell,
                     .exit_id(Some(Some(ids.bodydragdroplistview)))
                     .set(ids.footerdragdroplistview, ui);
             if let Some((v_index, _, _)) = exitid {
-                _personal.arranged.push((v_index, false, None));
+                _personal.arranged.push((v_index, false, None, false));
             }
             _personal.hand = handvec.iter().map(|&(x_index, _, _)| x_index).collect::<Vec<usize>>();
             let icon_rect = spriteable_rect(graphics_match::gameicon_sprite(), 1.0);
@@ -172,7 +172,7 @@ fn turn_to_submit(ui: &mut conrod::UiCell,
                 .exit_id(Some(Some(ids.body)))
                 .set(ids.handview, ui);
         if let Some((v_index, _, _)) = exitid {
-            player.arranged.push((v_index, false, None));
+            player.arranged.push((v_index, false, None, false));
         }
         player.hand = handvec.iter().map(|&(x_index, _, _)| x_index).collect::<Vec<usize>>();
     }

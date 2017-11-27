@@ -81,17 +81,19 @@ impl<'a, T> GameProcess<'a, T>
             .color(color::TRANSPARENT)
             .flow_down(&[(ids.body, animated_canvas::Canvas::new().color(color::TRANSPARENT)),
                          (ids.footer,
-                          animated_canvas::Canvas::new().color(color::DARK_GREEN).length(300.0))])
+                          animated_canvas::Canvas::new().color(color::DARK_GREEN).length(210.0))])
             .watch_state(gamedata.guistate.clone())
             // .close_icon(rust_logo)
             .frame_rate(30)
             .set(ids.master, ui);
+
         logic::body::render(ui,
                             ids,
                             &mut gamedata,
                             &appdata,
                             result_map,
                             action_tx.clone());
+
 
         logic::footer::render(ui,
                               ids,
@@ -105,6 +107,7 @@ impl<'a, T> GameProcess<'a, T>
                                &appdata,
                                result_map,
                                action_tx.clone());
+
     }
     #[allow(unused_mut)]
     pub fn update_state(&self,

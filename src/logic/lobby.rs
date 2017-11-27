@@ -1,6 +1,7 @@
 use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
 use cardgame_widgets::custom_widget::{tabview, animated_button, table_list};
 use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
+use cardgame_widgets::custom_widget::animated_canvas;
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use futures::{Future, Sink};
@@ -39,7 +40,11 @@ pub fn render(ui: &mut conrod::UiCell,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
               action_tx: mpsc::Sender<OwnedMessage>) {
-    widget::Canvas::new().color(color::TRANSPARENT).set(ids.master, ui);
+    animated_canvas::Canvas::new()
+        .color(color::TRANSPARENT)
+        .watch_state(gamedata.guistate.clone())
+        .frame_rate(30)
+        .set(ids.master, ui);
     let screen_h = ui.h_of(ids.master).unwrap();
     let tab_height = if gamedata.keypad_on {
         0.6 * screen_h
@@ -107,14 +112,14 @@ pub fn render(ui: &mut conrod::UiCell,
             let wh = ui.wh_of(ids.middle_tabview).unwrap();
             // let wh = [200.0,200.0];
             if let (&app::GuiState::Lobby, None) = (&gamedata.guistate, gamedata.tablenumber) {
-                let game_icon_sprite = graphics_match::gameicon_sprite();
-                let hover_rect = spriteable_rect(game_icon_sprite, card_index + 1.0);
-                let press_rect = spriteable_rect(game_icon_sprite, card_index + 2.0);
-                let normal_rect = spriteable_rect(game_icon_sprite, card_index);
+                let button_sprite = graphics_match::button::get_style();
+                let hover_rect = spriteable_rect(button_sprite, card_index + 1.0);
+                let press_rect = spriteable_rect(button_sprite, card_index + 2.0);
+                let normal_rect = spriteable_rect(button_sprite, card_index);
                 if animated_button::AnimatedButton::image(rust_logo)
                        .label(appdata.texts.newtable)
                        .label_font_size(14)
-                       .label_color(color::LIGHT_BLUE)
+                       .label_color(color::WHITE)
                        .normal_rect(Rect::from_corners(normal_rect.0, normal_rect.1))
                        .hover_rect(Rect::from_corners(hover_rect.0, hover_rect.1))
                        .press_rect(Rect::from_corners(press_rect.0, press_rect.1))
@@ -132,10 +137,12 @@ pub fn render(ui: &mut conrod::UiCell,
                 };
                 let _button_panel = ui.rect_of(ids.new_table_but).unwrap();
                 widget::Text::new(appdata.texts.playername)
+                    .color(color::WHITE)
                     .down_from(ids.new_table_but, 2.0)
                     .w_h(200.0, wh[1] * 0.06)
                     .set(ids.name_text, ui);
                 widget::Text::new(&gamedata.name)
+                    .color(color::WHITE)
                     .right_from(ids.name_text, 0.0)
                     .w_h(200.0, wh[1] * 0.06)
                     .set(ids.user_name, ui);
@@ -144,7 +151,7 @@ pub fn render(ui: &mut conrod::UiCell,
                     .set(ids.name_rect, ui);
                 let k = &mut gamedata.name_text_edit;
                 for edit in widget::TextEdit::new(k)
-            .color(color::BLACK)
+            .color(color::WHITE)
             .w_h(98.0, wh[1]* 0.06)
             .right_from(ids.user_name,wh[0]*0.025)
             .left_justify()
@@ -154,14 +161,14 @@ pub fn render(ui: &mut conrod::UiCell,
                     *k = edit;
                 }
                 let change_name_index = 9.0;
-                let game_icon_sprite = graphics_match::gameicon_sprite();
-                let hover_rect = spriteable_rect(game_icon_sprite, change_name_index + 1.0);
-                let press_rect = spriteable_rect(game_icon_sprite, change_name_index + 2.0);
-                let normal_rect = spriteable_rect(game_icon_sprite, change_name_index);
+                let button_sprite = graphics_match::button::get_style();
+                let hover_rect = spriteable_rect(button_sprite, change_name_index + 1.0);
+                let press_rect = spriteable_rect(button_sprite, change_name_index + 2.0);
+                let normal_rect = spriteable_rect(button_sprite, change_name_index);
                 if animated_button::AnimatedButton::image(rust_logo)
                        .label(appdata.texts.changename)
                        .label_font_size(14)
-                       .label_color(color::LIGHT_BLUE)
+                       .label_color(color::WHITE)
                        .normal_rect(Rect::from_corners(normal_rect.0, normal_rect.1))
                        .hover_rect(Rect::from_corners(hover_rect.0, hover_rect.1))
                        .press_rect(Rect::from_corners(press_rect.0, press_rect.1))

@@ -85,6 +85,7 @@ fn show_draft(ui: &mut conrod::UiCell,
     if let Some(&mut true) = print_instruction_set.get_mut(0) {
         let (mut items, scrollbar) = widget::List::flow_right(player.draft.len())
             .item_size(item_h)
+            .instantiate_all_items()
             .middle_of(ids.body)
             .h(220.0)
             .padded_w_of(ids.body, 20.0)
@@ -99,7 +100,7 @@ fn show_draft(ui: &mut conrod::UiCell,
             //zoom rect
             let mut top_left_c = _rect.top_left().clone();
             top_left_c.set_x(_rect.top_left().get_x() + 100.0);
-            top_left_c.set_y(_rect.top_left().get_y() + 80.0);
+            top_left_c.set_y(_rect.top_left().get_y() - 120.0);
             let btm_right = _rect.bottom_right().clone();
             let _zoom_rect = Rect::from_corners(top_left_c, btm_right);
             let _ih = ImageHoverable(Image::new(_image_id).source_rectangle(_rect),

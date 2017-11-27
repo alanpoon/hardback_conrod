@@ -8,19 +8,25 @@ use hardback_conrod as game_conrod;
 use game_conrod::backend::custom_glium::glium::{self, glutin, Surface};
 use game_conrod::{app, logic};
 use game_conrod::backend::{OwnedMessage, SupportIdType};
-use game_conrod::backend::meta::app::ResourceEnum;
+use game_conrod::backend::meta::app::{Font, ResourceEnum};
 use game_conrod::backend::codec_lib::codec;
 use game_conrod::page_curl::{self, page, render};
 use game_conrod::opengl;
 use game_conrod::on_request;
 use conrod_chat::backend::websocket::client;
+use conrod::event;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use futures::sync::mpsc;
+use std::time::Instant;
 const WIN_W: u32 = 900;
 const WIN_H: u32 = 600;
 const CONNECTION: &'static str = "ws://127.0.0.1:8080";
-
+#[derive(Clone)]
+pub enum ConrodMessage {
+    Event(Instant, conrod::event::Input),
+    Thread(Instant),
+}
 pub struct GameApp {}
 
 impl GameApp {
@@ -40,6 +46,11 @@ impl GameApp {
                                                       &mut image_map,
                                                       &display,
                                                       &mut ui);
+        if let Some(&SupportIdType::FontId(regular)) =
+            result_map.get(&ResourceEnum::Font(Font::REGULAR)) {
+            ui.theme.font_id = Some(regular);
+        }
+
         //<logic::game::ConrodMessage<OwnedMessage>>
         let (proxy_tx, proxy_rx) = std::sync::mpsc::channel();
         let (proxy_action_tx, proxy_action_rx) = mpsc::channel(2);
@@ -53,7 +64,7 @@ impl GameApp {
             let mut last_update = std::time::Instant::now();
             let mut c = 0;
             while !connected {
-                let sixteen_ms = std::time::Duration::new(10, 0);
+                let sixteen_ms = std::time::Duration::from_millis(500);
                 let now = std::time::Instant::now();
                 let duration_since_last_update = now.duration_since(last_update);
                 if (duration_since_last_update < sixteen_ms) & (c > 0) {
@@ -125,31 +136,17 @@ impl GameApp {
                     }
                 }
             }));
-        let mut events = Vec::new();
+        let mut old_captured_event: Option<ConrodMessage> = None;
+        let mut captured_event: Option<ConrodMessage> = None;
+        let sixteen_ms = std::time::Duration::from_millis(800);
 
         'render: loop {
             let ss_tx = s_tx.lock().unwrap();
             let proxy_action_tx = ss_tx.clone();
-            let sixteen_ms = std::time::Duration::from_millis(500);
-            let now = std::time::Instant::now();
-            let duration_since_last_update = now.duration_since(last_update);
-            if duration_since_last_update < sixteen_ms {
-                std::thread::sleep(sixteen_ms - duration_since_last_update);
-            }
-            events.clear();
-
-            // Get all the new events since the last frame.
-            events_loop.poll_events(|event| { events.push(event); });
-            while let Ok(s) = proxy_rx.try_recv() {
-                game_proc.update_state(&mut gamedata, &result_map, s);
-            }
-
-            // Process the events.
-            for event in events.drain(..) {
-
-                // Break from the loop upon `Escape` or closed window.
+            let mut to_break = false;
+            let mut to_continue = false;
+            events_loop.poll_events(|event| {
                 match event.clone() {
-
                     glium::glutin::Event::WindowEvent { event, .. } => {
                         match event {
                             glium::glutin::WindowEvent::Closed |
@@ -159,28 +156,75 @@ impl GameApp {
                                     ..
                                 },
                                 ..
-                            } => break 'render,
+                            } => {to_break=true;}
                             _ => (),
                         }
                     }
-                    _ => (),
-                };
+                    _ => {}
+                }
+                match conrod::backend::winit::convert_event(event.clone(), &display) {
+                    None => {
+                        to_continue = true;
+                    }
+                    Some(input) => {
+                        let d = std::time::Instant::now();
+                        if let event::Input::Text(s) = input.clone() {
+                            if s != String::from("") {
+                                captured_event = Some(ConrodMessage::Event(d, input));
+                            }
+                        } else {
+                            captured_event = Some(ConrodMessage::Event(d, input));
+                        }
 
-                // Use the `winit` backend feature to convert the winit event to a conrod input.
-                let input = match conrod::backend::winit::convert_event(event, &display) {
-                    None => continue,
-                    Some(input) => input,
-                };
-
-                // Handle the input with the `Ui`.
-                ui.handle_event(input);
-                // Set the widgets.
-                game_proc.run(&mut ui,
-                              &mut (gamedata),
-                              &result_map,
-                              proxy_action_tx.clone());
-
+                    }
+                }
+            });
+            if to_break {
+                break 'render;
             }
+            if to_continue {
+                continue;
+            }
+            match captured_event {
+                Some(ConrodMessage::Event(d, ref input)) => {
+                    if let Some(ConrodMessage::Event(_oldd, ref oldinput)) = old_captured_event {
+                        if oldinput.clone() != input.clone() {
+                            ui.handle_event(input.clone());
+                        }
+                    }
+                    if let None = old_captured_event {
+                        ui.handle_event(input.clone());
+                    }
+                    old_captured_event = Some(ConrodMessage::Event(d, input.clone()));
+                    // Set the widgets.
+                    game_proc.run(&mut ui,
+                                  &mut (gamedata),
+                                  &result_map,
+                                  proxy_action_tx.clone());
+
+                }
+                Some(ConrodMessage::Thread(_t)) => {
+                    // Set the widgets.
+                    game_proc.run(&mut ui,
+                                  &mut (gamedata),
+                                  &result_map,
+                                  proxy_action_tx.clone());
+                }
+                None => {
+                    let now = std::time::Instant::now();
+                    let duration_since_last_update = now.duration_since(last_update);
+                    if duration_since_last_update < sixteen_ms {
+                        std::thread::sleep(sixteen_ms - duration_since_last_update);
+                    }
+                    let t = std::time::Instant::now();
+                    captured_event = Some(ConrodMessage::Thread(t));
+                }
+            }
+
+            while let Ok(s) = proxy_rx.try_recv() {
+                game_proc.update_state(&mut gamedata, &result_map, s);
+            }
+
 
             // Draw the `Ui` if it has changed.
             let primitives = ui.draw();

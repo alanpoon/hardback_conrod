@@ -52,39 +52,37 @@ pub fn render(w_id: tabview::Item,
                    ref player_index,
                    ref mut personal,
                    ref mut overlay_timeless_selected,
+                   ref mut overlay_receivedimage,
                    .. } = *gamedata;
-    //remove all timelessclassic from personal's arranged
-    if let &mut Some(ref mut _personal) = personal {
-        _personal.arranged = _personal.arranged
-            .iter()
-            .filter(|&&(ref _c, _, ref _optstr,ref _t)| !_t.clone())
-            .map(|x|x.clone())
-            .collect::<Vec<(usize, bool, Option<String>, bool)>>();
-    }
 
     //normal_stuff don't need mut borrow
     let mut normal_stuff: Vec<(Option<String>, Option<ImageRectType>, Vec<ImageRectType>)> = vec![];
     let card_images = in_game::card_images(result_map);
     if let Some(&SupportIdType::ImageId(rust_logo)) =
         result_map.get(&ResourceEnum::Sprite(Sprite::RUST)) {
-        if let (&mut Some(ref mut _boardcodec), &Some(ref _player_index)) =
-            (boardcodec, player_index) {
+        if let (&mut Some(ref mut _boardcodec),
+                &Some(ref _player_index),
+                &mut Some(ref mut _personal)) = (boardcodec, player_index, personal) {
+            //remove all timelessclassic from personal's arranged
+            _personal.arranged = _personal.arranged
+                .iter()
+                .filter(|&&(ref _c, _, ref _optstr, ref _t)| !_t.clone())
+                .map(|x| x.clone())
+                .collect::<Vec<(usize, bool, Option<String>, bool)>>();
             for _p in _boardcodec.players.clone() {
                 let vec_cards = _p.timeless_classic
                     .iter()
                     .map(|x| {
                         let mut r = None;
-                        if let &mut Some(ref _personal) = personal {
-                            for (_ci, _inkbool, _, _timeless) in _personal.arranged.clone() {
-                                if *x != _ci {
-                                    let (_image_id, _rect, _) =
-                                        in_game::get_card_widget_image_flexible(x.clone(),
-                                                                                &card_images,
-                                                                                appdata);
-                                    let top_left = _rect.top_left();
-                                    let btm_right = _rect.bottom_right();
-                                    r = Some((_image_id, Some((top_left, btm_right))));
-                                }
+                        for (_ci, _inkbool, _, _timeless) in _personal.arranged.clone() {
+                            if *x != _ci {
+                                let (_image_id, _rect, _) =
+                                    in_game::get_card_widget_image_flexible(x.clone(),
+                                                                            &card_images,
+                                                                            appdata);
+                                let top_left = _rect.top_left();
+                                let btm_right = _rect.bottom_right();
+                                r = Some((_image_id, Some((top_left, btm_right)), _ci));
                             }
                         }
                         r
@@ -93,7 +91,7 @@ pub fn render(w_id: tabview::Item,
                     .map(|x| x.unwrap())
                     .collect::<Vec<ImageRectType>>();
 
-                normal_stuff.push((Some(_p.name), Some((rust_logo, None)), vec_cards));
+                normal_stuff.push((Some(_p.name), Some((rust_logo, None, 0)), vec_cards));
             }
             if let Some(_player) = _boardcodec.players.get_mut(_player_index.clone()) {
                 let mut vec_p = normal_stuff.iter()
@@ -113,10 +111,28 @@ pub fn render(w_id: tabview::Item,
                     .y_item_height(100.0)
                     .x_item_list([100.0, 100.0, 22.0, 5.0])
                     .set(ids.overlay_image_panels, ui);
-                for _c in widget::Button::new()
-                        .label(&appdata.texts.use_timelessclassic)
-                        .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
-                        .set(ids.overlay_okbut, ui) {}
+                match overlay_receivedimage[2] {
+                    OverlayStatus::None => {
+                        for _c in widget::Button::new()
+                                .label(&appdata.texts.use_timelessclassic)
+                                .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
+                                .set(ids.overlay_okbut, ui) {
+                            overlay_receivedimage[2] = OverlayStatus::Loading;
+                            for &PanelInfo { ref list_image, ref list_selected, .. } in
+                                vec_p.iter() {
+                                //list_image ->Vec<ImageRectType>
+                                for _selected in list_selected.iter() {
+                                    if let Some(&(_, _, ref _ci)) =
+                                        list_image.get(_selected.clone()) {
+                                        _personal.arranged.push((_ci.clone(), false, None, true));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+
             }
         }
     }

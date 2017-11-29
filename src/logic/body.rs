@@ -6,12 +6,15 @@ use cardgame_widgets::custom_widget::sample_drag_image;
 use cardgame_widgets::custom_widget::image_hover::{Hoverable, ImageHover};
 use cardgame_widgets::custom_widget::shuffle::Shuffle;
 use cardgame_widgets::custom_widget::dragdrop_list::DragDropList;
+use cardgame_widgets::custom_widget::promptview::{PromptView, PromptSender};
 use backend::codec_lib::codec::*;
 use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use std::collections::HashMap;
 use futures::sync::mpsc;
+use futures::{Future, Sink};
+
 use app::{self, GameData, Ids, Personal, GuiState};
 use logic::in_game;
 use graphics_match;
@@ -27,6 +30,17 @@ impl Hoverable for ImageHoverable {
         self.2
     }
 }
+#[derive(Clone)]
+pub struct PromptSendable(mpsc::Sender<OwnedMessage>);
+impl PromptSender for PromptSendable {
+    fn send(&self, msg: String) {
+        self.0
+            .clone()
+            .send(OwnedMessage::Text(msg))
+            .wait()
+            .unwrap();
+    }
+}
 pub fn render(ui: &mut conrod::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
@@ -37,27 +51,43 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref mut boardcodec,
                    ref mut print_instruction_set,
                    ref mut guistate,
+                   ref mut initial_draft,
+                   ref player_index,
                    ref mut personal,
+                   ref prompt_cache,
                    .. } = *gamedata;
     if let &mut Some(ref mut boardcodec) = boardcodec {
         let card_images = in_game::card_images(result_map);
         if let Some(ref mut _player) = boardcodec.players.get_mut(*page_index) {
-            match gamedata.guistate {
-                app::GuiState::Game(GameState::ShowDraft) => {
+            match guistate {
+                &mut app::GuiState::Game(GameState::ShowDraft) => {
                     show_draft(ui,
                                ids,
                                _player,
                                &card_images,
                                &appdata,
                                print_instruction_set,
-                               guistate,
-                               result_map);
+                               prompt_cache,
+                               initial_draft,
+                               result_map,
+                               _action_tx.clone());
                 }
-                app::GuiState::Game(GameState::Spell) => {
+                &mut app::GuiState::Game(GameState::Shuffle) => {
+                    shuffle(ui,
+                            ids,
+                            _player,
+                            &card_images,
+                            &appdata,
+                            &initial_draft,
+                            player_index,
+                            guistate,
+                            result_map);
+                }
+                &mut app::GuiState::Game(GameState::Spell) => {
                     cache_personal(_player, personal);
                     spell(ui, ids, &card_images, personal, appdata, result_map);
                 }
-                app::GuiState::Game(GameState::TurnToSubmit) => {
+                &mut app::GuiState::Game(GameState::TurnToSubmit) => {
                     spell(ui, ids, &card_images, personal, appdata, result_map);
                     turn_to_submit_but(ui, ids, &appdata);
                 }
@@ -78,23 +108,27 @@ fn show_draft(ui: &mut conrod::UiCell,
               card_images: &[Option<image::Id>; 27],
               appdata: &AppData,
               print_instruction_set: &mut Vec<bool>,
-              guistate: &mut GuiState,
-              _result_map: &HashMap<ResourceEnum, SupportIdType>) {
-    let item_h = 180.0;
-    let mut draft_iter = player.draft.iter();
+              prompt_cache: &Option<(String, Vec<String>)>,
+              initial_draft: &mut Vec<usize>,
+              _result_map: &HashMap<ResourceEnum, SupportIdType>,
+              action_tx: mpsc::Sender<OwnedMessage>) {
+    let body_w = ui.w_of(ids.body).unwrap();
+    let item_h = body_w / 5.0;
+    *initial_draft = player.draft.clone();
+    let mut dealt_iter = player.draft.iter();
     if let Some(&mut true) = print_instruction_set.get_mut(0) {
-        let (mut items, scrollbar) = widget::List::flow_right(player.draft.len())
+        let (mut items, scrollbar) = widget::List::flow_right(player.draftlen)
             .item_size(item_h)
             .instantiate_all_items()
-            .middle_of(ids.body)
-            .h(220.0)
+            .mid_bottom_of(ids.body)
+            .h(item_h * 1.2)
             .padded_w_of(ids.body, 20.0)
             .scrollbar_next_to()
             .set(ids.listview, ui);
         if let Some(s) = scrollbar {
             s.set(ui)
         }
-        while let (Some(item), Some(card_index)) = (items.next(ui), draft_iter.next()) {
+        while let (Some(item), Some(card_index)) = (items.next(ui), dealt_iter.next()) {
             let (_image_id, _rect, _) =
                 in_game::get_card_widget_image_portrait(card_index.clone(), card_images, appdata);
             //zoom rect
@@ -110,43 +144,79 @@ fn show_draft(ui: &mut conrod::UiCell,
             item.set(j, ui);
         }
     } else {
-        if let Some(&SupportIdType::ImageId(back_logo)) =
-            _result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)) {
-            let card_vec = draft_iter.map(|x| {
-                                              let (_image_id, _rect, _) =
-                        in_game::get_card_widget_image_portrait(x.clone(), card_images, appdata);
-                                              Image::new(_image_id).source_rectangle(_rect)
-                                          })
-                .collect::<Vec<Image>>();
-            let player_draft_c = player.draft.clone();
-            let give_out_vec = player.hand
-                .iter()
-                .enumerate()
-                .map(move |(_index, x)| {
-                    let mut _z = None;
-                    for ref _d in player_draft_c.clone() {
-                        if _d == x {
-                            _z = Some(_index);
-                        }
+        if let &Some(ref _prompt_cache) = prompt_cache {
+            let promptsender = PromptSendable(action_tx);
+            let instructions: Vec<(&str, Box<Fn(PromptSendable)>)> =
+                _prompt_cache.1
+                    .iter()
+                    .enumerate()
+                    .map(|(_index, _string)| {
+                        let k :(&str, Box<Fn(PromptSendable)>) = (&_string,
+                         Box::new(move|ps| {
+                            let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
+                            let mut g = GameCommand::new();
+                            g.reply = Some(_index.clone());
+                            h.set_gamecommand(g);
+                            ps.send(ServerReceivedMsg::serialize_send(h).unwrap());
+                        }));
+                        k
+                    })
+                    .collect::<Vec<(&str, Box<Fn(PromptSendable)>)>>();
+            let prompt_j = PromptView::new(&instructions, (0.5, &_prompt_cache.0), promptsender)
+                .padded_wh_of(ids.body, 100.0)
+                .middle_of(ids.body);
+            prompt_j.set(ids.promptview, ui);
+        }
+    }
+}
+fn shuffle(ui: &mut conrod::UiCell,
+           ids: &Ids,
+           player: &Player,
+           card_images: &[Option<image::Id>; 27],
+           appdata: &AppData,
+           initial_draft: &Vec<usize>,
+           player_index: &Option<usize>,
+           guistate: &mut GuiState,
+           _result_map: &HashMap<ResourceEnum, SupportIdType>) {
+    if let (Some(&SupportIdType::ImageId(back_logo)), &Some(_player_index)) =
+        (_result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)), player_index) {
+        let card_vec = initial_draft.iter()
+            .map(|x| {
+                     let (_image_id, _rect, _) =
+                    in_game::get_card_widget_image_portrait(x.clone(), card_images, appdata);
+                     Image::new(_image_id).source_rectangle(_rect)
+                 })
+            .collect::<Vec<Image>>();
+        let give_out_vec = player.hand
+            .iter()
+            .enumerate()
+            .map(move |(_index, x)| {
+                let mut _z = None;
+                for ref _d in initial_draft.clone() {
+                    if _d == x {
+                        _z = Some(_index);
                     }
-                    _z
-                })
-                .filter(|x| if let &Some(_) = x { true } else { false })
-                .map(|x| x.unwrap())
-                .collect::<Vec<usize>>();
-            let back_rect = Rect::from_corners([670.0, 70.0], [1130.0, 850.0]);
-            if !Shuffle::new(card_vec, Image::new(back_logo).source_rectangle(back_rect))
-                    .give_out(give_out_vec)
-                    .mid_left_of(ids.body)
-                    .w(400.0)
-                    .set(ids.shuffleview, ui) {
+                }
+                _z
+            })
+            .filter(|x| if let &Some(_) = x { true } else { false })
+            .map(|x| x.unwrap())
+            .collect::<Vec<usize>>();
+        println!("give_out_vec {:?}", give_out_vec);
+        let back_rect = Rect::from_corners([670.0, 70.0], [1130.0, 850.0]);
+        if !Shuffle::new(card_vec, Image::new(back_logo).source_rectangle(back_rect))
+                .give_out(give_out_vec)
+                .bottom_left_of(ids.body)
+                .w(400.0)
+                .close_frame_rate(25)
+                .set(ids.shuffleview, ui) {
+            if _player_index == 0 {
+                *guistate = GuiState::Game(GameState::TurnToSubmit);
+            } else {
                 *guistate = GuiState::Game(GameState::Spell);
             }
         }
-
     }
-
-
 }
 fn cache_personal(player: &mut Player, personal: &mut Option<Personal>) {
     if let &mut None = personal {

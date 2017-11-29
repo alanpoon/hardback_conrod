@@ -21,7 +21,6 @@ shared_library = "0.1.7"
 image = "0.15.0"
 toa-ping ={path="../toa-ping"}
 
-
 [features]
 _ws = ["websocket"]
 backend_glium_winit = []

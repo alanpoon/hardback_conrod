@@ -56,8 +56,8 @@ pub fn update(s: ClientReceivedMsg,
         gamedata.boardcodec = Some(_boardcodec);
 
     }
-    if let (Some(Some(ref _request)), Some(ref _overlay_index)) =
-        (request, gamedata.overlay_index) {
+    if let (&Some(Some(ref _request)), Some(ref _overlay_index)) =
+        (&request, gamedata.overlay_index) {
         //request
         let card_images = in_game::card_images(result_map);
         let (ref _p_i, ref _c_i, ref _string, ref _vecstring, ref _opt) = *_request;
@@ -68,6 +68,10 @@ pub fn update(s: ClientReceivedMsg,
         };
         gamedata.overlay_receivedimage[_overlay_index.clone()] =
             OverlayStatus::Received(_image_id, _rect, _theme);
+    }
+    if let (Some(Some(ref _request)), None) = (request, gamedata.overlay_index) {
+        //request for the prompts
+        let (ref _p_i, ref _c_i, ref _string, ref _vecstring, ref _opt) = *_request;
     }
     if let (Some(Some(_type_name)), Some(Some(_tables)), Some(_tablenumber)) =
         (type_name, tables, tablenumber) {

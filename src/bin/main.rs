@@ -19,8 +19,6 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use futures::sync::mpsc;
 use std::time::Instant;
-const WIN_W: u32 = 900;
-const WIN_H: u32 = 600;
 const CONNECTION: &'static str = "ws://127.0.0.1:8080";
 #[derive(Clone)]
 pub enum ConrodMessage {
@@ -39,7 +37,8 @@ impl GameApp {
         let display = glium::Display::new(window, context, &events_loop).unwrap();
         let mut renderer = conrod::backend::glium::Renderer::new(&display).unwrap();
         // construct our `Ui`.
-        let mut ui = conrod::UiBuilder::new([WIN_W as f64, WIN_H as f64]).build();
+        let (screen_w, screen_h) = display.get_framebuffer_dimensions();
+        let mut ui = conrod::UiBuilder::new([screen_w as f64, screen_h as f64]).build();
         let mut result_map = HashMap::<ResourceEnum, SupportIdType>::new();
         let mut image_map = conrod::image::Map::new();
         game_conrod::ui::load_resources_to_result_map(&mut result_map,
@@ -120,7 +119,7 @@ impl GameApp {
         let program =
             glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
                 .unwrap();
-        let last_update = std::time::Instant::now();
+        let mut last_update = std::time::Instant::now();
         let mut game_proc =
             logic::game::GameProcess::<OwnedMessage>::new(&mut ui,
                                                           Box::new(|gamedata,
@@ -225,10 +224,8 @@ impl GameApp {
                 game_proc.update_state(&mut gamedata, &result_map, s);
             }
 
-
             // Draw the `Ui` if it has changed.
             let primitives = ui.draw();
-
             renderer.fill(&display, primitives, &image_map);
             let mut target = display.draw();
             target.clear_color(0.0, 0.0, 0.0, 1.0);
@@ -238,9 +235,10 @@ impl GameApp {
                                   &program,
                                   &mut gamedata.page_vec,
                                   &result_map);
-            renderer.draw(&display, &mut target, &image_map).unwrap();
 
+            renderer.draw(&display, &mut target, &image_map).unwrap();
             target.finish().unwrap();
+            last_update = std::time::Instant::now();
         }
         Ok(())
     }

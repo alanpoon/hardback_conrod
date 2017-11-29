@@ -123,7 +123,7 @@ fn show_draft(ui: &mut conrod::UiCell,
         .instructions1
         .iter()
         .enumerate()
-        .filter(|&(index, _)| if index < 4 { true } else { false })
+        .filter(|&(index, _)| if index < 3 { true } else { false })
         .zip((*app).texts.instructions2.iter())
         .map(|((_index, ref label), &(ref rect_tuple, ref oval_option))| {
                  Instruction(label, rect_tuple, oval_option, ids.footer)

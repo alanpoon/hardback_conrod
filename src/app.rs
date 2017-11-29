@@ -25,9 +25,6 @@ widget_ids! {
         table_list,
          body,
          text,
-         prompt_rect,
-         prompt_header,
-         prompt_logo,
          //in_game
          handview,
          listview,
@@ -50,6 +47,9 @@ widget_ids! {
          overlay_image_panels,
          overlay_okbut,
          overlay_receivedimage,
+         //promptview
+         promptview,
+
     }
 }
 
@@ -86,12 +86,14 @@ pub struct GameData {
     pub personal: Option<Personal>,
     pub player_index: Option<usize>,
     pub print_instruction_set: Vec<bool>,
+    pub initial_draft: Vec<usize>,
     pub keypad_on: bool,
     pub overlay: bool,
     pub overlay_receivedimage: [OverlayStatus; 3],
     pub overlay_index: Option<usize>,
     pub overlay_remover_selected: HashSet<usize, RandomState>,
     pub overlay_timeless_selected: Vec<HashSet<usize, RandomState>>,
+    pub prompt_cache: Option<(String, Vec<String>)>,
 }
 impl GameData {
     pub fn new() -> GameData {
@@ -118,6 +120,7 @@ impl GameData {
             personal: None,
             player_index: None,
             print_instruction_set: vec![true],
+            initial_draft: vec![],
             keypad_on: false,
             overlay: false,
             overlay_receivedimage: [OverlayStatus::None, OverlayStatus::None, OverlayStatus::None],
@@ -127,6 +130,7 @@ impl GameData {
                                             HashSet::new(),
                                             HashSet::new(),
                                             HashSet::new()],
+            prompt_cache: None,
         }
     }
 }

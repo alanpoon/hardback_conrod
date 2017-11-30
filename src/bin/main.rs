@@ -5,7 +5,7 @@ extern crate futures;
 extern crate toa_ping;
 
 use hardback_conrod as game_conrod;
-use game_conrod::backend::custom_glium::glium::{self, glutin, Surface};
+use game_conrod::backend::glium::{self, glutin, Surface};
 use game_conrod::{app, logic};
 use game_conrod::backend::{OwnedMessage, SupportIdType};
 use game_conrod::backend::meta::app::{Font, ResourceEnum};

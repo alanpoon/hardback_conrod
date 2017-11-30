@@ -90,12 +90,12 @@ fn spell(ui: &mut conrod::UiCell,
                     .source_rectangle(v_rect)
                     .toggle_image(rust_image.clone())
                     .spinner_image(spinner_image.clone(), spinner_sprite)
-                    .w_h(100.0, 300.0)
+                    .w_h(200.0, 230.0)
             }),
                                            50.0)
-                    .padded_h_of(ids.footer, 10.0)
+                    .h(230.0)
                     .padded_w_of(ids.footer, 150.0)
-                    .top_left_of(ids.footer)
+                    .top_left_with_margin_on(ids.footer, 10.0)
                     .exit_id(Some(Some(ids.bodydragdroplistview)))
                     .set(ids.footerdragdroplistview, ui);
             if let Some((v_index, _, _)) = exitid {

@@ -54,7 +54,6 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref mut initial_draft,
                    ref player_index,
                    ref mut personal,
-                   ref prompt_cache,
                    .. } = *gamedata;
     if let &mut Some(ref mut boardcodec) = boardcodec {
         let card_images = in_game::card_images(result_map);
@@ -67,7 +66,6 @@ pub fn render(ui: &mut conrod::UiCell,
                                &card_images,
                                &appdata,
                                print_instruction_set,
-                               prompt_cache,
                                initial_draft,
                                result_map,
                                _action_tx.clone());
@@ -99,8 +97,11 @@ pub fn render(ui: &mut conrod::UiCell,
     //  draw_hand(ui, ids, gamedata, appdata, result_map);
 }
 fn turn_to_submit_but(ui: &mut conrod::UiCell, ids: &Ids, appdata: &AppData) {
-    widget::Button::new().label(&appdata.texts.submit).mid_bottom_of(ids.body).set(ids.submit_but,
-                                                                                   ui);
+    widget::Button::new()
+        .label(&appdata.texts.submit)
+        .mid_bottom_of(ids.body)
+        .w_h(100.0, 80.0)
+        .set(ids.submit_but, ui);
 }
 fn show_draft(ui: &mut conrod::UiCell,
               ids: &Ids,
@@ -108,7 +109,6 @@ fn show_draft(ui: &mut conrod::UiCell,
               card_images: &[Option<image::Id>; 27],
               appdata: &AppData,
               print_instruction_set: &mut Vec<bool>,
-              prompt_cache: &Option<(String, Vec<String>)>,
               initial_draft: &mut Vec<usize>,
               _result_map: &HashMap<ResourceEnum, SupportIdType>,
               action_tx: mpsc::Sender<OwnedMessage>) {
@@ -117,7 +117,7 @@ fn show_draft(ui: &mut conrod::UiCell,
     *initial_draft = player.draft.clone();
     let mut dealt_iter = player.draft.iter();
     if let Some(&mut true) = print_instruction_set.get_mut(0) {
-        let (mut items, scrollbar) = widget::List::flow_right(player.draftlen)
+        let (mut items, scrollbar) = widget::List::flow_right(player.draft.len())
             .item_size(item_h)
             .instantiate_all_items()
             .mid_bottom_of(ids.body)
@@ -144,29 +144,21 @@ fn show_draft(ui: &mut conrod::UiCell,
             item.set(j, ui);
         }
     } else {
-        if let &Some(ref _prompt_cache) = prompt_cache {
-            let promptsender = PromptSendable(action_tx);
-            let instructions: Vec<(&str, Box<Fn(PromptSendable)>)> =
-                _prompt_cache.1
-                    .iter()
-                    .enumerate()
-                    .map(|(_index, _string)| {
-                        let k :(&str, Box<Fn(PromptSendable)>) = (&_string,
-                         Box::new(move|ps| {
+
+        let promptsender = PromptSendable(action_tx);
+        let instructions: Vec<(&str, Box<Fn(PromptSendable)>)> = vec![("Continue",  Box::new(move|ps| {
                             let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                             let mut g = GameCommand::new();
-                            g.reply = Some(_index.clone());
+                            g.go_to_shuffle = Some(true);
                             h.set_gamecommand(g);
                             ps.send(ServerReceivedMsg::serialize_send(h).unwrap());
-                        }));
-                        k
-                    })
-                    .collect::<Vec<(&str, Box<Fn(PromptSendable)>)>>();
-            let prompt_j = PromptView::new(&instructions, (0.5, &_prompt_cache.0), promptsender)
+                        }))];
+        let prompt_j = PromptView::new(&instructions,
+                                       (0.5, "Lets' start to Shuffle the cards"),
+                                       promptsender)
                 .padded_wh_of(ids.body, 100.0)
                 .middle_of(ids.body);
-            prompt_j.set(ids.promptview, ui);
-        }
+        prompt_j.set(ids.promptview, ui);
     }
 }
 fn shuffle(ui: &mut conrod::UiCell,
@@ -255,11 +247,12 @@ fn spell(ui: &mut conrod::UiCell,
                         .source_rectangle(v_rect)
                         .toggle_image(rust_image.clone())
                         .spinner_image(spinner_image, spinner_rect)
-                        .w_h(100.0, 300.0)
+                        .w_h(200.0, 230.0)
                 }),
                                   50.0)
-                        .padded_wh_of(ids.body, 10.0)
-                        .top_left_of(ids.body)
+                        .h(260.0)
+                        .padded_w_of(ids.body, 20.0)
+                        .mid_bottom_with_margin_on(ids.body, 80.0)
                         .exit_id(Some(Some(ids.footerdragdroplistview)))
                         .set(ids.bodydragdroplistview, ui);
             if let Some((v_index, _, _, _, _, _)) = exitid {

@@ -20,7 +20,6 @@ extern crate find_folder;
 pub mod page_curl;
 pub mod logic;
 pub mod opengl;
-pub mod backend;
 pub mod app;
 pub mod ui;
 pub mod graphics_match;

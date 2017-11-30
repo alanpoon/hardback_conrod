@@ -93,7 +93,6 @@ pub struct GameData {
     pub overlay_index: Option<usize>,
     pub overlay_remover_selected: HashSet<usize, RandomState>,
     pub overlay_timeless_selected: Vec<HashSet<usize, RandomState>>,
-    pub prompt_cache: Option<(String, Vec<String>)>,
 }
 impl GameData {
     pub fn new() -> GameData {
@@ -130,7 +129,6 @@ impl GameData {
                                             HashSet::new(),
                                             HashSet::new(),
                                             HashSet::new()],
-            prompt_cache: None,
         }
     }
 }

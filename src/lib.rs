@@ -17,6 +17,7 @@ pub extern crate hardback_codec;
 extern crate futures;
 extern crate image;
 extern crate find_folder;
+pub mod backend;
 pub mod page_curl;
 pub mod logic;
 pub mod opengl;

@@ -1,11 +1,12 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable};
+use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,Borderable};
 use conrod::position::rect::Rect;
 use conrod::widget::primitive::image::Image;
 use conrod::widget::envelope_editor::EnvelopePoint;
 use cardgame_widgets::custom_widget::sample_drag_image;
 use cardgame_widgets::custom_widget::image_hover::{Hoverable, ImageHover};
 use cardgame_widgets::custom_widget::shuffle::Shuffle;
-use cardgame_widgets::custom_widget::dragdrop_list::DragDropList;
+use cardgame_widgets::custom_widget::arrange_list::{ArrangeList, ExitBy};
+use custom_widget::arrange_list_item::ItemWidget;
 use cardgame_widgets::custom_widget::promptview::{PromptView, PromptSender};
 use backend::codec_lib::codec::*;
 use backend::OwnedMessage;
@@ -18,18 +19,7 @@ use futures::{Future, Sink};
 use app::{self, GameData, Ids, Personal, GuiState};
 use logic::in_game;
 use graphics_match;
-pub struct ImageHoverable(Image, Option<Image>, Option<Image>);
-impl Hoverable for ImageHoverable {
-    fn idle(&self) -> Image {
-        self.0
-    }
-    fn hover(&self) -> Option<Image> {
-        self.1
-    }
-    fn press(&self) -> Option<Image> {
-        self.2
-    }
-}
+use graphics_match::ImageHoverable;
 #[derive(Clone)]
 pub struct PromptSendable(mpsc::Sender<OwnedMessage>);
 impl PromptSender for PromptSendable {
@@ -195,13 +185,13 @@ fn shuffle(ui: &mut conrod::UiCell,
             .map(|x| x.unwrap())
             .collect::<Vec<usize>>();
         println!("give_out_vec {:?}", give_out_vec);
-        let back_rect = Rect::from_corners([670.0, 70.0], [1130.0, 850.0]);
-        if !Shuffle::new(card_vec, Image::new(back_logo).source_rectangle(back_rect))
-                .give_out(give_out_vec)
-                .bottom_left_of(ids.body)
-                .w(400.0)
-                .close_frame_rate(25)
-                .set(ids.shuffleview, ui) {
+        if !Shuffle::new(card_vec,
+                         Image::new(back_logo).source_rectangle(graphics_match::backcard()))
+                    .give_out(give_out_vec)
+                    .bottom_left_of(ids.body)
+                    .w(400.0)
+                    .close_frame_rate(25)
+                    .set(ids.shuffleview, ui) {
             if _player_index == 0 {
                 *guistate = GuiState::Game(GameState::TurnToSubmit);
             } else {
@@ -236,27 +226,41 @@ fn spell(ui: &mut conrod::UiCell,
                 })
                 .collect::<Vec<(usize, image::Id, conrod::Rect, bool, Option<String>, bool)>>();
         if let (Some(&SupportIdType::ImageId(spinner_image)),
-                Some(&SupportIdType::ImageId(rust_image))) =
-            (result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)),
-             result_map.get(&ResourceEnum::Sprite(Sprite::RUST))) {
+                Some(&SupportIdType::ImageId(back_image)),
+                Some(&SupportIdType::ImageId(arrows_image))) =
+            (result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)),
+             result_map.get(&ResourceEnum::Sprite(Sprite::RUST)),
+             result_map.get(&ResourceEnum::Sprite(Sprite::ARROWS))) {
             let spinner_rect = graphics_match::spinner_sprite();
-            let exitid =
-                DragDropList::new(&mut arrangedvec,
-                                  Box::new(move |(_v_index, v_blowup, v_rect, _, _, _)| {
-                    sample_drag_image::Button::image(v_blowup)
-                        .source_rectangle(v_rect)
-                        .toggle_image(rust_image.clone())
+            let (_l, _t, _r, _b) = graphics_match::all_arrows(arrows_image);
+            let (exitid, exitby, scrollbar) =
+                ArrangeList::new(&mut arrangedvec,
+                                 Box::new(move |(_v_index, v_blowup, v_rect, _, _, _)| {
+                    let i_h_struct =
+                        ImageHoverable(Image::new(v_blowup).source_rectangle(v_rect), None, None);
+                    let t_i_h_struct = ImageHoverable(Image::new(back_image.clone()).source_rectangle(graphics_match::backcard()),None,None);
+                    ItemWidget::new(i_h_struct,t_i_h_struct)
                         .spinner_image(spinner_image, spinner_rect)
-                        .w_h(200.0, 230.0)
+                        .border_color(color::YELLOW)
+                        .border(20.0)
                 }),
-                                  50.0)
+                                 200.0)
                         .h(260.0)
                         .padded_w_of(ids.body, 20.0)
                         .mid_bottom_with_margin_on(ids.body, 80.0)
-                        .exit_id(Some(Some(ids.footerdragdroplistview)))
+                        .left_arrow(_l)
+                        .right_arrow(_r)
+                        .bottom_arrow(_b)
                         .set(ids.bodydragdroplistview, ui);
-            if let Some((v_index, _, _, _, _, _)) = exitid {
-                _personal.hand.push(v_index);
+
+            match (exitid, exitby) {                
+                (Some(_x), ExitBy::Bottom) => {
+                    _personal.hand.push(_x.0);
+                }
+                _ => {}
+            }
+            if let Some(s) = scrollbar {
+                s.set(ui);
             }
             _personal.arranged = arrangedvec.iter()
                 .map(|&(ref x_index, _, _, ref ink, ref op_string, ref timeless)| {

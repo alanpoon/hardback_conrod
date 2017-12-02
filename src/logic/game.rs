@@ -39,7 +39,6 @@ impl<'a, T> GameProcess<'a, T>
                mut gamedata: &mut GameData,
                result_map: &HashMap<ResourceEnum, SupportIdType>,
                action_tx: mpsc::Sender<OwnedMessage>) {
-        //    let mut ids = Ids::new(ui.widget_id_generator());
         let ids = &self.ids;
         match &gamedata.guistate {
             &GuiState::Game(_) => {

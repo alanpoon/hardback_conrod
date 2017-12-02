@@ -2,6 +2,7 @@ use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
 use conrod::{Rect, image};
 use conrod::widget::primitive::image::Image;
 use cardgame_widgets::custom_widget::image_hover::Hoverable;
+use cardgame_widgets::custom_widget::list_select::ListItem;
 use conrod::widget::envelope_editor::EnvelopePoint;
 
 pub struct ImageHoverable(pub Image, pub Option<Image>, pub Option<Image>);
@@ -59,6 +60,27 @@ pub fn gameicon_sprite() -> SpriteInfo {
 pub fn gameicons_rect(i: f64) -> Rect {
     let icon_rect = spriteable_rect(gameicon_sprite(), i);
     Rect::from_corners(icon_rect.0, icon_rect.1)
+}
+pub fn gameicons_listitem(image_id: image::Id,
+                          i: usize,
+                          r: usize,
+                          c: usize,
+                          la: usize,
+                          p: usize,
+                          d: usize)
+                          -> Vec<ListItem> {
+    vec![ListItem::IMAGE(image_id, gameicons_rect(1.0)), //ink
+         ListItem::BRACKET(i as i16),
+         ListItem::IMAGE(image_id, gameicons_rect(2.0)), //inkremover
+         ListItem::BRACKET(r as i16),
+         ListItem::IMAGE(image_id, gameicons_rect(3.0)), //coin
+         ListItem::BRACKET(c as i16),
+         ListItem::IMAGE(image_id, gameicons_rect(4.0)), //literacy award
+         ListItem::BRACKET(la as i16),
+         ListItem::IMAGE(image_id, gameicons_rect(5.0)), //prestige
+         ListItem::BRACKET(p as i16),
+         ListItem::IMAGE(image_id, gameicons_rect(6.0)), //draftlen
+         ListItem::BRACKET(d as i16)]
 }
 pub fn backcard() -> Rect {
     Rect::from_corners([670.0, 70.0], [1130.0, 850.0])

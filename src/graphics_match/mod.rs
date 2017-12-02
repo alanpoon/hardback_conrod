@@ -2,6 +2,7 @@ use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
 use conrod::{Rect, image};
 use conrod::widget::primitive::image::Image;
 use cardgame_widgets::custom_widget::image_hover::Hoverable;
+use conrod::widget::envelope_editor::EnvelopePoint;
 
 pub struct ImageHoverable(pub Image, pub Option<Image>, pub Option<Image>);
 impl Hoverable for ImageHoverable {
@@ -48,7 +49,7 @@ pub fn spinner_sprite() -> SpriteInfo {
 }
 pub fn gameicon_sprite() -> SpriteInfo {
     SpriteInfo {
-        first: (0.0, 800.0),
+        first: (0.0, 1200.0),
         num_in_row: 3,
         num_in_col: 3,
         w_h: (400.0, 400.0),
@@ -99,4 +100,11 @@ pub fn all_arrows(button: image::Id)
                        Some(Image::new(button).source_rectangle(Rect::from_corners(b_1.0, b_1.1))),
                        None);
     (left_arrow_z, top_arrow_z, right_arrow_z, btm_arrow_z)
+}
+pub fn cards_btm(recz: Rect) -> Rect {
+    let topleft_c = recz.top_left();
+    let mut topleft_cm = topleft_c.clone();
+    topleft_cm.set_x(topleft_c.get_x() + 136.0);
+    topleft_cm.set_y(topleft_c.get_y() - 400.0);
+    Rect::from_corners(topleft_cm, recz.bottom_right())
 }

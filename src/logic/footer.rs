@@ -102,7 +102,7 @@ fn spell(ui: &mut conrod::UiCell,
                 ArrangeList::new(&mut handvec,
                                  Box::new(move |(_v_index, v_blowup, v_rect)| {
                     let i_h_struct =
-                        ImageHoverable(Image::new(v_blowup).source_rectangle(v_rect), None, None);
+                        ImageHoverable(Image::new(v_blowup).source_rectangle(v_rect), Some(Image::new(v_blowup).source_rectangle(graphics_match::cards_btm(v_rect))), Some(Image::new(v_blowup).source_rectangle(graphics_match::cards_btm(v_rect))));
                     let t_i_h_struct =
                         ImageHoverable(Image::new(back_image.clone())
                                            .source_rectangle(graphics_match::backcard()),

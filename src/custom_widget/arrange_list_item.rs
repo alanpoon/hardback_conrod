@@ -1,6 +1,7 @@
-use cardgame_widgets::custom_widget::arrange_list::{Hoverable, ImageHover, Arrangeable, TimesClicked};
+use cardgame_widgets::custom_widget::arrange_list::{Hoverable, Arrangeable, TimesClicked};
 use conrod::{widget, Color, Colorable, Borderable, Positionable, UiCell, Widget, event, input,
              image, Theme, Sizeable};
+
 use conrod::position::{Rect, Scalar, Dimensions, Point};
 use cardgame_widgets::custom_widget::dragdrop_list::Draggable;
 use cardgame_widgets::sprite::{Spriteable, spriteable_rect};
@@ -45,7 +46,10 @@ widget_ids! {
         background,
         rect,
         image,
-        spinner
+        spinner,
+        textedit_background,
+        textedit_blinkline,
+        textedit_at_toggle
     }
 }
 
@@ -54,6 +58,8 @@ pub struct State {
     ids: Ids,
     drag: Drag,
     toggle_bool: bool,
+    op_str: String,
+    blink_line_frame: u16,
 }
 
 impl<H, S> ItemWidget<H, S>
@@ -92,13 +98,15 @@ impl<H, S> Widget for ItemWidget<H, S>
     /// The event produced by instantiating the widget.
     ///
     /// `Some` when clicked, otherwise `None`.
-    type Event = TimesClicked;
+    type Event = ();
 
     fn init_state(&self, id_gen: widget::id::Generator) -> Self::State {
         State {
             ids: Ids::new(id_gen),
             drag: Drag::None,
             toggle_bool: false,
+            op_str: "".to_owned(),
+            blink_line_frame: 0,
         }
     }
 
@@ -113,13 +121,15 @@ impl<H, S> Widget for ItemWidget<H, S>
         // Finally, we'll describe how we want our widget drawn by simply instantiating the
         // necessary primitive graphics widgets.
         //
+
+        let (interaction, _times_triggered) = interaction_and_times_triggered(id, ui);
         let (_, _, w, h) = rect.x_y_w_h();
         let border = if self.bordered {
             self.style.border(ui.theme())
         } else {
             0.0
         };
-        let toggle_bool = state.toggle_bool;
+        let mut toggle_bool = state.toggle_bool;
         rectangle_fill(id,
                        state.ids.background,
                        rect,
@@ -144,14 +154,58 @@ impl<H, S> Widget for ItemWidget<H, S>
         } else {
             self.image
         };
-        let t = ImageHover::new(widget_ih)
+        let _image = match interaction {
+            Interaction::Idle => widget_ih.idle(),
+            Interaction::Hover => widget_ih.hover().unwrap_or(widget_ih.idle()),
+            Interaction::Press => widget_ih.press().unwrap_or(widget_ih.idle()),
+        };
+        _image.w_h(w, h)
             .middle_of(id)
-            .padded_wh_of(id, border)
             .parent(id)
             .graphics_for(id)
             .set(state.ids.image, ui);
+        if toggle_bool {
+            let rect = Rect::from_xy_dim([0.0, 0.0], [80.0, 40.0]);
+            rectangle_fill(id,
+                           state.ids.textedit_background,
+                           rect,
+                           self.style.color(&ui.theme),
+                           ui);
+
+            for edit in widget::TextEdit::new(state.op_str)
+                    .color(self.style.color(&ui.theme).plain_contrast())
+                    .middle_of(state.ids.textedit_background)
+                    .padded_wh_of(state.ids.textedit_background, 5.0)
+                    .set(state.ids.textedit_at_toggle, ui) {
+                if state.op_str.chars().count() <= 1 {
+                    state.update(|state| state.op_str = Some(edit));
+                }
+            }
+
+            if state.op_str.chars().count() == 0 {
+                state.update(|state| state.blink_line_frame += 1);
+                if state.blink_line_frame % 120 == 0 {
+                    let line_l = ui.w_of(state.ids.textedit_background).unwrap();
+                    let _style = widget::line::Style {
+                        maybe_pattern: None,
+                        maybe_color: Some(self.style.color(&ui.theme).plain_contrast()),
+                        maybe_thickness: Some(border),
+                        maybe_cap: None,
+                    };
+                    widget::Line::centred_styled([-line_l * 0.5, 0.0], [line_l * 0.5, 0.0], _style)
+                        .mid_bottom_of(state.ids.textedit_background)
+                        .set(state.ids.textedit_blinkline, ui);
+                }
+                if state.blink_line_frame > 400 {
+                    state.update(|state| state.blink_line_frame = 0);
+                }
+            } else {
+                state.update(|state| state.blink_line_frame = 0);
+            }
+        }
+
         let mut drag = state.drag;
-        let mut toggle_bool = state.toggle_bool;
+
         update_drag(id, &mut drag, ui);
         let draw_spinner_index = update_toggle_bool_spinner_index(&mut drag, &mut toggle_bool);
         state.update(|state| {
@@ -166,7 +220,7 @@ impl<H, S> Widget for ItemWidget<H, S>
                             spinner_index,
                             ui);
         }
-        t
+
     }
     fn drag_area(&self, dim: Dimensions, style: &Style, _theme: &Theme) -> Option<Rect> {
         if let Some(_) = style.draggable {
@@ -175,6 +229,17 @@ impl<H, S> Widget for ItemWidget<H, S>
             None
         }
     }
+}
+fn interaction_and_times_triggered(button_id: widget::Id, ui: &UiCell) -> (Interaction, u16) {
+    let input = ui.widget_input(button_id);
+    let interaction = input.mouse().map_or(Interaction::Idle,
+                                           |mouse| if mouse.buttons.left().is_down() {
+                                               Interaction::Press
+                                           } else {
+                                               Interaction::Hover
+                                           });
+    let times_triggered = (input.clicks().left().count() + input.taps().count()) as u16;
+    (interaction, times_triggered)
 }
 fn rectangle_fill(button_id: widget::Id,
                   rectangle_id: widget::Id,
@@ -203,11 +268,10 @@ fn update_drag(button_id: widget::Id, drag: &mut Drag, ui: &UiCell) {
                 match press.button {
                     event::Button::Mouse(input::MouseButton::Left, point) => {
                         match drag {
-                            &mut Drag::Selecting(_, _) => {}
                             &mut Drag::None => {
                                 *drag = Drag::Selecting(0, point);
                             }
-                            &mut Drag::Terminate => {}
+                            _ => {}
                         }
                     }
                     _ => {}
@@ -252,9 +316,10 @@ fn draw_spinner_op<H: Spriteable>(button_id: widget::Id,
                                   ui: &mut UiCell) {
     if let Some((spinner_image, _sprite)) = spinner_image {
         let _rect = spriteable_rect(_sprite, spinner_index as f64);
+        let but_w = ui.w_of(button_id).unwrap();
         widget::Image::new(spinner_image)
             .source_rectangle(Rect::from_corners(_rect.0, _rect.1))
-            .w_h(40.0, 40.0)
+            .w_h(but_w * 0.8, but_w * 0.8)
             .middle_of(button_id)
             .set(spinner_id, ui);
     }
@@ -304,4 +369,10 @@ impl<H, S> Borderable for ItemWidget<H, S>
         border { style.border = Some(Scalar) }
         border_color { style.border_color = Some(Color) }
     }
+}
+#[derive(Copy, Clone,Debug)]
+enum Interaction {
+    Idle,
+    Hover,
+    Press,
 }

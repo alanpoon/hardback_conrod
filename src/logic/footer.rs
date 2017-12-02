@@ -1,9 +1,11 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
-use cardgame_widgets::custom_widget::dragdrop_list::DragDropList;
-use cardgame_widgets::custom_widget::sample_drag_image;
+use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,
+             Borderable, Rect};
+use conrod::widget::primitive::image::Image;
+use cardgame_widgets::custom_widget::image_hover::{Hoverable, ImageHover};
+use cardgame_widgets::custom_widget::arrange_list::{ArrangeList, ExitBy};
+use custom_widget::arrange_list_item::ItemWidget;
 use cardgame_widgets::custom_widget::instructionset::InstructionSet;
 use cardgame_widgets::custom_widget::animated_canvas;
-use cardgame_widgets::sprite::spriteable_rect;
 use backend::codec_lib::codec::*;
 use std::collections::HashMap;
 use futures::sync::mpsc;
@@ -14,6 +16,7 @@ use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use backend::meta::{cards, local};
 use graphics_match;
+use graphics_match::ImageHoverable;
 use logic::in_game;
 use instruction::Instruction;
 pub fn render(ui: &mut conrod::UiCell,
@@ -47,7 +50,15 @@ pub fn render(ui: &mut conrod::UiCell,
                           _action_tx);
                 }
                 app::GuiState::Game(GameState::TurnToSubmit) => {
-                    turn_to_submit(ui, ids, _player, &card_images, &appdata, result_map);
+                    spell(ui,
+                          ids,
+                          _player,
+                          &card_images,
+                          &appdata,
+                          personal,
+                          overlay,
+                          result_map,
+                          _action_tx);
                 }
                 _ => {}
             }
@@ -76,35 +87,54 @@ fn spell(ui: &mut conrod::UiCell,
                                                             appdata);
                 (x.clone().clone(), _image_id, _rect)
             })
-            .collect::<Vec<(usize, image::Id, conrod::Rect)>>();
+            .collect::<Vec<(usize, image::Id, Rect)>>();
         if let (Some(&SupportIdType::ImageId(spinner_image)),
-                Some(&SupportIdType::ImageId(rust_image)),
+                Some(&SupportIdType::ImageId(back_image)),
+                Some(&SupportIdType::ImageId(arrows_image)),
                 Some(&SupportIdType::ImageId(icon_image))) =
             (result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)),
-             result_map.get(&ResourceEnum::Sprite(Sprite::RUST)),
+             result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)),
+             result_map.get(&ResourceEnum::Sprite(Sprite::ARROWS)),
              result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
-            let exitid = DragDropList::new(&mut handvec,
-                                           Box::new(move |(_v_index, v_blowup, v_rect)| {
-                let spinner_sprite = graphics_match::spinner_sprite();
-                sample_drag_image::Button::image(v_blowup)
-                    .source_rectangle(v_rect)
-                    .toggle_image(rust_image.clone())
-                    .spinner_image(spinner_image.clone(), spinner_sprite)
-                    .w_h(200.0, 230.0)
-            }),
-                                           50.0)
-                    .h(230.0)
-                    .padded_w_of(ids.footer, 150.0)
-                    .top_left_with_margin_on(ids.footer, 10.0)
-                    .exit_id(Some(Some(ids.bodydragdroplistview)))
-                    .set(ids.footerdragdroplistview, ui);
-            if let Some((v_index, _, _)) = exitid {
-                _personal.arranged.push((v_index, false, None, false));
+            let spinner_rect = graphics_match::spinner_sprite();
+            let (_l, _t, _r, _b) = graphics_match::all_arrows(arrows_image);
+            let (exitid, exitby, scrollbar) =
+                ArrangeList::new(&mut handvec,
+                                 Box::new(move |(_v_index, v_blowup, v_rect)| {
+                    let i_h_struct =
+                        ImageHoverable(Image::new(v_blowup).source_rectangle(v_rect), None, None);
+                    let t_i_h_struct =
+                        ImageHoverable(Image::new(back_image.clone())
+                                           .source_rectangle(graphics_match::backcard()),
+                                       None,
+                                       None);
+                    ItemWidget::new(i_h_struct, t_i_h_struct)
+                        .spinner_image(spinner_image, spinner_rect)
+                        .border_color(color::YELLOW)
+                        .border(20.0)
+                }),
+                                 200.0)
+                        .padded_h_of(ids.footer, 10.0)
+                        .padded_w_of(ids.footer, 150.0)
+                        .top_left_with_margin_on(ids.footer, 10.0)
+                        .left_arrow(_l)
+                        .right_arrow(_r)
+                        .top_arrow(_t)
+                        .set(ids.footerdragdroplistview, ui);
+            match (exitid, exitby) {                
+                (Some(_x), ExitBy::Top) => {
+                    _personal.arranged.push((_x.0, false, None, false));
+                }
+                _ => {}
+            }
+            if let Some(s) = scrollbar {
+                s.set(ui);
             }
             _personal.hand = handvec.iter().map(|&(x_index, _, _)| x_index).collect::<Vec<usize>>();
-            let icon_rect = spriteable_rect(graphics_match::gameicon_sprite(), 1.0);
+
             for _ in widget::Button::image(icon_image)
-                    .source_rectangle(Rect::from_corners(icon_rect.0, icon_rect.1))
+                    .source_rectangle(graphics_match::gameicons_rect(0.0))
+                    .w_h(80.0, 80.0)
                     .right_from(ids.footerdragdroplistview, 0.0)
                     .set(ids.footer_overlay_but, ui) {
                 *overlay = true;
@@ -138,44 +168,6 @@ fn show_draft(ui: &mut conrod::UiCell,
         }
     }
 
-}
-fn turn_to_submit(ui: &mut conrod::UiCell,
-                  ids: &Ids,
-                  player: &mut Player,
-                  card_images: &[Option<image::Id>; 27],
-                  appdata: &AppData,
-                  result_map: &HashMap<ResourceEnum, SupportIdType>) {
-    let mut handvec = player.hand
-        .iter()
-        .map(|x| {
-                 let (_image_id, _rect, _) =
-                in_game::get_card_widget_image_portrait(x.clone(), card_images, appdata);
-                 (x.clone(), _image_id, _rect)
-             })
-        .collect::<Vec<(usize, image::Id, conrod::Rect)>>();
-    if let (Some(&SupportIdType::ImageId(spinner_image)),
-            Some(&SupportIdType::ImageId(rust_image))) =
-        (result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)),
-         result_map.get(&ResourceEnum::Sprite(Sprite::RUST))) {
-        let exitid = DragDropList::new(&mut handvec,
-                                       Box::new(move |(_v_index, v_blowup, v_rect)| {
-            let spinner_sprite = graphics_match::spinner_sprite();
-            sample_drag_image::Button::image(v_blowup)
-                .source_rectangle(v_rect)
-                .toggle_image(rust_image.clone())
-                .spinner_image(spinner_image.clone(), spinner_sprite)
-                .w_h(100.0, 300.0)
-        }),
-                                       50.0)
-                .padded_wh_of(ids.footer, 10.0)
-                .top_left_of(ids.footer)
-                .exit_id(Some(Some(ids.body)))
-                .set(ids.handview, ui);
-        if let Some((v_index, _, _)) = exitid {
-            player.arranged.push((v_index, false, None, false));
-        }
-        player.hand = handvec.iter().map(|&(x_index, _, _)| x_index).collect::<Vec<usize>>();
-    }
 }
 
 

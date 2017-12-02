@@ -56,8 +56,9 @@ pub struct State {
     toggle_bool: bool,
 }
 
-impl<H,S> ItemWidget<H,S>
-    where H: Hoverable,S:Spriteable
+impl<H, S> ItemWidget<H, S>
+    where H: Hoverable,
+          S: Spriteable
 {
     /// Create a button context to be built upon.
     pub fn new(image: H, toggle_image: H) -> Self {
@@ -143,7 +144,7 @@ impl<H, S> Widget for ItemWidget<H, S>
         } else {
             self.image
         };
-        let t =ImageHover::new(widget_ih)
+        let t = ImageHover::new(widget_ih)
             .middle_of(id)
             .padded_wh_of(id, border)
             .parent(id)
@@ -280,8 +281,9 @@ fn update_toggle_bool_spinner_index(drag: &mut Drag, toggle_bool: &mut bool) -> 
         _ => None,
     }
 }
-impl<H,S> Arrangeable for ItemWidget<H,S>
-    where H: Hoverable,S:Spriteable
+impl<H, S> Arrangeable for ItemWidget<H, S>
+    where H: Hoverable,
+          S: Spriteable
 {
     fn selectable(mut self) -> Self {
         self.bordered = true;

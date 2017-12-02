@@ -1,12 +1,11 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,Borderable};
-use conrod::position::rect::Rect;
+use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,
+             Borderable, Rect};
 use conrod::widget::primitive::image::Image;
 use conrod::widget::envelope_editor::EnvelopePoint;
-use cardgame_widgets::custom_widget::sample_drag_image;
 use cardgame_widgets::custom_widget::image_hover::{Hoverable, ImageHover};
-use cardgame_widgets::custom_widget::shuffle::Shuffle;
 use cardgame_widgets::custom_widget::arrange_list::{ArrangeList, ExitBy};
 use custom_widget::arrange_list_item::ItemWidget;
+use cardgame_widgets::custom_widget::shuffle::Shuffle;
 use cardgame_widgets::custom_widget::promptview::{PromptView, PromptSender};
 use backend::codec_lib::codec::*;
 use backend::OwnedMessage;
@@ -69,10 +68,11 @@ pub fn render(ui: &mut conrod::UiCell,
                             &initial_draft,
                             player_index,
                             guistate,
+                            personal,
                             result_map);
                 }
                 &mut app::GuiState::Game(GameState::Spell) => {
-                    cache_personal(_player, personal);
+
                     spell(ui, ids, &card_images, personal, appdata, result_map);
                 }
                 &mut app::GuiState::Game(GameState::TurnToSubmit) => {
@@ -159,6 +159,7 @@ fn shuffle(ui: &mut conrod::UiCell,
            initial_draft: &Vec<usize>,
            player_index: &Option<usize>,
            guistate: &mut GuiState,
+           personal: &mut Option<Personal>,
            _result_map: &HashMap<ResourceEnum, SupportIdType>) {
     if let (Some(&SupportIdType::ImageId(back_logo)), &Some(_player_index)) =
         (_result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)), player_index) {
@@ -184,12 +185,12 @@ fn shuffle(ui: &mut conrod::UiCell,
             .filter(|x| if let &Some(_) = x { true } else { false })
             .map(|x| x.unwrap())
             .collect::<Vec<usize>>();
-        println!("give_out_vec {:?}", give_out_vec);
         if !Shuffle::new(card_vec,
                          Image::new(back_logo).source_rectangle(graphics_match::backcard()))
                     .give_out(give_out_vec)
                     .bottom_left_of(ids.body)
-                    .w(400.0)
+                    .h(260.0)
+                    .w_of(ids.body)
                     .close_frame_rate(25)
                     .set(ids.shuffleview, ui) {
             if _player_index == 0 {
@@ -197,10 +198,11 @@ fn shuffle(ui: &mut conrod::UiCell,
             } else {
                 *guistate = GuiState::Game(GameState::Spell);
             }
+            cache_personal(player, personal);
         }
     }
 }
-fn cache_personal(player: &mut Player, personal: &mut Option<Personal>) {
+fn cache_personal(player: &Player, personal: &mut Option<Personal>) {
     if let &mut None = personal {
         *personal = Some(Personal {
                              hand: player.hand.clone(),
@@ -228,8 +230,8 @@ fn spell(ui: &mut conrod::UiCell,
         if let (Some(&SupportIdType::ImageId(spinner_image)),
                 Some(&SupportIdType::ImageId(back_image)),
                 Some(&SupportIdType::ImageId(arrows_image))) =
-            (result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)),
-             result_map.get(&ResourceEnum::Sprite(Sprite::RUST)),
+            (result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)),
+             result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)),
              result_map.get(&ResourceEnum::Sprite(Sprite::ARROWS))) {
             let spinner_rect = graphics_match::spinner_sprite();
             let (_l, _t, _r, _b) = graphics_match::all_arrows(arrows_image);
@@ -238,8 +240,12 @@ fn spell(ui: &mut conrod::UiCell,
                                  Box::new(move |(_v_index, v_blowup, v_rect, _, _, _)| {
                     let i_h_struct =
                         ImageHoverable(Image::new(v_blowup).source_rectangle(v_rect), None, None);
-                    let t_i_h_struct = ImageHoverable(Image::new(back_image.clone()).source_rectangle(graphics_match::backcard()),None,None);
-                    ItemWidget::new(i_h_struct,t_i_h_struct)
+                    let t_i_h_struct =
+                        ImageHoverable(Image::new(back_image.clone())
+                                           .source_rectangle(graphics_match::backcard()),
+                                       None,
+                                       None);
+                    ItemWidget::new(i_h_struct, t_i_h_struct)
                         .spinner_image(spinner_image, spinner_rect)
                         .border_color(color::YELLOW)
                         .border(20.0)

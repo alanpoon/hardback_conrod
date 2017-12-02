@@ -1,9 +1,9 @@
 use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
-use conrod::{Rect,image};
+use conrod::{Rect, image};
 use conrod::widget::primitive::image::Image;
 use cardgame_widgets::custom_widget::image_hover::Hoverable;
 
-pub struct ImageHoverable(pub Image,pub Option<Image>,pub Option<Image>);
+pub struct ImageHoverable(pub Image, pub Option<Image>, pub Option<Image>);
 impl Hoverable for ImageHoverable {
     fn idle(&self) -> Image {
         self.0
@@ -55,7 +55,10 @@ pub fn gameicon_sprite() -> SpriteInfo {
         pad: (0.0, 0.0, 0.0, 0.0),
     }
 }
-
+pub fn gameicons_rect(i: f64) -> Rect {
+    let icon_rect = spriteable_rect(gameicon_sprite(), i);
+    Rect::from_corners(icon_rect.0, icon_rect.1)
+}
 pub fn backcard() -> Rect {
     Rect::from_corners([670.0, 70.0], [1130.0, 850.0])
 }

@@ -81,8 +81,6 @@ impl<'a, T> GameProcess<'a, T>
             .flow_down(&[(ids.body, animated_canvas::Canvas::new().color(color::TRANSPARENT)),
                          (ids.footer,
                           animated_canvas::Canvas::new().color(color::DARK_GREEN).length(210.0))])
-            .watch_state(gamedata.guistate.clone())
-            // .close_icon(rust_logo)
             .frame_rate(30)
             .set(ids.master, ui);
 

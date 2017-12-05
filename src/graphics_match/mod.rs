@@ -2,7 +2,7 @@ use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
 use conrod::{Rect, image};
 use conrod::widget::primitive::image::Image;
 use cardgame_widgets::custom_widget::image_hover::Hoverable;
-use cardgame_widgets::custom_widget::list_select::ListItem;
+use cardgame_widgets::custom_widget::player_info::item::IconStruct;
 use conrod::widget::envelope_editor::EnvelopePoint;
 
 pub struct ImageHoverable(pub Image, pub Option<Image>, pub Option<Image>);
@@ -68,19 +68,14 @@ pub fn gameicons_listitem(image_id: image::Id,
                           la: usize,
                           p: usize,
                           d: usize)
-                          -> Vec<ListItem> {
-    vec![ListItem::IMAGE(image_id, gameicons_rect(1.0)), //ink
-         ListItem::BRACKET(i as i16),
-         ListItem::IMAGE(image_id, gameicons_rect(2.0)), //inkremover
-         ListItem::BRACKET(r as i16),
-         ListItem::IMAGE(image_id, gameicons_rect(3.0)), //coin
-         ListItem::BRACKET(c as i16),
-         ListItem::IMAGE(image_id, gameicons_rect(4.0)), //literacy award
-         ListItem::BRACKET(la as i16),
-         ListItem::IMAGE(image_id, gameicons_rect(5.0)), //prestige
-         ListItem::BRACKET(p as i16),
-         ListItem::IMAGE(image_id, gameicons_rect(6.0)), //draftlen
-         ListItem::BRACKET(d as i16)]
+                          -> Vec<IconStruct> {
+    vec![IconStruct(Image::new(image_id).source_rectangle(gameicons_rect(1.0)),i.to_string(),"Ink: Like Blackjack, draw one more card in hope of scoring more points. You must however use this card to spell word".to_owned()), //ink
+         IconStruct(Image::new(image_id).source_rectangle(gameicons_rect(2.0)),r.to_string(),"Ink Remover: You may convert an inked card back to normal. You put it back into your hand".to_owned()), //inkremover
+         IconStruct(Image::new(image_id).source_rectangle(gameicons_rect(3.0)),c.to_string(),"Coin: You may use coin to buy new cards".to_owned()), //coin
+         IconStruct(Image::new(image_id).source_rectangle(gameicons_rect(4.0)),la.to_string(),"Literacy Award: Construct longer words, the token go to the last player who constructed the longest word".to_owned()), //literacy award
+         IconStruct(Image::new(image_id).source_rectangle(gameicons_rect(5.0)),p.to_string(),"Prestige: End Game Victory Point".to_owned()), //prestige
+         IconStruct(Image::new(image_id).source_rectangle(gameicons_rect(6.0)),d.to_string(),"Size of Draft pile".to_owned()), //draftlen
+    ]
 }
 pub fn backcard() -> Rect {
     Rect::from_corners([670.0, 70.0], [1130.0, 850.0])

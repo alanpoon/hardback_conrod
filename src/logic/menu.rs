@@ -13,11 +13,7 @@ pub fn render(ui: &mut conrod::UiCell,
               _appdata: &AppData,
               _result_map: &HashMap<ResourceEnum, SupportIdType>,
               _action_tx: mpsc::Sender<OwnedMessage>) {
-    animated_canvas::Canvas::new()
-        .color(color::TRANSPARENT)
-        .watch_state(gamedata.guistate.clone())
-        .frame_rate(30)
-        .set(ids.master, ui);
+    animated_canvas::Canvas::new().color(color::TRANSPARENT).frame_rate(30).set(ids.master, ui);
     if widget::Button::new()
            .w_h(200.0, 50.0)
            .mid_left_of(ids.master)

@@ -40,11 +40,7 @@ pub fn render(ui: &mut conrod::UiCell,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
               action_tx: mpsc::Sender<OwnedMessage>) {
-    animated_canvas::Canvas::new()
-        .color(color::TRANSPARENT)
-        .watch_state(gamedata.guistate.clone())
-        .frame_rate(30)
-        .set(ids.master, ui);
+    animated_canvas::Canvas::new().color(color::TRANSPARENT).frame_rate(30).set(ids.master, ui);
     let screen_h = ui.h_of(ids.master).unwrap();
     let tab_height = if gamedata.keypad_on {
         0.6 * screen_h

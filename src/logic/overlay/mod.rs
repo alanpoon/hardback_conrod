@@ -2,8 +2,10 @@ use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, ima
 use cardgame_widgets::custom_widget::animated_canvas;
 use cardgame_widgets::custom_widget::tabview;
 use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
-use cardgame_widgets::custom_widget::list_select::ListSelect;
-use custom_widget::player_info::ItemWidget;
+use conrod::widget::primitive::image::Image;
+use cardgame_widgets::custom_widget::player_info::list::List;
+use cardgame_widgets::custom_widget::player_info::item::IconStruct;
+use cardgame_widgets::text::get_font_size_hn;
 use backend::codec_lib::codec::*;
 use std::collections::HashMap;
 use futures::sync::mpsc;
@@ -34,15 +36,17 @@ pub fn render(ui: &mut conrod::UiCell,
                  result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
                 let close_rect = spriteable_rect(graphics_match::keypad_sprite(), 2.0);
                 if animated_canvas::Canvas::new()
-                       .pad(50.0)
+                       .pad(100.0)
+                       .middle_of(ids.body)
+                       .wh_of(ids.body)
                        .flow_down(&[(ids.overlaytop,
                                      animated_canvas::Canvas::new()
-                                         .color(color::BLUE)
-                                         .length(80.0)),
+                                         .color(color::LIGHT_BLUE)
+                                         .length(10.0)),
                                     (ids.overlaybody,
-                                     animated_canvas::Canvas::new().color(color::BLUE))])
-                       .color(color::LIGHT_BLUE)
-                       .watch_state(gamedata.guistate.clone())
+                                     animated_canvas::Canvas::new()
+                                         .color(color::LIGHT_BLUE))])
+                       .color(color::TRANSPARENT)
                        .close_icon(keypad_image)
                        .close_icon_src_rect(Rect::from_corners(close_rect.0, close_rect.1))
                        .frame_rate(30)
@@ -50,6 +54,7 @@ pub fn render(ui: &mut conrod::UiCell,
                        .is_done() {
                     gamedata.overlay = false;
                 }
+                let default_color = color::GREY;
                 let icon_v = graphics_match::gameicons_listitem(icon_image,
                                                                 _player.ink.clone(),
                                                                 _player.remover.clone(),
@@ -57,7 +62,35 @@ pub fn render(ui: &mut conrod::UiCell,
                                                                 _player.literacy_award.clone(),
                                                                 _player.vp.clone(),
                                                                 _player.draftlen.clone());
-                ItemWidget::new(icon_v, &mut gamedata.overlay2).set(ids.overlay_player_info, ui);
+                let slist = List::new(icon_v.clone(), &mut gamedata.overlay2)
+                    .color(default_color)
+                    .label("Player Info")
+                    .label_color(default_color.plain_contrast())
+                    .wh_of(ids.overlaytop)
+                    .middle_of(ids.overlaytop)
+                    .set(ids.overlay_player_info, ui);
+                if let (Some(_s), Some(_si), Some(xy)) = slist {
+                    let _dim = [300.0, 100.0];
+                    widget::Rectangle::fill_with([_dim[0] * 0.5, _dim[1]], default_color)
+                        .x(xy[0])
+                        .down_from(ids.overlay_player_info, 0.0)
+                        .set(ids.overlay2_rect, ui);
+                    if let Some(&IconStruct(ref _image, _, ref _desc)) = icon_v.get(_s) {
+                        _image.wh([20.0, 20.0])
+                            .mid_left_of(ids.overlay2_rect)
+                            .set(ids.overlay2_image, ui);
+                        let fontsize = get_font_size_hn(_dim[1], 4.0);
+                        widget::Text::new(&_desc)
+                            .font_size(fontsize)
+                            .color(default_color.plain_contrast())
+                            .align_middle_y_of(ids.overlay2_image)
+                            .right_from(ids.overlay2_image, 0.0)
+                            .w(_dim[0] * 0.5 - 20.0)
+                            .h_of(ids.overlay2_rect)
+                            .set(ids.overlay2_text, ui);
+                    }
+                }
+
             }
 
             if let Some(mut items) = tabview::TabView::new(vec![appdata.texts.use_ink,
@@ -80,6 +113,7 @@ pub fn render(ui: &mut conrod::UiCell,
                 }
 
             }
+
         }
     }
 

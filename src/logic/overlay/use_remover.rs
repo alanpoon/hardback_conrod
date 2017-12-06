@@ -28,7 +28,13 @@ pub fn render(w_id: tabview::Item,
                    ref mut overlay_remover_selected,
                    .. } = *gamedata;
     //choose from the inked cards
-
+    widget::Text::new(&appdata.texts.use_remover)
+        .color(color::WHITE)
+        .font_size(60)
+        .h(100.0)
+        .w_of(w_id.parent_id)
+        .top_left_of(w_id.parent_id)
+        .set(ids.overlay_subject, ui);
     if let (&mut Some(ref mut boardcodec), &Some(ref _player_index)) = (boardcodec, player_index) {
         if let Some(ref _player) = boardcodec.players.get(_player_index.clone()) {
             let arranged = _player.arranged.clone();
@@ -41,8 +47,9 @@ pub fn render(w_id: tabview::Item,
                 .flow_down()
                 .item_size(item_h)
                 .scrollbar_next_to()
-                .w_h(700.0, 260.0)
-                .middle_of(w_id.parent_id)
+                .w_of(w_id.parent_id)
+                .h(260.0)
+                .down_from(ids.overlay_subject, 0.0)
                 .set(ids.overlay_explainlistselect, ui);
             let card_images = in_game::card_images(result_map);
             // Handle the `ListSelect`s events.

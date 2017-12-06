@@ -177,12 +177,12 @@ impl<H, S> Widget for ItemWidget<H, S>
                     .middle_of(state.ids.textedit_background)
                     .padded_wh_of(state.ids.textedit_background, 5.0)
                     .set(state.ids.textedit_at_toggle, ui) {
-                if state.op_str.chars().count() <= 1 {
+                if state.op_str.chars().count() < 1 {
                     state.update(|state| state.op_str = edit);
                 }
             }
 
-            if state.op_str.chars().count() == 0 {
+            if state.op_str.chars().count() != 1 {
                 state.update(|state| state.blink_line_frame += 1);
                 if (state.blink_line_frame / 120) == 0 {
                     let line_l = ui.w_of(state.ids.textedit_background).unwrap();

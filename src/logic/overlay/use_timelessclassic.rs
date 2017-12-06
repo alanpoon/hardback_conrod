@@ -54,7 +54,13 @@ pub fn render(w_id: tabview::Item,
                    ref mut overlay_timeless_selected,
                    ref mut overlay_receivedimage,
                    .. } = *gamedata;
-
+    widget::Text::new(&appdata.texts.use_timelessclassic)
+        .color(color::WHITE)
+        .font_size(60)
+        .h(100.0)
+        .w_of(w_id.parent_id)
+        .top_left_of(w_id.parent_id)
+        .set(ids.overlay_subject, ui);
     //normal_stuff don't need mut borrow
     let mut normal_stuff: Vec<(Option<String>, Option<ImageRectType>, Vec<ImageRectType>)> = vec![];
     let card_images = in_game::card_images(result_map);

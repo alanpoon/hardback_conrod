@@ -77,7 +77,7 @@ pub fn render(ui: &mut conrod::UiCell,
                 }
                 &mut app::GuiState::Game(GameState::TurnToSubmit) => {
                     spell(ui, ids, &card_images, personal, appdata, result_map);
-                    turn_to_submit_but(ui, ids, &appdata);
+                    turn_to_submit_but(ui, ids, personal, &appdata, _action_tx.clone());
                 }
                 _ => {}
             }
@@ -86,12 +86,22 @@ pub fn render(ui: &mut conrod::UiCell,
 
     //  draw_hand(ui, ids, gamedata, appdata, result_map);
 }
-fn turn_to_submit_but(ui: &mut conrod::UiCell, ids: &Ids, appdata: &AppData) {
-    widget::Button::new()
-        .label(&appdata.texts.submit)
-        .mid_bottom_of(ids.body)
-        .w_h(100.0, 80.0)
-        .set(ids.submit_but, ui);
+fn turn_to_submit_but(ui: &mut conrod::UiCell,
+                      ids: &Ids,
+                      personal: &mut Option<Personal>,
+                      appdata: &AppData,
+                      action_tx: mpsc::Sender<OwnedMessage>) {
+    for _i in widget::Button::new()
+            .label(&appdata.texts.submit)
+            .mid_bottom_of(ids.body)
+            .w_h(100.0, 80.0)
+            .set(ids.submit_but, ui) {
+        let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
+        let mut g = GameCommand::new();
+        g.submit_word = Some(true);
+        h.set_gamecommand(g);
+        action_tx.send(ServerReceivedMsg::serialize_send(h).unwrap()).wait().unwrap();
+    }
 }
 fn show_draft(ui: &mut conrod::UiCell,
               ids: &Ids,
@@ -175,9 +185,9 @@ fn shuffle(ui: &mut conrod::UiCell,
             .enumerate()
             .map(move |(_index, x)| {
                 let mut _z = None;
-                for ref _d in initial_draft.clone() {
+                for (ref _initial_index, _d) in initial_draft.clone().iter().enumerate() {
                     if _d == x {
-                        _z = Some(_index);
+                        _z = Some(_initial_index.clone());
                     }
                 }
                 _z

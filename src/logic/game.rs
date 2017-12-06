@@ -48,7 +48,7 @@ impl<'a, T> GameProcess<'a, T>
                                  &self.appdata,
                                  result_map,
                                  action_tx);
-               
+
             }
             &GuiState::Menu => {
                 logic::menu::render(&mut ui.set_widgets(),

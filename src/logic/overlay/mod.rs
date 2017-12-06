@@ -37,7 +37,7 @@ pub fn render(ui: &mut conrod::UiCell,
                 let close_rect = spriteable_rect(graphics_match::keypad_sprite(), 2.0);
                 if animated_canvas::Canvas::new()
                        .middle_of(ids.master)
-                       .padded_wh_of(ids.master,50.0)
+                       .padded_wh_of(ids.master, 20.0)
                        .flow_down(&[(ids.overlaytop,
                                      animated_canvas::Canvas::new()
                                          .color(color::LIGHT_BLUE)
@@ -46,6 +46,8 @@ pub fn render(ui: &mut conrod::UiCell,
                                      animated_canvas::Canvas::new()
                                          .color(color::LIGHT_BLUE))])
                        .color(color::TRANSPARENT)
+                       .parent(ids.master)
+                       .close_icon_dim([20.0, 20.0])
                        .close_icon(keypad_image)
                        .close_icon_src_rect(Rect::from_corners(close_rect.0, close_rect.1))
                        .frame_rate(30)
@@ -61,7 +63,7 @@ pub fn render(ui: &mut conrod::UiCell,
                                                                 _player.literacy_award.clone(),
                                                                 _player.vp.clone(),
                                                                 _player.draftlen.clone());
-                
+
                 let slist = List::new(icon_v.clone(), &mut gamedata.overlay2)
                     .color(default_color)
                     .label("Player Info")
@@ -69,12 +71,13 @@ pub fn render(ui: &mut conrod::UiCell,
                     .wh_of(ids.overlaytop)
                     .middle_of(ids.overlaytop)
                     .set(ids.overlay_player_info, ui);
-                
+
                 if let (Some(_s), Some(_si), Some(xy)) = slist {
                     let _dim = [300.0, 100.0];
-                     animated_canvas::Canvas::new()
-                         .x(xy[0])
+                    animated_canvas::Canvas::new()
+                        .x(xy[0])
                         .y(200.0)
+                        .parent(ids.master)
                         .color(default_color)
                         .wh(_dim)
                         .set(ids.overlay2_canvas, ui);
@@ -92,11 +95,11 @@ pub fn render(ui: &mut conrod::UiCell,
                             .h(_dim[1])
                             .set(ids.overlay2_text, ui);
                     }
-                    
+
                 }
-                
+
             }
-            
+
             if let Some(mut items) = tabview::TabView::new(vec![appdata.texts.use_ink,
                                                             appdata.texts.use_remover,
                                                             appdata.texts.use_timelessclassic])
@@ -117,7 +120,7 @@ pub fn render(ui: &mut conrod::UiCell,
                 }
 
             }
-            
+
         }
     }
 

@@ -48,6 +48,7 @@ impl<'a, T> GameProcess<'a, T>
                                  &self.appdata,
                                  result_map,
                                  action_tx);
+               
             }
             &GuiState::Menu => {
                 logic::menu::render(&mut ui.set_widgets(),
@@ -75,7 +76,6 @@ impl<'a, T> GameProcess<'a, T>
                    appdata: &AppData,
                    result_map: &HashMap<ResourceEnum, SupportIdType>,
                    action_tx: mpsc::Sender<OwnedMessage>) {
-
         animated_canvas::Canvas::new()
             .color(color::TRANSPARENT)
             .flow_down(&[(ids.body, animated_canvas::Canvas::new().color(color::TRANSPARENT)),
@@ -83,14 +83,12 @@ impl<'a, T> GameProcess<'a, T>
                           animated_canvas::Canvas::new().color(color::DARK_GREEN).length(210.0))])
             .frame_rate(30)
             .set(ids.master, ui);
-
         logic::body::render(ui,
                             ids,
                             &mut gamedata,
                             &appdata,
                             result_map,
                             action_tx.clone());
-
 
         logic::footer::render(ui,
                               ids,

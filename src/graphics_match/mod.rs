@@ -69,11 +69,11 @@ pub fn gameicons_listitem(image_id: image::Id,
                           p: usize,
                           d: usize)
                           -> Vec<IconStruct> {
-    vec![IconStruct(Image::new(image_id).source_rectangle(gameicons_rect(1.0)),i.to_string(),"Ink: Like Blackjack, draw one more card in hope of scoring more points. You must however use this card to spell word".to_owned()), //ink
-         IconStruct(Image::new(image_id).source_rectangle(gameicons_rect(2.0)),r.to_string(),"Ink Remover: You may convert an inked card back to normal. You put it back into your hand".to_owned()), //inkremover
-         IconStruct(Image::new(image_id).source_rectangle(gameicons_rect(3.0)),c.to_string(),"Coin: You may use coin to buy new cards".to_owned()), //coin
-         IconStruct(Image::new(image_id).source_rectangle(gameicons_rect(4.0)),la.to_string(),"Literacy Award: Construct longer words, the token go to the last player who constructed the longest word".to_owned()), //literacy award
-         IconStruct(Image::new(image_id).source_rectangle(gameicons_rect(5.0)),p.to_string(),"Prestige: End Game Victory Point".to_owned()), //prestige
+    vec![IconStruct(Image::new(image_id).source_rectangle(gameicons_rect(1.0)),i.to_string(),"Ink, like Blackjack, draw one more card in hope of scoring more points. You must however use this card to spell word".to_owned()), //ink
+         IconStruct(Image::new(image_id).source_rectangle(gameicons_rect(2.0)),r.to_string(),"Ink Remover, You may convert an inked card back to normal. You put it back into your hand".to_owned()), //inkremover
+         IconStruct(Image::new(image_id).source_rectangle(gameicons_rect(3.0)),c.to_string(),"Coin, You may use coin to buy new cards".to_owned()), //coin
+         IconStruct(Image::new(image_id).source_rectangle(gameicons_rect(4.0)),la.to_string(),"Literacy Award, Construct longer words, the token go to the last player who constructed the longest word".to_owned()), //literacy award
+         IconStruct(Image::new(image_id).source_rectangle(gameicons_rect(5.0)),p.to_string(),"Prestige, End Game Victory Point".to_owned()), //prestige
          IconStruct(Image::new(image_id).source_rectangle(gameicons_rect(6.0)),d.to_string(),"Size of Draft pile".to_owned()), //draftlen
     ]
 }

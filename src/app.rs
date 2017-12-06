@@ -48,7 +48,7 @@ widget_ids! {
          overlay_okbut,
          overlay_receivedimage,
          overlay_player_info,
-         overlay2_rect,
+         overlay2_canvas,
          overlay2_image,
          overlay2_text,
          //promptview

@@ -196,6 +196,7 @@ impl GameApp {
                     }
                     old_captured_event = Some(ConrodMessage::Event(d, input.clone()));
                     // Set the widgets.
+
                     game_proc.run(&mut ui,
                                   &mut (gamedata),
                                   &result_map,
@@ -223,7 +224,6 @@ impl GameApp {
             while let Ok(s) = proxy_rx.try_recv() {
                 game_proc.update_state(&mut gamedata, &result_map, s);
             }
-
             // Draw the `Ui` if it has changed.
             let primitives = ui.draw();
             renderer.fill(&display, primitives, &image_map);
@@ -235,7 +235,6 @@ impl GameApp {
                                   &program,
                                   &mut gamedata.page_vec,
                                   &result_map);
-
             renderer.draw(&display, &mut target, &image_map).unwrap();
             target.finish().unwrap();
             last_update = std::time::Instant::now();

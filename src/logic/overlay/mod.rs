@@ -36,13 +36,12 @@ pub fn render(ui: &mut conrod::UiCell,
                  result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
                 let close_rect = spriteable_rect(graphics_match::keypad_sprite(), 2.0);
                 if animated_canvas::Canvas::new()
-                       .pad(100.0)
-                       .middle_of(ids.body)
-                       .wh_of(ids.body)
+                       .middle_of(ids.master)
+                       .padded_wh_of(ids.master,50.0)
                        .flow_down(&[(ids.overlaytop,
                                      animated_canvas::Canvas::new()
                                          .color(color::LIGHT_BLUE)
-                                         .length(10.0)),
+                                         .length(100.0)),
                                     (ids.overlaybody,
                                      animated_canvas::Canvas::new()
                                          .color(color::LIGHT_BLUE))])
@@ -62,6 +61,7 @@ pub fn render(ui: &mut conrod::UiCell,
                                                                 _player.literacy_award.clone(),
                                                                 _player.vp.clone(),
                                                                 _player.draftlen.clone());
+                
                 let slist = List::new(icon_v.clone(), &mut gamedata.overlay2)
                     .color(default_color)
                     .label("Player Info")
@@ -69,15 +69,18 @@ pub fn render(ui: &mut conrod::UiCell,
                     .wh_of(ids.overlaytop)
                     .middle_of(ids.overlaytop)
                     .set(ids.overlay_player_info, ui);
+                
                 if let (Some(_s), Some(_si), Some(xy)) = slist {
                     let _dim = [300.0, 100.0];
-                    widget::Rectangle::fill_with([_dim[0] * 0.5, _dim[1]], default_color)
-                        .x(xy[0])
-                        .down_from(ids.overlay_player_info, 0.0)
-                        .set(ids.overlay2_rect, ui);
+                     animated_canvas::Canvas::new()
+                         .x(xy[0])
+                        .y(200.0)
+                        .color(default_color)
+                        .wh(_dim)
+                        .set(ids.overlay2_canvas, ui);
                     if let Some(&IconStruct(ref _image, _, ref _desc)) = icon_v.get(_s) {
                         _image.wh([20.0, 20.0])
-                            .mid_left_of(ids.overlay2_rect)
+                            .mid_left_of(ids.overlay2_canvas)
                             .set(ids.overlay2_image, ui);
                         let fontsize = get_font_size_hn(_dim[1], 4.0);
                         widget::Text::new(&_desc)
@@ -85,14 +88,15 @@ pub fn render(ui: &mut conrod::UiCell,
                             .color(default_color.plain_contrast())
                             .align_middle_y_of(ids.overlay2_image)
                             .right_from(ids.overlay2_image, 0.0)
-                            .w(_dim[0] * 0.5 - 20.0)
-                            .h_of(ids.overlay2_rect)
+                            .w(_dim[0] - 20.0)
+                            .h(_dim[1])
                             .set(ids.overlay2_text, ui);
                     }
+                    
                 }
-
+                
             }
-
+            
             if let Some(mut items) = tabview::TabView::new(vec![appdata.texts.use_ink,
                                                             appdata.texts.use_remover,
                                                             appdata.texts.use_timelessclassic])
@@ -113,7 +117,7 @@ pub fn render(ui: &mut conrod::UiCell,
                 }
 
             }
-
+            
         }
     }
 

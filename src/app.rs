@@ -144,9 +144,3 @@ pub enum Footer {
     ShowHand,
     None,
 }
-#[derive( Debug, Clone)]
-pub struct Personal {
-    //Can change independently
-    pub hand: Vec<usize>,
-    pub arranged: Vec<(usize, bool, Option<String>, bool)>,
-}

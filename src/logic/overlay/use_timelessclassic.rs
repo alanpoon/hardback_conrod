@@ -9,7 +9,7 @@ use std::collections::hash_map::RandomState;
 use std::collections::HashSet;
 use futures::sync::mpsc;
 use futures::{Future, Sink};
-use app::{GameData, Ids, Personal, OverlayStatus};
+use app::{GameData, Ids, OverlayStatus};
 use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};

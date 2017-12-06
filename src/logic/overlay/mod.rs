@@ -10,7 +10,7 @@ use backend::codec_lib::codec::*;
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use futures::{Future, Sink};
-use app::{self, GameData, Ids, Personal};
+use app::{self, GameData, Ids};
 use graphics_match;
 use backend::OwnedMessage;
 use backend::SupportIdType;

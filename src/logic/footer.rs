@@ -10,7 +10,7 @@ use backend::codec_lib::codec::*;
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use futures::{Future, Sink};
-use app::{self, GameData, Ids, Personal};
+use app::{self, GameData, Ids};
 use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
@@ -77,6 +77,7 @@ fn spell(ui: &mut conrod::UiCell,
          result_map: &HashMap<ResourceEnum, SupportIdType>,
          _action_tx: mpsc::Sender<OwnedMessage>) {
     if let &mut Some(ref mut _personal) = personal {
+        let temp = (*_personal).clone();
         let mut handvec = _personal.hand
             .clone()
             .iter()
@@ -131,7 +132,15 @@ fn spell(ui: &mut conrod::UiCell,
                 s.set(ui);
             }
             _personal.hand = handvec.iter().map(|&(x_index, _, _)| x_index).collect::<Vec<usize>>();
-
+             if (*_personal).clone()!=temp{
+                     let promptsender = PromptSendable(_action_tx);
+                     let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
+                    let mut g = GameCommand::new();
+                    let now = std::time::Instant::now();
+                    g.personal = Some(_personal.clone());
+                    h.set_gamecommand(g);
+                    promptsender.send(ServerReceivedMsg::serialize_send(h).unwrap());
+                }
             for _ in widget::Button::image(icon_image)
                     .source_rectangle(graphics_match::gameicons_rect(0.0))
                     .w_h(80.0, 80.0)

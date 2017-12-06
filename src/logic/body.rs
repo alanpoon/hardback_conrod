@@ -14,8 +14,8 @@ use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use futures::{Future, Sink};
-
-use app::{self, GameData, Ids, Personal, GuiState};
+use std;
+use app::{self, GameData, Ids, GuiState};
 use logic::in_game;
 use graphics_match;
 use graphics_match::ImageHoverable;
@@ -73,10 +73,10 @@ pub fn render(ui: &mut conrod::UiCell,
                 }
                 &mut app::GuiState::Game(GameState::Spell) => {
 
-                    spell(ui, ids, &card_images, personal, appdata, result_map);
+                    spell(ui, ids, &card_images, personal, appdata, result_map,_action_tx.clone());
                 }
                 &mut app::GuiState::Game(GameState::TurnToSubmit) => {
-                    spell(ui, ids, &card_images, personal, appdata, result_map);
+                    spell(ui, ids, &card_images, personal, appdata, result_map,_action_tx.clone());
                     turn_to_submit_but(ui, ids, personal, &appdata, _action_tx.clone());
                 }
                 _ => {}
@@ -90,17 +90,19 @@ fn turn_to_submit_but(ui: &mut conrod::UiCell,
                       ids: &Ids,
                       personal: &mut Option<Personal>,
                       appdata: &AppData,
-                      action_tx: mpsc::Sender<OwnedMessage>) {
+                      _action_tx: mpsc::Sender<OwnedMessage>) {
+    let promptsender = PromptSendable(_action_tx);
     for _i in widget::Button::new()
             .label(&appdata.texts.submit)
             .mid_bottom_of(ids.body)
             .w_h(100.0, 80.0)
             .set(ids.submit_but, ui) {
+            
         let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
         let mut g = GameCommand::new();
         g.submit_word = Some(true);
         h.set_gamecommand(g);
-        action_tx.send(ServerReceivedMsg::serialize_send(h).unwrap()).wait().unwrap();
+        promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
     }
 }
 fn show_draft(ui: &mut conrod::UiCell,
@@ -225,8 +227,10 @@ fn spell(ui: &mut conrod::UiCell,
          card_images: &[Option<image::Id>; 27],
          personal: &mut Option<Personal>,
          appdata: &AppData,
-         result_map: &HashMap<ResourceEnum, SupportIdType>) {
+         result_map: &HashMap<ResourceEnum, SupportIdType>,
+         _action_tx: mpsc::Sender<OwnedMessage>) {
     if let &mut Some(ref mut _personal) = personal {
+        let temp = (*_personal).clone();
         let mut arrangedvec =
             _personal.arranged
                 .clone()
@@ -278,11 +282,22 @@ fn spell(ui: &mut conrod::UiCell,
             if let Some(s) = scrollbar {
                 s.set(ui);
             }
+            
             _personal.arranged = arrangedvec.iter()
                 .map(|&(ref x_index, _, _, ref ink, ref op_string, ref timeless)| {
                          (x_index.clone(), ink.clone(), op_string.clone(), timeless.clone())
                      })
                 .collect::<Vec<(usize, bool, Option<String>, bool)>>();
+               
+                if (*_personal).clone()!=temp{
+                     let promptsender = PromptSendable(_action_tx);
+                     let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
+                    let mut g = GameCommand::new();
+                    let now = std::time::Instant::now();
+                    g.personal = Some(_personal.clone());
+                    h.set_gamecommand(g);
+                    promptsender.send(ServerReceivedMsg::serialize_send(h).unwrap());
+                }
         }
     }
 

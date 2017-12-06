@@ -7,7 +7,7 @@ use backend::codec_lib::codec::*;
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use futures::{Future, Sink};
-use app::{GameData, Ids, Personal, OverlayStatus};
+use app::{GameData, Ids, OverlayStatus};
 use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};

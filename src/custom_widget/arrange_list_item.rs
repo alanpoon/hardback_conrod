@@ -3,7 +3,6 @@ use conrod::{widget, Color, Colorable, Borderable, Positionable, UiCell, Widget,
              image, Theme, Sizeable};
 
 use conrod::position::{Rect, Scalar, Dimensions, Point};
-use cardgame_widgets::custom_widget::dragdrop_list::Draggable;
 use cardgame_widgets::sprite::{Spriteable, spriteable_rect};
 use conrod::widget::Rectangle;
 

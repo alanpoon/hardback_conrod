@@ -54,7 +54,9 @@ widget_ids! {
          overlay2_text,
          //promptview
          promptview,
-
+         //buy
+         body_header_text,
+         listselect_view,
     }
 }
 
@@ -99,6 +101,7 @@ pub struct GameData {
     pub overlay_remover_selected: HashSet<usize, RandomState>,
     pub overlay_timeless_selected: Vec<HashSet<usize, RandomState>>,
     pub overlay2: bool,
+    pub buy_selected: Option<usize>,
 }
 impl GameData {
     pub fn new() -> GameData {
@@ -136,6 +139,7 @@ impl GameData {
                                             HashSet::new(),
                                             HashSet::new()],
             overlay2: false,
+            buy_selected: None,
         }
     }
 }

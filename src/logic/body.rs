@@ -5,8 +5,10 @@ use conrod::widget::envelope_editor::EnvelopePoint;
 use cardgame_widgets::custom_widget::image_hover::{Hoverable, ImageHover};
 use cardgame_widgets::custom_widget::arrange_list::{ArrangeList, ExitBy};
 use custom_widget::arrange_list_item::ItemWidget;
+use custom_widget::buy_list_item;
 use cardgame_widgets::custom_widget::shuffle::Shuffle;
 use cardgame_widgets::custom_widget::promptview::{PromptView, PromptSender};
+use cardgame_widgets::custom_widget::instructionset::InstructionSet;
 use backend::codec_lib::codec::*;
 use backend::OwnedMessage;
 use backend::SupportIdType;
@@ -42,11 +44,13 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref mut guistate,
                    ref mut initial_draft,
                    ref player_index,
+                   ref last_submit,
                    ref mut personal,
                    .. } = *gamedata;
     if let &mut Some(ref mut boardcodec) = boardcodec {
         let card_images = in_game::card_images(result_map);
-        if let Some(ref mut _player) = boardcodec.players.get_mut(*page_index) {
+        if let (Some(ref mut _player), offer_row) =
+            (boardcodec.players.get_mut(*page_index), boardcodec.offer_row) {
             match guistate {
                 &mut app::GuiState::Game(GameState::ShowDraft) => {
                     show_draft(ui,
@@ -73,11 +77,32 @@ pub fn render(ui: &mut conrod::UiCell,
                 }
                 &mut app::GuiState::Game(GameState::Spell) => {
 
-                    spell(ui, ids, &card_images, personal, appdata, result_map,_action_tx.clone());
+                    spell(ui,
+                          ids,
+                          &card_images,
+                          personal,
+                          appdata,
+                          result_map,
+                          _action_tx.clone());
                 }
                 &mut app::GuiState::Game(GameState::TurnToSubmit) => {
-                    spell(ui, ids, &card_images, personal, appdata, result_map,_action_tx.clone());
+                    spell(ui,
+                          ids,
+                          &card_images,
+                          personal,
+                          appdata,
+                          result_map,
+                          _action_tx.clone());
                     turn_to_submit_but(ui, ids, personal, &appdata, _action_tx.clone());
+                }
+                &mut app::GuiState::Game(GameState::Buy) => {
+                    buy(ui,
+                        ids,
+                        &card_images,
+                        offer_row,
+                        appdata,
+                        result_map,
+                        _action_tx.clone());
                 }
                 _ => {}
             }
@@ -92,12 +117,13 @@ fn turn_to_submit_but(ui: &mut conrod::UiCell,
                       appdata: &AppData,
                       _action_tx: mpsc::Sender<OwnedMessage>) {
     let promptsender = PromptSendable(_action_tx);
-    for _i in widget::Button::new()
-            .label(&appdata.texts.submit)
-            .mid_bottom_of(ids.body)
-            .w_h(100.0, 80.0)
-            .set(ids.submit_but, ui) {
-            
+    if let Some(_) = widget::Button::new()
+           .label(&appdata.texts.submit)
+           .mid_bottom_of(ids.body)
+           .w_h(100.0, 80.0)
+           .set(ids.submit_but, ui)
+           .next() {
+
         let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
         let mut g = GameCommand::new();
         g.submit_word = Some(true);
@@ -148,13 +174,14 @@ fn show_draft(ui: &mut conrod::UiCell,
     } else {
 
         let promptsender = PromptSendable(action_tx);
-        let instructions: Vec<(&str, Box<Fn(PromptSendable)>)> = vec![("Continue",  Box::new(move|ps| {
-                            let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
-                            let mut g = GameCommand::new();
-                            g.go_to_shuffle = Some(true);
-                            h.set_gamecommand(g);
-                            ps.send(ServerReceivedMsg::serialize_send(h).unwrap());
-                        }))];
+        let instructions: Vec<(&str, Box<Fn(PromptSendable)>)> = vec![("Continue",
+                                                                       Box::new(move |ps| {
+            let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
+            let mut g = GameCommand::new();
+            g.go_to_shuffle = Some(true);
+            h.set_gamecommand(g);
+            ps.send(ServerReceivedMsg::serialize_send(h).unwrap());
+        }))];
         let prompt_j = PromptView::new(&instructions,
                                        (0.5, "Lets' start to Shuffle the cards"),
                                        promptsender)
@@ -282,23 +309,123 @@ fn spell(ui: &mut conrod::UiCell,
             if let Some(s) = scrollbar {
                 s.set(ui);
             }
-            
+
             _personal.arranged = arrangedvec.iter()
                 .map(|&(ref x_index, _, _, ref ink, ref op_string, ref timeless)| {
                          (x_index.clone(), ink.clone(), op_string.clone(), timeless.clone())
                      })
                 .collect::<Vec<(usize, bool, Option<String>, bool)>>();
-               
-                if (*_personal).clone()!=temp{
-                     let promptsender = PromptSendable(_action_tx);
-                     let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
-                    let mut g = GameCommand::new();
-                    let now = std::time::Instant::now();
-                    g.personal = Some(_personal.clone());
-                    h.set_gamecommand(g);
-                    promptsender.send(ServerReceivedMsg::serialize_send(h).unwrap());
-                }
+
+            if (*_personal).clone() != temp {
+                let promptsender = PromptSendable(_action_tx);
+                let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
+                let mut g = GameCommand::new();
+                g.personal = Some(_personal.clone());
+                h.set_gamecommand(g);
+                promptsender.send(ServerReceivedMsg::serialize_send(h).unwrap());
+            }
         }
     }
 
+}
+fn buy(ui: &mut conrod::UiCell,
+       ids: &Ids,
+       card_images: &[Option<image::Id>; 27],
+       offer_row: &mut Vec<usize>,
+       buyselected: &mut Option<usize>,
+       appdata: &AppData,
+       result_map: &HashMap<ResourceEnum, SupportIdType>,
+       _action_tx: mpsc::Sender<OwnedMessage>) {
+
+    widget::Text::new(appdata.texts.buy)
+        .color(color::WHITE)
+        .font_size(60)
+        .h(100.0)
+        .w_of(ids.body)
+        .top_left_of(ids.body)
+        .set(ids.body_header_text, ui);
+    let body_w = ui.w_of(ids.body).unwrap();
+    let item_h = body_w / 5.0;
+    let mut offer_row_iter = offer_row.iter();
+    let (mut events, scrollbar) = widget::ListSelect::single(offer_row.len())
+        .item_size(item_h)
+        .instantiate_all_items()
+        .mid_bottom_of(ids.body)
+        .h(item_h * 1.2)
+        .padded_w_of(ids.body, 20.0)
+        .scrollbar_next_to()
+        .set(ids.listselect_view, ui);
+    if let Some(s) = scrollbar {
+        s.set(ui)
+    }
+    while let Some(event) = events.next(ui, |i| {
+        let mut y = false;
+        if let Some(_x) = buyselected {
+            if _x == i {
+                y = true;
+            }
+        }
+        y
+    }) {
+        use conrod::widget::list_select::Event;
+        match event {
+            // For the `Item` events we instantiate the `List`'s items.
+            Event::Item(item) => {
+                let card_index = offer_row.get(item.i).unwrap();
+                let (_image_id, _rect, _) =
+                    in_game::get_card_widget_image_portrait(card_index.clone(),
+                                                            card_images,
+                                                            appdata);
+                //zoom rect
+                let mut top_left_c = _rect.top_left().clone();
+                top_left_c.set_x(_rect.top_left().get_x() + 100.0);
+                top_left_c.set_y(_rect.top_left().get_y() - 120.0);
+                let btm_right = _rect.bottom_right().clone();
+                let _zoom_rect = Rect::from_corners(top_left_c, btm_right);
+                let i_h_struct = ImageHoverable(Image::new(_image_id).source_rectangle(_rect),
+                                                Some(Image::new(_image_id)
+                                                         .source_rectangle(_zoom_rect)),
+                                                Some(Image::new(v).source_rectangle(_zoom_rect)));
+                let mut j = buy_list_item::ItemWidget::new(i_h_struct)
+                    .border_color(color::YELLOW)
+                    .border(20.0);
+                if let Some(_s) = buyselected {
+                    if _s == item.i {
+                        j = j.bordered();
+                    }
+                }
+                item.set(j, ui);
+            }
+            Event::Selection(selected_id) => {
+                if let Some(_s) = buyselected {
+                    if _s == selected_id {
+                        buyselected = None;
+                    } else {
+                        buyselected = Some(selected_id);
+                    }
+                } else {
+                    buyselected = Some(selected_id);
+                }
+            }
+            _ => {}
+        }
+    }
+    let text = if buyselected.is_some() {
+        appdata.texts.buy
+    } else {
+        appdata.texts.continue_without_buying
+    };
+    if let Some(_) = widget::Button::new()
+           .label(&text)
+           .mid_bottom_of(ids.body)
+           .w_h(100.0, 80.0)
+           .set(ids.submit_but, ui)
+           .next() {
+        let promptsender = PromptSendable(_action_tx.clone());
+        let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
+        let mut g = GameCommand::new();
+        g.buy_offer = Some((buyselected.is_some(), buyselected.unwrap_or(0)));
+        h.set_gamecommand(g);
+        promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
+    }
 }

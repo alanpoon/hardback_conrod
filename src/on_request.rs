@@ -5,7 +5,7 @@ use backend::SupportIdType;
 use std::collections::HashMap;
 use conrod_chat::chat;
 use logic::in_game;
-
+use std::time::Instant;
 #[allow(unused_variables,non_snake_case)]
 pub fn update(s: ClientReceivedMsg,
               gamedata: &mut GameData,
@@ -22,6 +22,7 @@ pub fn update(s: ClientReceivedMsg,
                             message,
                             boardstate,
                             player_index,
+                            notification,
                             log,
                             .. } = s;
     if let (Some(Some(_type_name)),
@@ -72,6 +73,9 @@ pub fn update(s: ClientReceivedMsg,
     if let (Some(Some(ref _request)), None) = (request, gamedata.overlay_index) {
         //request for the prompts
         let (ref _p_i, ref _c_i, ref _string, ref _vecstring, ref _opt) = *_request;
+    }
+    if let Some(Some(_string)) = notification {
+        gamedata.notification = Some((_string, Instant::now()));
     }
     if let (Some(Some(_type_name)), Some(Some(_tables)), Some(_tablenumber)) =
         (type_name, tables, tablenumber) {

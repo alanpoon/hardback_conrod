@@ -58,6 +58,10 @@ impl<H> ItemWidget<H>
             style: Style::default(),
         }
     }
+    pub fn bordered(mut self) -> Self {
+        self.bordered = true;
+        self
+    }
 }
 
 /// A custom Conrod widget must implement the Widget trait. See the **Widget** trait

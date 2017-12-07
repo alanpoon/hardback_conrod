@@ -19,10 +19,11 @@ use futures::{Future, Sink};
 use std;
 use app::{self, GameData, Ids, GuiState};
 use logic::in_game;
+use logic;
 use graphics_match;
 use graphics_match::ImageHoverable;
 #[derive(Clone)]
-pub struct PromptSendable(mpsc::Sender<OwnedMessage>);
+pub struct PromptSendable(pub mpsc::Sender<OwnedMessage>);
 impl PromptSender for PromptSendable {
     fn send(&self, msg: String) {
         self.0
@@ -44,13 +45,14 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref mut guistate,
                    ref mut initial_draft,
                    ref player_index,
-                   ref last_submit,
+                   ref notification,
                    ref mut personal,
+                   ref mut buy_selected,
                    .. } = *gamedata;
     if let &mut Some(ref mut boardcodec) = boardcodec {
         let card_images = in_game::card_images(result_map);
-        if let (Some(ref mut _player), offer_row) =
-            (boardcodec.players.get_mut(*page_index), boardcodec.offer_row) {
+        if let (Some(ref mut _player), ref offer_row) =
+            (boardcodec.players.get_mut(*page_index), &boardcodec.offer_row) {
             match guistate {
                 &mut app::GuiState::Game(GameState::ShowDraft) => {
                     show_draft(ui,
@@ -96,16 +98,11 @@ pub fn render(ui: &mut conrod::UiCell,
                     turn_to_submit_but(ui, ids, personal, &appdata, _action_tx.clone());
                 }
                 &mut app::GuiState::Game(GameState::Buy) => {
-                    buy(ui,
-                        ids,
-                        &card_images,
-                        offer_row,
-                        appdata,
-                        result_map,
-                        _action_tx.clone());
+                    buy(ui, ids, &card_images, offer_row, buy_selected, appdata);
                 }
                 _ => {}
             }
+            logic::notification::render(ui, ids, notification.clone());
         }
     }
 
@@ -331,11 +328,9 @@ fn spell(ui: &mut conrod::UiCell,
 fn buy(ui: &mut conrod::UiCell,
        ids: &Ids,
        card_images: &[Option<image::Id>; 27],
-       offer_row: &mut Vec<usize>,
+       offer_row: &Vec<usize>,
        buyselected: &mut Option<usize>,
-       appdata: &AppData,
-       result_map: &HashMap<ResourceEnum, SupportIdType>,
-       _action_tx: mpsc::Sender<OwnedMessage>) {
+       appdata: &AppData) {
 
     widget::Text::new(appdata.texts.buy)
         .color(color::WHITE)
@@ -346,10 +341,9 @@ fn buy(ui: &mut conrod::UiCell,
         .set(ids.body_header_text, ui);
     let body_w = ui.w_of(ids.body).unwrap();
     let item_h = body_w / 5.0;
-    let mut offer_row_iter = offer_row.iter();
     let (mut events, scrollbar) = widget::ListSelect::single(offer_row.len())
+        .flow_right()
         .item_size(item_h)
-        .instantiate_all_items()
         .mid_bottom_of(ids.body)
         .h(item_h * 1.2)
         .padded_w_of(ids.body, 20.0)
@@ -360,7 +354,7 @@ fn buy(ui: &mut conrod::UiCell,
     }
     while let Some(event) = events.next(ui, |i| {
         let mut y = false;
-        if let Some(_x) = buyselected {
+        if let &mut Some(_x) = buyselected {
             if _x == i {
                 y = true;
             }
@@ -377,19 +371,15 @@ fn buy(ui: &mut conrod::UiCell,
                                                             card_images,
                                                             appdata);
                 //zoom rect
-                let mut top_left_c = _rect.top_left().clone();
-                top_left_c.set_x(_rect.top_left().get_x() + 100.0);
-                top_left_c.set_y(_rect.top_left().get_y() - 120.0);
-                let btm_right = _rect.bottom_right().clone();
-                let _zoom_rect = Rect::from_corners(top_left_c, btm_right);
-                let i_h_struct = ImageHoverable(Image::new(_image_id).source_rectangle(_rect),
-                                                Some(Image::new(_image_id)
-                                                         .source_rectangle(_zoom_rect)),
-                                                Some(Image::new(v).source_rectangle(_zoom_rect)));
+                let _zoom_rect = graphics_match::cards_btm(_rect);
+                let i_h_struct =
+                    ImageHoverable(Image::new(_image_id).source_rectangle(_rect),
+                                   Some(Image::new(_image_id).source_rectangle(_zoom_rect)),
+                                   Some(Image::new(_image_id).source_rectangle(_zoom_rect)));
                 let mut j = buy_list_item::ItemWidget::new(i_h_struct)
                     .border_color(color::YELLOW)
                     .border(20.0);
-                if let Some(_s) = buyselected {
+                if let &mut Some(_s) = buyselected {
                     if _s == item.i {
                         j = j.bordered();
                     }
@@ -397,35 +387,18 @@ fn buy(ui: &mut conrod::UiCell,
                 item.set(j, ui);
             }
             Event::Selection(selected_id) => {
-                if let Some(_s) = buyselected {
+                if let &mut Some(_s) = buyselected {
                     if _s == selected_id {
-                        buyselected = None;
+                        *buyselected = None;
                     } else {
-                        buyselected = Some(selected_id);
+                        *buyselected = Some(selected_id);
                     }
                 } else {
-                    buyselected = Some(selected_id);
+                    *buyselected = Some(selected_id);
                 }
             }
             _ => {}
         }
     }
-    let text = if buyselected.is_some() {
-        appdata.texts.buy
-    } else {
-        appdata.texts.continue_without_buying
-    };
-    if let Some(_) = widget::Button::new()
-           .label(&text)
-           .mid_bottom_of(ids.body)
-           .w_h(100.0, 80.0)
-           .set(ids.submit_but, ui)
-           .next() {
-        let promptsender = PromptSendable(_action_tx.clone());
-        let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
-        let mut g = GameCommand::new();
-        g.buy_offer = Some((buyselected.is_some(), buyselected.unwrap_or(0)));
-        h.set_gamecommand(g);
-        promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
-    }
+
 }

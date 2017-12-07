@@ -6,3 +6,4 @@ pub mod top_left;
 pub mod in_game;
 pub mod body;
 pub mod overlay;
+pub mod notification;

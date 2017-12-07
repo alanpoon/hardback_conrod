@@ -6,6 +6,10 @@ use cardgame_widgets::custom_widget::arrange_list::{ArrangeList, ExitBy};
 use custom_widget::arrange_list_item::ItemWidget;
 use cardgame_widgets::custom_widget::instructionset::InstructionSet;
 use cardgame_widgets::custom_widget::animated_canvas;
+use cardgame_widgets::custom_widget::promptview::PromptSender;
+use cardgame_widgets::text::get_font_size_hn;
+use cardgame_widgets::custom_widget::player_info::list::List;
+use cardgame_widgets::custom_widget::player_info::item::IconStruct;
 use backend::codec_lib::codec::*;
 use std::collections::HashMap;
 use futures::sync::mpsc;
@@ -19,6 +23,7 @@ use graphics_match;
 use graphics_match::ImageHoverable;
 use logic::in_game;
 use instruction::Instruction;
+use logic::body::PromptSendable;
 pub fn render(ui: &mut conrod::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
@@ -30,6 +35,8 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref mut print_instruction_set,
                    ref mut personal,
                    ref mut overlay,
+                   ref mut overlay2,
+                   ref mut buy_selected,
                    .. } = *gamedata;
     if let &mut Some(ref mut boardcodec) = boardcodec {
         let card_images = in_game::card_images(result_map);
@@ -59,6 +66,16 @@ pub fn render(ui: &mut conrod::UiCell,
                           overlay,
                           result_map,
                           _action_tx);
+                }
+                app::GuiState::Game(GameState::Buy) => {
+                    buy(ui,
+                        ids,
+                        _player,
+                        overlay2,
+                        buy_selected,
+                        appdata,
+                        result_map,
+                        _action_tx.clone());
                 }
                 _ => {}
             }
@@ -217,4 +234,79 @@ fn page_previous(gamedata: &mut GameData) {
         }
 
     }
+}
+fn buy(ui: &mut conrod::UiCell,
+       ids: &Ids,
+       _player: &mut Player,
+       overlay2: &mut bool,
+       buyselected: &mut Option<usize>,
+       appdata: &AppData,
+       result_map: &HashMap<ResourceEnum, SupportIdType>,
+       _action_tx: mpsc::Sender<OwnedMessage>) {
+    let text = if buyselected.is_some() {
+        appdata.texts.buy
+    } else {
+        appdata.texts.continue_without_buying
+    };
+    if let Some(_) = widget::Button::new()
+           .label(&text)
+           .mid_top_of(ids.footer)
+           .w_h(200.0, 80.0)
+           .set(ids.submit_but, ui)
+           .next() {
+        let promptsender = PromptSendable(_action_tx.clone());
+        let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
+        let mut g = GameCommand::new();
+        g.buy_offer = Some((buyselected.is_some(), buyselected.unwrap_or(0)));
+        h.set_gamecommand(g);
+        promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
+    }
+    if let Some(&SupportIdType::ImageId(icon_image)) =
+        result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS)) {
+        let default_color = color::GREY;
+        let icon_v = graphics_match::gameicons_listitem(icon_image,
+                                                        _player.ink.clone(),
+                                                        _player.remover.clone(),
+                                                        _player.coin.clone(),
+                                                        _player.literacy_award.clone(),
+                                                        _player.vp.clone(),
+                                                        _player.draftlen.clone());
+
+        let slist = List::new(icon_v.clone(), overlay2)
+            .color(default_color)
+            .label("Player Info")
+            .label_color(default_color.plain_contrast())
+            .down_from(ids.submit_but, 0.0)
+            .align_middle_x_of(ids.submit_but)
+            .h(80.0)
+            .w_of(ids.footer)
+            .set(ids.overlay_player_info, ui);
+
+        if let (Some(_s), Some(_si), Some(xy)) = slist {
+            let _dim = [300.0, 100.0];
+            animated_canvas::Canvas::new()
+                .x(xy[0])
+                .y(-200.0)
+                .parent(ids.master)
+                .color(default_color)
+                .wh(_dim)
+                .set(ids.overlay2_canvas, ui);
+            if let Some(&IconStruct(ref _image, _, ref _desc)) = icon_v.get(_s) {
+                _image.wh([20.0, 20.0]).mid_left_of(ids.overlay2_canvas).set(ids.overlay2_image,
+                                                                             ui);
+                let fontsize = get_font_size_hn(_dim[1], 4.0);
+                widget::Text::new(&_desc)
+                    .font_size(fontsize)
+                    .color(default_color.plain_contrast())
+                    .align_middle_y_of(ids.overlay2_image)
+                    .right_from(ids.overlay2_image, 0.0)
+                    .w(_dim[0] - 20.0)
+                    .h(_dim[1])
+                    .set(ids.overlay2_text, ui);
+            }
+
+        }
+    }
+
+
 }

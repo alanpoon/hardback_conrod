@@ -6,6 +6,7 @@ use backend::codec_lib::codec::*;
 use conrod::{image, Rect};
 use std::collections::hash_map::RandomState;
 use std::collections::HashSet;
+use std::time::Instant;
 widget_ids! {
     pub struct Ids {
          master,
@@ -25,6 +26,8 @@ widget_ids! {
         table_list,
          body,
          text,
+         //notification
+         notification_view,
          //in_game
          handview,
          listview,
@@ -57,6 +60,7 @@ widget_ids! {
          //buy
          body_header_text,
          listselect_view,
+         
     }
 }
 
@@ -102,6 +106,7 @@ pub struct GameData {
     pub overlay_timeless_selected: Vec<HashSet<usize, RandomState>>,
     pub overlay2: bool,
     pub buy_selected: Option<usize>,
+    pub notification: Option<(String, Instant)>,
 }
 impl GameData {
     pub fn new() -> GameData {
@@ -140,6 +145,7 @@ impl GameData {
                                             HashSet::new()],
             overlay2: false,
             buy_selected: None,
+            notification: None,
         }
     }
 }

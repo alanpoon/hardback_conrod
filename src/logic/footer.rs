@@ -77,6 +77,16 @@ pub fn render(ui: &mut conrod::UiCell,
                         result_map,
                         _action_tx.clone());
                 }
+                app::GuiState::Game(GameState::TrashOther(_)) => {
+                    trash_other(ui,
+                                ids,
+                                _player,
+                                overlay2,
+                                buy_selected,
+                                appdata,
+                                result_map,
+                                _action_tx.clone());
+                }
                 _ => {}
             }
         }
@@ -247,6 +257,81 @@ fn buy(ui: &mut conrod::UiCell,
         appdata.texts.buy
     } else {
         appdata.texts.continue_without_buying
+    };
+    if let Some(_) = widget::Button::new()
+           .label(&text)
+           .mid_top_of(ids.footer)
+           .w_h(200.0, 80.0)
+           .set(ids.submit_but, ui)
+           .next() {
+        let promptsender = PromptSendable(_action_tx.clone());
+        let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
+        let mut g = GameCommand::new();
+        g.buy_offer = Some((buyselected.is_some(), buyselected.unwrap_or(0)));
+        h.set_gamecommand(g);
+        promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
+    }
+    if let Some(&SupportIdType::ImageId(icon_image)) =
+        result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS)) {
+        let default_color = color::GREY;
+        let icon_v = graphics_match::gameicons_listitem(icon_image,
+                                                        _player.ink.clone(),
+                                                        _player.remover.clone(),
+                                                        _player.coin.clone(),
+                                                        _player.literacy_award.clone(),
+                                                        _player.vp.clone(),
+                                                        _player.draftlen.clone());
+
+        let slist = List::new(icon_v.clone(), overlay2)
+            .color(default_color)
+            .label("Player Info")
+            .label_color(default_color.plain_contrast())
+            .down_from(ids.submit_but, 0.0)
+            .align_middle_x_of(ids.submit_but)
+            .h(80.0)
+            .w_of(ids.footer)
+            .set(ids.overlay_player_info, ui);
+
+        if let (Some(_s), Some(_si), Some(xy)) = slist {
+            let _dim = [300.0, 100.0];
+            animated_canvas::Canvas::new()
+                .x(xy[0])
+                .y(-200.0)
+                .parent(ids.master)
+                .color(default_color)
+                .wh(_dim)
+                .set(ids.overlay2_canvas, ui);
+            if let Some(&IconStruct(ref _image, _, ref _desc)) = icon_v.get(_s) {
+                _image.wh([20.0, 20.0]).mid_left_of(ids.overlay2_canvas).set(ids.overlay2_image,
+                                                                             ui);
+                let fontsize = get_font_size_hn(_dim[1], 4.0);
+                widget::Text::new(&_desc)
+                    .font_size(fontsize)
+                    .color(default_color.plain_contrast())
+                    .align_middle_y_of(ids.overlay2_image)
+                    .right_from(ids.overlay2_image, 0.0)
+                    .w(_dim[0] - 20.0)
+                    .h(_dim[1])
+                    .set(ids.overlay2_text, ui);
+            }
+
+        }
+    }
+
+
+}
+fn trash_other(ui: &mut conrod::UiCell,
+               ids: &Ids,
+               _player: &mut Player,
+               overlay2: &mut bool,
+               buyselected: &mut Option<usize>,
+               appdata: &AppData,
+               result_map: &HashMap<ResourceEnum, SupportIdType>,
+               _action_tx: mpsc::Sender<OwnedMessage>) {
+    let text = if buyselected.is_some() {
+        appdata.texts.trash_other
+    } else {
+        appdata.texts.continue_without_trashing_other
     };
     if let Some(_) = widget::Button::new()
            .label(&text)

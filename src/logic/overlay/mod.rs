@@ -77,6 +77,7 @@ pub fn render(ui: &mut conrod::UiCell,
                     animated_canvas::Canvas::new()
                         .x(xy[0])
                         .y(200.0)
+                        .graphics_of(ids.master)
                         .parent(ids.master)
                         .color(default_color)
                         .wh(_dim)

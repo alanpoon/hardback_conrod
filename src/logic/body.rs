@@ -9,6 +9,8 @@ use custom_widget::buy_list_item;
 use cardgame_widgets::custom_widget::shuffle::Shuffle;
 use cardgame_widgets::custom_widget::promptview::{PromptView, PromptSender};
 use cardgame_widgets::custom_widget::instructionset::InstructionSet;
+use cardgame_widgets::custom_widget::player_info; //player_info::list::List
+use cardgame_widgets::custom_widget::player_info; //::item::IconStruct
 use backend::codec_lib::codec::*;
 use backend::OwnedMessage;
 use backend::SupportIdType;
@@ -48,6 +50,7 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref notification,
                    ref mut personal,
                    ref mut buy_selected,
+                   ref mut overlay2,
                    .. } = *gamedata;
     if let &mut Some(ref mut boardcodec) = boardcodec {
         let card_images = in_game::card_images(result_map);
@@ -99,6 +102,21 @@ pub fn render(ui: &mut conrod::UiCell,
                 }
                 &mut app::GuiState::Game(GameState::Buy) => {
                     buy(ui, ids, &card_images, offer_row, buy_selected, appdata);
+                }
+                &mut app::GuiState::Game(GameState::TrashOther(_otherthanthis)) => {
+                    trash_other(ui,
+                                ids,
+                                _player,
+                                _otherthanthis,
+                                &card_images,
+                                buy_selected,
+                                &appdata);
+                }
+                &mut app::GuiState::Game(GameState::DrawCard) => {
+                    recache_personal(_player, personal);
+                }
+                &mut app::GuiState::Game(GameState::ShowResult(_w)) => {
+                    show_result(ui, ids, _player, _w, overlay2, &appdata, result_map);
                 }
                 _ => {}
             }
@@ -246,6 +264,12 @@ fn cache_personal(player: &Player, personal: &mut Option<Personal>) {
                          });
     }
 }
+fn recache_personal(player: &Player, personal: &mut Option<Personal>) {
+    *personal = Some(Personal {
+                         hand: player.hand.clone(),
+                         arranged: vec![],
+                     });
+}
 fn spell(ui: &mut conrod::UiCell,
          ids: &Ids,
          card_images: &[Option<image::Id>; 27],
@@ -339,6 +363,12 @@ fn buy(ui: &mut conrod::UiCell,
         .w_of(ids.body)
         .top_left_of(ids.body)
         .set(ids.body_header_text, ui);
+    widget::Text::new(appdata.texts.unused_coins)
+        .color(color::WHITE)
+        .font_size(50)
+        .h(80.0)
+        .down_from(ids.body_header_text, 0.0)
+        .set(ids.body_subject_text, ui);
     let body_w = ui.w_of(ids.body).unwrap();
     let item_h = body_w / 5.0;
     let (mut events, scrollbar) = widget::ListSelect::single(offer_row.len())
@@ -401,4 +431,160 @@ fn buy(ui: &mut conrod::UiCell,
         }
     }
 
+}
+fn trash_other(ui: &mut conrod::UiCell,
+               ids: &Ids,
+               player: &Player,
+               otherthanthis: usize,
+               card_images: &[Option<image::Id>; 27],
+               buyselected: &mut Option<usize>,
+               appdata: &AppData) {
+    let mut hand = player.hand.clone();
+    let arranged = player.arranged
+        .iter()
+        .map(|&(ref ci, _, _, ref time)| {
+                 if *time {
+                     return None;
+                 }
+                 return Some(ci.clone());
+             })
+        .filter(|x| x.is_some())
+        .map(|x| x.unwrap())
+        .collect::<Vec<usize>>();
+    hand.extend(arranged);
+    widget::Text::new(appdata.texts.trash)
+        .color(color::WHITE)
+        .font_size(60)
+        .h(100.0)
+        .w_of(ids.body)
+        .top_left_of(ids.body)
+        .set(ids.body_header_text, ui);
+    widget::Text::new(appdata.texts.trash_other)
+        .color(color::WHITE)
+        .font_size(50)
+        .h(80.0)
+        .down_from(ids.body_header_text, 0.0)
+        .set(ids.body_subject_text, ui);
+    let body_w = ui.w_of(ids.body).unwrap();
+    let item_h = body_w / 5.0;
+    let (mut events, scrollbar) = widget::ListSelect::single(hand.len())
+        .flow_right()
+        .item_size(item_h)
+        .mid_bottom_of(ids.body)
+        .h(item_h * 1.2)
+        .padded_w_of(ids.body, 20.0)
+        .scrollbar_next_to()
+        .set(ids.listselect_view, ui);
+    if let Some(s) = scrollbar {
+        s.set(ui)
+    }
+    while let Some(event) = events.next(ui, |i| {
+        let mut y = false;
+        if let &mut Some(_x) = buyselected {
+            if _x == i {
+                y = true;
+            }
+        }
+        y
+    }) {
+        use conrod::widget::list_select::Event;
+        match event {
+            // For the `Item` events we instantiate the `List`'s items.
+            Event::Item(item) => {
+                let card_index = hand.get(item.i).unwrap();
+                let (_image_id, _rect, _) =
+                    in_game::get_card_widget_image_portrait(card_index.clone(),
+                                                            card_images,
+                                                            appdata);
+                //zoom rect
+                let _zoom_rect = graphics_match::cards_btm(_rect);
+                let i_h_struct =
+                    ImageHoverable(Image::new(_image_id).source_rectangle(_rect),
+                                   Some(Image::new(_image_id).source_rectangle(_zoom_rect)),
+                                   Some(Image::new(_image_id).source_rectangle(_zoom_rect)));
+                let mut j = buy_list_item::ItemWidget::new(i_h_struct)
+                    .border_color(color::YELLOW)
+                    .border(20.0);
+                if let &mut Some(_s) = buyselected {
+                    if _s == item.i {
+                        j = j.bordered();
+                    }
+                }
+                item.set(j, ui);
+            }
+            Event::Selection(selected_id) => {
+                if let &mut Some(_s) = buyselected {
+                    if _s == selected_id {
+                        *buyselected = None;
+                    } else {
+                        *buyselected = Some(selected_id);
+                    }
+                } else {
+                    *buyselected = Some(selected_id);
+                }
+            }
+            _ => {}
+        }
+    }
+
+}
+fn show_result(ui: &mut conrod::UiCell,
+               ids: &Ids,
+               players: &Vec<Player>,
+               winner: usize,
+               overlay2: &mut bool,
+               appdata: &AppData,
+               result_map: &HashMap<ResourceEnum, SupportIdType>) {
+    if let Some(_p) = players.get(winner) {
+        let _str = _p.name;
+        _str.push_str(" Wins!");
+        widget::Text::new(&_str)
+            .color(color::WHITE)
+            .font_size(60)
+            .h_of(100.0)
+            .top_left_with_margins_on(ids.body, 80.0, 100.0)
+            .w_of(ids.body)
+            .middle_of(ids.body)
+            .set(ids.body_subject_text, ui);
+    }
+
+
+    let item_h = 100.0;
+    let (mut items, scrollbar) = widget::List::flow_down(players.len())
+        .item_size(item_h)
+        .mid_bottom_with_margin_on(ids.body, 20.0)
+        .h(item_h * 1.2)
+        .padded_w_of(ids.body, 20.0)
+        .scrollbar_next_to()
+        .set(ids.listview, ui);
+    if let Some(s) = scrollbar {
+        s.set(ui)
+    }
+    if let Some(&SupportIdType::ImageId(icon_image)) =
+        result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS)) {
+        let default_color = color::GREY;
+
+        while let Some(item) = items.next(ui) {
+            let i = item.i;
+            if let Some(_p) = players.get(i) {
+                let icon_v = graphics_match::gameicons_listitem(icon_image,
+                                                                _p.ink.clone(),
+                                                                _p.remover.clone(),
+                                                                _p.coin.clone(),
+                                                                _p.literacy_award.clone(),
+                                                                _p.vp.clone(),
+                                                                _p.draftlen.clone());
+                let icon_vpliteracy = icon_v.iter()
+                    .enumerate()
+                    .filter(|(_i, _)| (_i == 3) | (_i == 4))
+                    .collect::<Vec<player_info::item::IconStruct>>();
+                let slist = player_info::list::List::new(icon_vpliteracy, &mut overlay2)
+                    .color(default_color)
+                    .label(&_p.name)
+                    .label_color(default_color.plain_contrast());
+                item.set(slist, ui);
+            }
+
+        }
+    }
 }

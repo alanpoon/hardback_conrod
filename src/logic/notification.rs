@@ -4,6 +4,7 @@ use app::Ids;
 use std::time::Instant;
 pub fn render(ui: &mut conrod::UiCell, ids: &Ids, notification: Option<(String, Instant)>) {
     if let Some((s, i)) = notification {
+        println!("there is notification");
         Notification::new(&s, i)
             .top_right_of(ids.body)
             .color(color::GREY)

@@ -59,8 +59,8 @@ widget_ids! {
          promptview,
          //buy
          body_header_text,
+         body_subject_text,
          listselect_view,
-         
     }
 }
 

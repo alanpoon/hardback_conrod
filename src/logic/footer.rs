@@ -36,6 +36,8 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref mut personal,
                    ref mut overlay,
                    ref mut overlay2,
+                   ref mut overlay_chat,
+                   ref mut overlay_exit,
                    ref mut buy_selected,
                    .. } = *gamedata;
     if let &mut Some(ref mut boardcodec) = boardcodec {
@@ -53,6 +55,8 @@ pub fn render(ui: &mut conrod::UiCell,
                           &appdata,
                           personal,
                           overlay,
+                          overlay_chat,
+                          overlay_exit,
                           result_map,
                           _action_tx);
                 }
@@ -64,6 +68,8 @@ pub fn render(ui: &mut conrod::UiCell,
                           &appdata,
                           personal,
                           overlay,
+                          overlay_chat,
+                          overlay_exit,
                           result_map,
                           _action_tx);
                 }
@@ -101,6 +107,8 @@ fn spell(ui: &mut conrod::UiCell,
          appdata: &AppData,
          personal: &mut Option<Personal>,
          overlay: &mut bool,
+         overlay_chat: &mut bool,
+         overlay_exit: &mut bool,
          result_map: &HashMap<ResourceEnum, SupportIdType>,
          _action_tx: mpsc::Sender<OwnedMessage>) {
     if let &mut Some(ref mut _personal) = personal {
@@ -167,12 +175,29 @@ fn spell(ui: &mut conrod::UiCell,
                 h.set_gamecommand(g);
                 promptsender.send(ServerReceivedMsg::serialize_send(h).unwrap());
             }
+            let exit_door = if *overlay { 9.0 } else { 8.0 };
             for _ in widget::Button::image(icon_image)
-                    .source_rectangle(graphics_match::gameicons_rect(0.0))
+                    .source_rectangle(graphics_match::gameicons_rect(exit_door))
                     .w_h(80.0, 80.0)
                     .right_from(ids.footerdragdroplistview, 0.0)
                     .set(ids.footer_overlay_but, ui) {
                 *overlay = true;
+            }
+            //chat button
+            for _ in widget::Button::image(icon_image)
+                    .source_rectangle(graphics_match::gameicons_rect(11.0))
+                    .w_h(80.0, 80.0)
+                    .right_from(ids.footer_overlay_but, 0.0)
+                    .set(ids.footer_overlay_but2, ui) {
+                *overlay_chat = true;
+            }
+            //exit button
+            for _ in widget::Button::image(icon_image)
+                    .source_rectangle(graphics_match::gameicons_rect(10.0))
+                    .w_h(80.0, 80.0)
+                    .right_from(ids.footer_overlay_but2, 0.0)
+                    .set(ids.footer_overlay_but3, ui) {
+                *overlay_exit = true;
             }
         }
     }

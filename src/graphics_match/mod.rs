@@ -50,9 +50,9 @@ pub fn spinner_sprite() -> SpriteInfo {
 }
 pub fn gameicon_sprite() -> SpriteInfo {
     SpriteInfo {
-        first: (0.0, 1200.0),
+        first: (0.0, 1600.0),
         num_in_row: 3,
-        num_in_col: 3,
+        num_in_col: 4,
         w_h: (400.0, 400.0),
         pad: (0.0, 0.0, 0.0, 0.0),
     }

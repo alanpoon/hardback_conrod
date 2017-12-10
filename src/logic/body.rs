@@ -9,8 +9,7 @@ use custom_widget::buy_list_item;
 use cardgame_widgets::custom_widget::shuffle::Shuffle;
 use cardgame_widgets::custom_widget::promptview::{PromptView, PromptSender};
 use cardgame_widgets::custom_widget::instructionset::InstructionSet;
-use cardgame_widgets::custom_widget::player_info; //player_info::list::List
-use cardgame_widgets::custom_widget::player_info; //::item::IconStruct
+use cardgame_widgets::custom_widget::player_info; //player_info::list::List,//::item::IconStruct
 use backend::codec_lib::codec::*;
 use backend::OwnedMessage;
 use backend::SupportIdType;
@@ -98,7 +97,7 @@ pub fn render(ui: &mut conrod::UiCell,
                           appdata,
                           result_map,
                           _action_tx.clone());
-                    turn_to_submit_but(ui, ids, personal, &appdata, _action_tx.clone());
+                    turn_to_submit_but(ui, ids, &appdata, _action_tx.clone());
                 }
                 &mut app::GuiState::Game(GameState::Buy) => {
                     buy(ui, ids, &card_images, offer_row, buy_selected, appdata);
@@ -115,20 +114,30 @@ pub fn render(ui: &mut conrod::UiCell,
                 &mut app::GuiState::Game(GameState::DrawCard) => {
                     recache_personal(_player, personal);
                 }
-                &mut app::GuiState::Game(GameState::ShowResult(_w)) => {
-                    show_result(ui, ids, _player, _w, overlay2, &appdata, result_map);
-                }
+
                 _ => {}
             }
-            logic::notification::render(ui, ids, notification.clone());
+
         }
+        match guistate {
+            &mut app::GuiState::Game(GameState::ShowResult(_w)) => {
+                show_result(ui,
+                            ids,
+                            &boardcodec.players,
+                            _w,
+                            overlay2,
+                            &appdata,
+                            result_map);
+            }
+            _ => {}
+        }
+        logic::notification::render(ui, ids, notification.clone());
     }
 
     //  draw_hand(ui, ids, gamedata, appdata, result_map);
 }
 fn turn_to_submit_but(ui: &mut conrod::UiCell,
                       ids: &Ids,
-                      personal: &mut Option<Personal>,
                       appdata: &AppData,
                       _action_tx: mpsc::Sender<OwnedMessage>) {
     let promptsender = PromptSendable(_action_tx);
@@ -443,7 +452,7 @@ fn trash_other(ui: &mut conrod::UiCell,
     let arranged = player.arranged
         .iter()
         .map(|&(ref ci, _, _, ref time)| {
-                 if *time {
+                 if (*time) | (ci == otherthanthis) {
                      return None;
                  }
                  return Some(ci.clone());
@@ -533,15 +542,15 @@ fn show_result(ui: &mut conrod::UiCell,
                players: &Vec<Player>,
                winner: usize,
                overlay2: &mut bool,
-               appdata: &AppData,
+               _appdata: &AppData,
                result_map: &HashMap<ResourceEnum, SupportIdType>) {
     if let Some(_p) = players.get(winner) {
-        let _str = _p.name;
+        let mut _str = _p.name.clone();
         _str.push_str(" Wins!");
         widget::Text::new(&_str)
             .color(color::WHITE)
             .font_size(60)
-            .h_of(100.0)
+            .h(100.0)
             .top_left_with_margins_on(ids.body, 80.0, 100.0)
             .w_of(ids.body)
             .middle_of(ids.body)
@@ -576,9 +585,10 @@ fn show_result(ui: &mut conrod::UiCell,
                                                                 _p.draftlen.clone());
                 let icon_vpliteracy = icon_v.iter()
                     .enumerate()
-                    .filter(|(_i, _)| (_i == 3) | (_i == 4))
+                    .filter(|&(_i, _)| (_i == 3) | (_i == 4))
+                    .map(|x| x.1.clone())
                     .collect::<Vec<player_info::item::IconStruct>>();
-                let slist = player_info::list::List::new(icon_vpliteracy, &mut overlay2)
+                let slist = player_info::list::List::new(icon_vpliteracy, overlay2)
                     .color(default_color)
                     .label(&_p.name)
                     .label_color(default_color.plain_contrast());

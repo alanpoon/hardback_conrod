@@ -14,6 +14,8 @@ widget_ids! {
          footerprevious,
          footernext,
          footer_overlay_but,
+         footer_overlay_but2, //chat
+         footer_overlay_but3, //exit
          menubut_multiplayer,
         //lobby
         middle_tabview,
@@ -61,6 +63,15 @@ widget_ids! {
          body_header_text,
          body_subject_text,
          listselect_view,
+         //chat
+         overlay_chat,
+         overlaybody_chat,
+         overlaybody_tabview_chat,
+         overlay_exit,
+         overlaybody_exit,
+         overlaytext_exit,
+         overlayyes_exit,
+         overlayno_exit,
     }
 }
 
@@ -100,6 +111,8 @@ pub struct GameData {
     pub initial_draft: Vec<usize>,
     pub keypad_on: bool,
     pub overlay: bool,
+    pub overlay_chat: bool,
+    pub overlay_exit: bool,
     pub overlay_receivedimage: [OverlayStatus; 3],
     pub overlay_index: Option<usize>,
     pub overlay_remover_selected: HashSet<usize, RandomState>,
@@ -136,6 +149,8 @@ impl GameData {
             initial_draft: vec![],
             keypad_on: false,
             overlay: false,
+            overlay_chat: false,
+            overlay_exit: false,
             overlay_receivedimage: [OverlayStatus::None, OverlayStatus::None, OverlayStatus::None],
             overlay_index: None,
             overlay_remover_selected: HashSet::new(),

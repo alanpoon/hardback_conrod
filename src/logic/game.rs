@@ -102,7 +102,18 @@ impl<'a, T> GameProcess<'a, T>
                                &appdata,
                                result_map,
                                action_tx.clone());
-
+        logic::overlay_chat::render(ui,
+                                    ids,
+                                    &mut gamedata,
+                                    &appdata,
+                                    result_map,
+                                    action_tx.clone());
+        logic::overlay_exit::render(ui,
+                                    ids,
+                                    &mut gamedata,
+                                    &appdata,
+                                    result_map,
+                                    action_tx.clone());
     }
     #[allow(unused_mut)]
     pub fn update_state(&self,

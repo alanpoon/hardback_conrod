@@ -123,7 +123,7 @@ impl<H> Widget for ItemWidget<H>
             Interaction::Hover => self.image.hover().unwrap_or(self.image.idle()),
             Interaction::Press => self.image.press().unwrap_or(self.image.idle()),
         };
-        _image.w_h(w, h)
+        _image.w_h(w - border, h - border)
             .middle_of(id)
             .parent(id)
             .graphics_for(id)

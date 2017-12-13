@@ -7,7 +7,7 @@ use cardgame_widgets::custom_widget::arrange_list::{ArrangeList, ExitBy};
 use custom_widget::arrange_list_item::ItemWidget;
 use custom_widget::buy_list_item;
 use cardgame_widgets::custom_widget::shuffle::Shuffle;
-use cardgame_widgets::custom_widget::promptview::{PromptView, PromptSender};
+use cardgame_widgets::custom_widget::promptview::{PromptView, PromptSendable};
 use cardgame_widgets::custom_widget::instructionset::InstructionSet;
 use cardgame_widgets::custom_widget::player_info; //player_info::list::List,//::item::IconStruct
 use backend::codec_lib::codec::*;
@@ -23,17 +23,8 @@ use logic::in_game;
 use logic;
 use graphics_match;
 use graphics_match::ImageHoverable;
-#[derive(Clone)]
-pub struct PromptSendable(pub mpsc::Sender<OwnedMessage>);
-impl PromptSender for PromptSendable {
-    fn send(&self, msg: String) {
-        self.0
-            .clone()
-            .send(OwnedMessage::Text(msg))
-            .wait()
-            .unwrap();
-    }
-}
+use app::PromptSender;
+
 pub fn render(ui: &mut conrod::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
@@ -111,9 +102,6 @@ pub fn render(ui: &mut conrod::UiCell,
                                 buy_selected,
                                 &appdata);
                 }
-                &mut app::GuiState::Game(GameState::DrawCard) => {
-                    recache_personal(_player, personal);
-                }
 
                 _ => {}
             }
@@ -140,7 +128,7 @@ fn turn_to_submit_but(ui: &mut conrod::UiCell,
                       ids: &Ids,
                       appdata: &AppData,
                       _action_tx: mpsc::Sender<OwnedMessage>) {
-    let promptsender = PromptSendable(_action_tx);
+    let promptsender = PromptSender(_action_tx);
     if let Some(_) = widget::Button::new()
            .label(&appdata.texts.submit)
            .mid_bottom_of(ids.body)
@@ -197,20 +185,22 @@ fn show_draft(ui: &mut conrod::UiCell,
         }
     } else {
 
-        let promptsender = PromptSendable(action_tx);
-        let instructions: Vec<(&str, Box<Fn(PromptSendable)>)> = vec![("Continue",
-                                                                       Box::new(move |ps| {
+        let promptsender = PromptSender(action_tx);
+        let instructions: Vec<(&str, Box<Fn(PromptSender)>)> = vec![("Continue",
+                                                                     Box::new(move |ps| {
             let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
             let mut g = GameCommand::new();
             g.go_to_shuffle = Some(true);
             h.set_gamecommand(g);
             ps.send(ServerReceivedMsg::serialize_send(h).unwrap());
         }))];
-        let prompt_j = PromptView::new(&instructions,
-                                       (0.5, "Lets' start to Shuffle the cards"),
-                                       promptsender)
-                .padded_wh_of(ids.body, 100.0)
-                .middle_of(ids.body);
+
+        let mut prompt =
+            Some((0.5f64, "Lets' start to Shuffle the cards".to_owned(), instructions));
+        let prompt_j = PromptView::new(&mut prompt, promptsender)
+            .wh_of(ids.master)
+            .color(color::LIGHT_GREY)
+            .middle_of(ids.master);
         prompt_j.set(ids.promptview, ui);
     }
 }
@@ -273,12 +263,7 @@ fn cache_personal(player: &Player, personal: &mut Option<Personal>) {
                          });
     }
 }
-fn recache_personal(player: &Player, personal: &mut Option<Personal>) {
-    *personal = Some(Personal {
-                         hand: player.hand.clone(),
-                         arranged: vec![],
-                     });
-}
+
 fn spell(ui: &mut conrod::UiCell,
          ids: &Ids,
          card_images: &[Option<image::Id>; 27],
@@ -347,7 +332,7 @@ fn spell(ui: &mut conrod::UiCell,
                 .collect::<Vec<(usize, bool, Option<String>, bool)>>();
 
             if (*_personal).clone() != temp {
-                let promptsender = PromptSendable(_action_tx);
+                let promptsender = PromptSender(_action_tx);
                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                 let mut g = GameCommand::new();
                 g.personal = Some(_personal.clone());
@@ -367,14 +352,15 @@ fn buy(ui: &mut conrod::UiCell,
 
     widget::Text::new(appdata.texts.buy)
         .color(color::WHITE)
-        .font_size(60)
+        .font_size(50)
         .h(100.0)
         .w_of(ids.body)
         .top_left_of(ids.body)
         .set(ids.body_header_text, ui);
     widget::Text::new(appdata.texts.unused_coins)
-        .color(color::WHITE)
+        .color(color::GREY)
         .font_size(50)
+        .w_of(ids.body)
         .h(80.0)
         .down_from(ids.body_header_text, 0.0)
         .set(ids.body_subject_text, ui);
@@ -452,7 +438,7 @@ fn trash_other(ui: &mut conrod::UiCell,
     let arranged = player.arranged
         .iter()
         .map(|&(ref ci, _, _, ref time)| {
-                 if (*time) | (ci == otherthanthis) {
+                 if (*time) | (*ci == otherthanthis) {
                      return None;
                  }
                  return Some(ci.clone());
@@ -583,12 +569,12 @@ fn show_result(ui: &mut conrod::UiCell,
                                                                 _p.literacy_award.clone(),
                                                                 _p.vp.clone(),
                                                                 _p.draftlen.clone());
-                let icon_vpliteracy = icon_v.iter()
+                let icon_vpliteracyink = icon_v.iter()
                     .enumerate()
-                    .filter(|&(_i, _)| (_i == 3) | (_i == 4))
+                    .filter(|&(_i, _)| (_i == 3) | (_i == 4) | (i == 0))
                     .map(|x| x.1.clone())
                     .collect::<Vec<player_info::item::IconStruct>>();
-                let slist = player_info::list::List::new(icon_vpliteracy, overlay2)
+                let slist = player_info::list::List::new(icon_vpliteracyink, overlay2)
                     .color(default_color)
                     .label(&_p.name)
                     .label_color(default_color.plain_contrast());

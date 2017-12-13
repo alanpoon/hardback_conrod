@@ -1,6 +1,5 @@
 use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
 use cardgame_widgets::custom_widget::animated_canvas;
-use cardgame_widgets::custom_widget::tabview;
 use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
 use backend::codec_lib::codec::*;
 use std::collections::HashMap;
@@ -12,8 +11,8 @@ use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use logic;
-use cardgame_widgets::custom_widget::promptview::PromptSender;
-use logic::body::PromptSendable;
+use cardgame_widgets::custom_widget::promptview::PromptSendable;
+use app::PromptSender;
 pub fn render(ui: &mut conrod::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
@@ -47,11 +46,12 @@ pub fn render(ui: &mut conrod::UiCell,
                 .set(ids.overlaytext_exit, ui);
             for _i in widget::Button::new()
                     .label(&appdata.texts.yes)
+                    .label_color(default_color.plain_contrast())
                     .h(80.0)
                     .w(100.0)
                     .bottom_left_with_margin_on(ids.overlaybody_exit, 20.0)
                     .set(ids.overlayyes_exit, ui) {
-                let promptsender = PromptSendable(action_tx.clone());
+                let promptsender = PromptSender(action_tx.clone());
                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                 let mut g = GameCommand::new();
                 g.exit_game = Some(true);

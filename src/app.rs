@@ -7,6 +7,10 @@ use conrod::{image, Rect};
 use std::collections::hash_map::RandomState;
 use std::collections::HashSet;
 use std::time::Instant;
+use futures::sync::mpsc;
+use futures::{Future, Sink};
+use cardgame_widgets::custom_widget::promptview::PromptSendable;
+use backend::OwnedMessage;
 widget_ids! {
     pub struct Ids {
          master,
@@ -72,6 +76,9 @@ widget_ids! {
          overlaytext_exit,
          overlayyes_exit,
          overlayno_exit,
+         overlay_prompt,
+         overlayerbody_prompt,
+         overlaypromptview_prompt,
     }
 }
 
@@ -87,6 +94,17 @@ pub enum OverlayStatus {
     Loading,
     Received(image::Id, Rect, cards::CardType),
     None,
+}
+#[derive(Clone)]
+pub struct PromptSender(pub mpsc::Sender<OwnedMessage>);
+impl PromptSendable for PromptSender {
+    fn send(&self, msg: String) {
+        self.0
+            .clone()
+            .send(OwnedMessage::Text(msg))
+            .wait()
+            .unwrap();
+    }
 }
 pub struct GameData {
     pub guistate: GuiState,
@@ -118,6 +136,7 @@ pub struct GameData {
     pub overlay_remover_selected: HashSet<usize, RandomState>,
     pub overlay_timeless_selected: Vec<HashSet<usize, RandomState>>,
     pub overlay2: bool,
+    pub overlay_prompt: Option<(f64, String, Vec<(String, Box<Fn(PromptSender)>)>)>,
     pub buy_selected: Option<usize>,
     pub notification: Option<(String, Instant)>,
 }
@@ -159,6 +178,7 @@ impl GameData {
                                             HashSet::new(),
                                             HashSet::new()],
             overlay2: false,
+            overlay_prompt: None,
             buy_selected: None,
             notification: None,
         }

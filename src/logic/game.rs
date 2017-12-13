@@ -114,6 +114,7 @@ impl<'a, T> GameProcess<'a, T>
                                     &appdata,
                                     result_map,
                                     action_tx.clone());
+        logic::overlay_prompt::render(ui, ids, &mut gamedata, action_tx.clone());
     }
     #[allow(unused_mut)]
     pub fn update_state(&self,

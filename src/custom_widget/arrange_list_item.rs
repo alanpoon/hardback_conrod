@@ -158,7 +158,7 @@ impl<H, S> Widget for ItemWidget<H, S>
             Interaction::Hover => widget_ih.hover().unwrap_or(widget_ih.idle()),
             Interaction::Press => widget_ih.press().unwrap_or(widget_ih.idle()),
         };
-        _image.w_h(w, h)
+        _image.w_h(w - border, h - border)
             .middle_of(id)
             .parent(id)
             .graphics_for(id)

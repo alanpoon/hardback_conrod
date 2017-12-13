@@ -6,7 +6,6 @@ use cardgame_widgets::custom_widget::arrange_list::{ArrangeList, ExitBy};
 use custom_widget::arrange_list_item::ItemWidget;
 use cardgame_widgets::custom_widget::instructionset::InstructionSet;
 use cardgame_widgets::custom_widget::animated_canvas;
-use cardgame_widgets::custom_widget::promptview::PromptSender;
 use cardgame_widgets::text::get_font_size_hn;
 use cardgame_widgets::custom_widget::player_info::list::List;
 use cardgame_widgets::custom_widget::player_info::item::IconStruct;
@@ -23,7 +22,8 @@ use graphics_match;
 use graphics_match::ImageHoverable;
 use logic::in_game;
 use instruction::Instruction;
-use logic::body::PromptSendable;
+use cardgame_widgets::custom_widget::promptview::PromptSendable;
+use app::PromptSender;
 pub fn render(ui: &mut conrod::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
@@ -168,7 +168,7 @@ fn spell(ui: &mut conrod::UiCell,
             }
             _personal.hand = handvec.iter().map(|&(x_index, _, _)| x_index).collect::<Vec<usize>>();
             if (*_personal).clone() != temp {
-                let promptsender = PromptSendable(_action_tx);
+                let promptsender = PromptSender(_action_tx);
                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                 let mut g = GameCommand::new();
                 g.personal = Some(_personal.clone());
@@ -289,7 +289,7 @@ fn buy(ui: &mut conrod::UiCell,
            .w_h(200.0, 80.0)
            .set(ids.submit_but, ui)
            .next() {
-        let promptsender = PromptSendable(_action_tx.clone());
+        let promptsender = PromptSender(_action_tx.clone());
         let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
         let mut g = GameCommand::new();
         g.buy_offer = Some((buyselected.is_some(), buyselected.unwrap_or(0)));
@@ -364,7 +364,7 @@ fn trash_other(ui: &mut conrod::UiCell,
            .w_h(200.0, 80.0)
            .set(ids.submit_but, ui)
            .next() {
-        let promptsender = PromptSendable(_action_tx.clone());
+        let promptsender = PromptSender(_action_tx.clone());
         let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
         let mut g = GameCommand::new();
         g.buy_offer = Some((buyselected.is_some(), buyselected.unwrap_or(0)));

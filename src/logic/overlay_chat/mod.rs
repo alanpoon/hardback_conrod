@@ -24,12 +24,13 @@ pub fn render(ui: &mut conrod::UiCell,
             let close_rect = spriteable_rect(graphics_match::keypad_sprite(), 2.0);
             if animated_canvas::Canvas::new()
                    .middle_of(ids.master)
-                   .padded_wh_of(ids.master, 20.0)
+                   .padded_wh_of(ids.master, 30.0)
                    .flow_down(&[(ids.overlaybody_chat,
                                  animated_canvas::Canvas::new().color(color::LIGHT_BLUE))])
                    .color(color::TRANSPARENT)
                    .parent(ids.master)
-                   .close_icon_dim([20.0, 20.0])
+                   .close_icon_color(color::WHITE)
+                   .close_icon_dim([30.0, 30.0])
                    .close_icon(keypad_image)
                    .close_icon_src_rect(Rect::from_corners(close_rect.0, close_rect.1))
                    .frame_rate(30)

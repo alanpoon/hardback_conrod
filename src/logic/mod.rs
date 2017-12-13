@@ -8,4 +8,5 @@ pub mod body;
 pub mod overlay;
 pub mod overlay_chat;
 pub mod overlay_exit;
+pub mod overlay_prompt;
 pub mod notification;

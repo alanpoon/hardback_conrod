@@ -6,6 +6,8 @@ use std::collections::HashMap;
 use conrod_chat::chat;
 use logic::in_game;
 use std::time::Instant;
+use cardgame_widgets::custom_widget::promptview::PromptSendable;
+use app::PromptSender;
 #[allow(unused_variables,non_snake_case)]
 pub fn update(s: ClientReceivedMsg,
               gamedata: &mut GameData,
@@ -24,6 +26,7 @@ pub fn update(s: ClientReceivedMsg,
                             player_index,
                             notification,
                             log,
+                            hand,
                             .. } = s;
     if let (Some(Some(_type_name)),
             Some(Some(_location)),
@@ -70,12 +73,35 @@ pub fn update(s: ClientReceivedMsg,
         gamedata.overlay_receivedimage[_overlay_index.clone()] =
             OverlayStatus::Received(_image_id, _rect, _theme);
     }
-    if let (Some(Some(ref _request)), None) = (request, gamedata.overlay_index) {
+    if let Some(Some(ref _request)) = request {
         //request for the prompts
+        let GameData { ref mut overlay_prompt, .. } = *gamedata;
         let (ref _p_i, ref _c_i, ref _string, ref _vecstring, ref _opt) = *_request;
+        let vec_closure: Vec<(String, Box<Fn(PromptSender)>)> =
+            _vecstring.iter()
+                .enumerate()
+                .map(|(_i, _x)| {
+                    let o: (String, Box<Fn(PromptSender)>) = (_x.clone(),
+                                                              Box::new(move |ps| {
+                        let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
+                        let mut g = GameCommand::new();
+                        g.reply = Some(_i.clone());
+                        h.set_gamecommand(g);
+                        ps.send(ServerReceivedMsg::serialize_send(h).unwrap());
+                    }));
+                    o
+                })
+                .collect::<Vec<(String, Box<Fn(PromptSender)>)>>();
+        *overlay_prompt = Some((0.5, _string.clone(), vec_closure))
+
     }
     if let Some(Some(_string)) = notification {
         gamedata.notification = Some((_string, Instant::now()));
+    }
+    if let Some(Some(_hand)) = hand {
+        let GameData { ref mut personal, .. } = *gamedata;
+        recache_personal(_hand, personal);
+
     }
     if let (Some(Some(_type_name)), Some(Some(_tables)), Some(_tablenumber)) =
         (type_name, tables, tablenumber) {
@@ -86,4 +112,11 @@ pub fn update(s: ClientReceivedMsg,
     }
 
 
+
+}
+fn recache_personal(hand: Vec<usize>, personal: &mut Option<Personal>) {
+    *personal = Some(Personal {
+                         hand: hand,
+                         arranged: vec![],
+                     });
 }

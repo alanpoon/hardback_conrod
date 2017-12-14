@@ -186,7 +186,7 @@ fn show_draft(ui: &mut conrod::UiCell,
     } else {
 
         let promptsender = PromptSender(action_tx);
-        let instructions: Vec<(&str, Box<Fn(PromptSender)>)> = vec![("Continue",
+        let instructions: Vec<(String, Box<Fn(PromptSender)>)> = vec![("Continue".to_owned(),
                                                                      Box::new(move |ps| {
             let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
             let mut g = GameCommand::new();

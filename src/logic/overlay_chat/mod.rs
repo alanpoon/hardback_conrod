@@ -1,4 +1,5 @@
 use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
+
 use cardgame_widgets::custom_widget::animated_canvas;
 use cardgame_widgets::custom_widget::tabview;
 use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
@@ -7,6 +8,8 @@ use std::collections::HashMap;
 use futures::sync::mpsc;
 use futures::{Future, Sink};
 use app::{self, GameData, Ids};
+use conrod_chat::custom_widget::chatview_futures;
+use conrod_chat::chat::{english, sprite};
 use graphics_match;
 use backend::OwnedMessage;
 use backend::SupportIdType;
@@ -22,11 +25,18 @@ pub fn render(ui: &mut conrod::UiCell,
         if let Some(&SupportIdType::ImageId(keypad_image)) =
             result_map.get(&ResourceEnum::Sprite(Sprite::KEYPAD)) {
             let close_rect = spriteable_rect(graphics_match::keypad_sprite(), 2.0);
+            let keypadlength = if gamedata.keypad_on {
+                250.0
+            } else {
+                0.0
+            };
             if animated_canvas::Canvas::new()
                    .middle_of(ids.master)
                    .padded_wh_of(ids.master, 30.0)
                    .flow_down(&[(ids.overlaybody_chat,
-                                 animated_canvas::Canvas::new().color(color::LIGHT_BLUE))])
+                                 animated_canvas::Canvas::new().color(color::LIGHT_BLUE)),
+                                 (ids.overlaykeypad_chat,
+                                 animated_canvas::Canvas::new().color(color::LIGHT_BLUE)).length(keypadlength)])
                    .color(color::TRANSPARENT)
                    .parent(ids.master)
                    .close_icon_color(color::WHITE)
@@ -73,6 +83,36 @@ fn render_closure()
     vec![
              Box::new(|w_id, ids, mut gamedata, _appdata, result_map, action_tx, ui| {
             //Chat
-            logic::top_left::draw_lobby_chat(w_id, ids, &mut gamedata, result_map, action_tx, ui);
+            draw_game_chat(w_id, ids, &mut gamedata, result_map, action_tx, ui);
         })]
+}
+fn draw_game_chat(w_id: tabview::Item,
+                       ids: &Ids,
+                       gamedata: &mut GameData,
+                       result_map: &HashMap<ResourceEnum, SupportIdType>,
+                       action_tx: mpsc::Sender<OwnedMessage>,
+                       mut ui: &mut conrod::UiCell) {
+    if let (Some(&SupportIdType::ImageId(rust_img)), Some(&SupportIdType::ImageId(key_pad))) =
+        (result_map.get(&ResourceEnum::Sprite(Sprite::RUST)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::KEYPAD))) {
+                 
+        let english_tuple = english::populate(key_pad, sprite::get_spriteinfo());
+        let k = chatview_futures::ChatView::new(&mut gamedata.lobby_history,
+                                                &mut gamedata.lobby_textedit,
+                                                w_id.widget_id,
+                                                &english_tuple,
+                                                Some(rust_img),
+                                                &gamedata.name,
+                                                action_tx,
+                                                Box::new(process));
+        gamedata.keypad_on = w_id.set(k, &mut ui);
+    }
+}
+fn process(_name: &String, text: &String) -> OwnedMessage {
+    let g = json!({
+    "type":"chat",
+  "message": text,
+  "location":"game"
+});
+    OwnedMessage::Text(g.to_string())
 }

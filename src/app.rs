@@ -70,6 +70,7 @@ widget_ids! {
          //chat
          overlay_chat,
          overlaybody_chat,
+         overlaykeypad_chat,
          overlaybody_tabview_chat,
          overlay_exit,
          overlaybody_exit,

@@ -7,7 +7,7 @@ pub fn render(ui: &mut conrod::UiCell, ids: &Ids, notification: Option<(String, 
         Notification::new(&s, i)
             .top_right_of(ids.body)
             .color(color::GREY)
-            .wh([180.0, 80.0])
+            .wh([240.0, 80.0])
             .set(ids.notification_view, ui);
     }
 

@@ -93,6 +93,16 @@ pub fn render(ui: &mut conrod::UiCell,
                                 result_map,
                                 _action_tx.clone());
                 }
+                app::GuiState::Game(GameState::WaitForReply) => {
+                    buy(ui,
+                        ids,
+                        _player,
+                        overlay2,
+                        buy_selected,
+                        appdata,
+                        result_map,
+                        _action_tx.clone());
+                }
                 _ => {}
             }
         }

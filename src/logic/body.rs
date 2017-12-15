@@ -360,8 +360,8 @@ fn buy(ui: &mut conrod::UiCell,
     widget::Text::new(appdata.texts.unused_coins)
         .color(color::GREY)
         .font_size(50)
-        .w_of(ids.body)
-        .h(80.0)
+        .padded_w_of(ids.body,100.0)
+        .h(70.0)
         .down_from(ids.body_header_text, 0.0)
         .set(ids.body_subject_text, ui);
     let body_w = ui.w_of(ids.body).unwrap();

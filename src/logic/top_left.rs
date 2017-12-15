@@ -27,11 +27,6 @@ pub fn draw_lobby_chat(w_id: tabview::Item,
     if let (Some(&SupportIdType::ImageId(rust_img)), Some(&SupportIdType::ImageId(key_pad))) =
         (result_map.get(&ResourceEnum::Sprite(Sprite::RUST)),
          result_map.get(&ResourceEnum::Sprite(Sprite::KEYPAD))) {
-              let (keypad_length, _) = if gamedata.keypad_on {
-                (300.0, 400.0)
-            } else {
-                (0.0, 700.0)
-            };
         let english_tuple = english::populate(key_pad, sprite::get_spriteinfo());
         let k= chatview_futures::ChatView::new(&mut gamedata.lobby_history,
                                                 &mut gamedata.lobby_textedit,

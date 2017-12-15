@@ -36,7 +36,7 @@ pub fn render(ui: &mut conrod::UiCell,
                    .flow_down(&[(ids.overlaybody_chat,
                                  animated_canvas::Canvas::new().color(color::LIGHT_BLUE)),
                                  (ids.overlaykeypad_chat,
-                                 animated_canvas::Canvas::new().color(color::LIGHT_BLUE)).length(keypadlength)])
+                                 animated_canvas::Canvas::new().color(color::LIGHT_BLUE).length(keypadlength))])
                    .color(color::TRANSPARENT)
                    .parent(ids.master)
                    .close_icon_color(color::WHITE)
@@ -67,7 +67,6 @@ pub fn render(ui: &mut conrod::UiCell,
                      action_tx_clone,
                      ui);
             }
-
         }
     }
 }
@@ -97,9 +96,9 @@ fn draw_game_chat(w_id: tabview::Item,
          result_map.get(&ResourceEnum::Sprite(Sprite::KEYPAD))) {
                  
         let english_tuple = english::populate(key_pad, sprite::get_spriteinfo());
-        let k = chatview_futures::ChatView::new(&mut gamedata.lobby_history,
-                                                &mut gamedata.lobby_textedit,
-                                                w_id.widget_id,
+        let k = chatview_futures::ChatView::new(&mut gamedata.game_history,
+                                                &mut gamedata.game_textedit,
+                                                ids.master,
                                                 &english_tuple,
                                                 Some(rust_img),
                                                 &gamedata.name,

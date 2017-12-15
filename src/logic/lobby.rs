@@ -40,17 +40,20 @@ pub fn render(ui: &mut conrod::UiCell,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
               action_tx: mpsc::Sender<OwnedMessage>) {
-    animated_canvas::Canvas::new().color(color::TRANSPARENT).frame_rate(30).set(ids.master, ui);
-    let screen_h = ui.h_of(ids.master).unwrap();
-    let tab_height = if gamedata.keypad_on {
-        0.6 * screen_h
-    } else {
-        0.86 * screen_h
-    };
+                     let keypadlength = if gamedata.keypad_on {
+                250.0
+            } else {
+                0.0
+            };
+    animated_canvas::Canvas::new().flow_down(&[(ids.overlaybody_chat,
+                                 animated_canvas::Canvas::new().color(color::LIGHT_BLUE)),
+                                 (ids.overlaykeypad_chat,
+                                 animated_canvas::Canvas::new().color(color::LIGHT_BLUE).length(keypadlength))])
+                                 .color(color::TRANSPARENT).frame_rate(30).set(ids.master, ui);
+    
     if let Some(mut items) = tabview::TabView::new(vec![appdata.texts.lobby, appdata.texts.chat])
-           .padded_w_of(ids.master, 0.0)
-           .h(tab_height)
-           .mid_top_of(ids.master)
+           .padded_wh_of(ids.overlaybody_chat, 0.0)
+           .middle_of(ids.overlaybody_chat)
            .set(ids.middle_tabview, ui) {
         let vec_closure = render_closure();
         let mut it_j = vec_closure.iter();

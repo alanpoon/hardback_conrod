@@ -22,7 +22,6 @@ pub fn load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, Suppo
     CGM_image_map!{
     (ResourceEnum::Sprite(Sprite::BUTTON),"image",app::get_button_path()),
     (ResourceEnum::Sprite(Sprite::PAGE1F),"texture","images/characters/player1.jpg"),     
-    (ResourceEnum::Sprite(Sprite::PAGE1F),"texture","images/characters/player1.jpg"),
     (ResourceEnum::Sprite(Sprite::PAGE2F),"texture","images/characters/player2.jpg"),
     (ResourceEnum::Sprite(Sprite::PAGE3F),"texture","images/characters/player3.jpg"),
     (ResourceEnum::Sprite(Sprite::PAGE4F),"texture","images/characters/player4.jpg"),
@@ -63,8 +62,6 @@ pub fn load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, Suppo
     (ResourceEnum::Font(Font::BOLD),"font","fonts/NotoSans/NotoSans-Bold.ttf"),
     (ResourceEnum::Font(Font::BOLDITALIC),"font","fonts/NotoSans/NotoSans-BoldItalic.ttf"),
     (ResourceEnum::Font(Font::ITALIC),"font","fonts/NotoSans/NotoSans-Italic.ttf"),
-    
-    // (ResourceEnum::Font(Font::BEON),"font","fonts/Beon/beon-webfont.ttf")
   }
     let g = ImageIds::new();
     g.pump(result_map, display, ui, image_map);

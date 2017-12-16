@@ -1,7 +1,7 @@
 use page_curl::page::Page;
 use backend::meta::app::Sprite;
 use backend::meta::cards;
-use conrod_chat::custom_widget::chatview::Message;
+use conrod_chat::custom_widget::Message;
 use backend::codec_lib::codec::*;
 use conrod::{image, Rect};
 use std::collections::hash_map::RandomState;

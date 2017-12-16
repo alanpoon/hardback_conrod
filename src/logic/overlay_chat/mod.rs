@@ -9,7 +9,6 @@ use futures::sync::mpsc;
 use futures::{Future, Sink};
 use app::{self, GameData, Ids};
 use conrod_chat::custom_widget::chatview_futures;
-use conrod_chat::chat::{english, sprite};
 use graphics_match;
 use backend::OwnedMessage;
 use backend::SupportIdType;
@@ -25,18 +24,16 @@ pub fn render(ui: &mut conrod::UiCell,
         if let Some(&SupportIdType::ImageId(keypad_image)) =
             result_map.get(&ResourceEnum::Sprite(Sprite::KEYPAD)) {
             let close_rect = spriteable_rect(graphics_match::keypad_sprite(), 2.0);
-            let keypadlength = if gamedata.keypad_on {
-                250.0
-            } else {
-                0.0
-            };
+            let keypadlength = if gamedata.keypad_on { 250.0 } else { 0.0 };
             if animated_canvas::Canvas::new()
                    .middle_of(ids.master)
                    .padded_wh_of(ids.master, 30.0)
                    .flow_down(&[(ids.overlaybody_chat,
                                  animated_canvas::Canvas::new().color(color::LIGHT_BLUE)),
-                                 (ids.overlaykeypad_chat,
-                                 animated_canvas::Canvas::new().color(color::LIGHT_BLUE).length(keypadlength))])
+                                (ids.overlaykeypad_chat,
+                                 animated_canvas::Canvas::new()
+                                     .color(color::LIGHT_BLUE)
+                                     .length(keypadlength))])
                    .color(color::TRANSPARENT)
                    .parent(ids.master)
                    .close_icon_color(color::WHITE)
@@ -53,6 +50,7 @@ pub fn render(ui: &mut conrod::UiCell,
 
         if let Some(mut items) = tabview::TabView::new(vec![appdata.texts.chat])
                .padded_wh_of(ids.overlaybody_chat, 0.0)
+               .bar_thickness(appdata.convert_h(60.0))
                .mid_top_of(ids.overlaybody_chat)
                .set(ids.overlaybody_tabview_chat, ui) {
             let vec_closure = render_closure();
@@ -85,26 +83,46 @@ fn render_closure()
             draw_game_chat(w_id, ids, &mut gamedata, result_map, action_tx, ui);
         })]
 }
+#[cfg(not(target_os="linux"))]
 fn draw_game_chat(w_id: tabview::Item,
-                       ids: &Ids,
-                       gamedata: &mut GameData,
-                       result_map: &HashMap<ResourceEnum, SupportIdType>,
-                       action_tx: mpsc::Sender<OwnedMessage>,
-                       mut ui: &mut conrod::UiCell) {
+                  _ids: &Ids,
+                  gamedata: &mut GameData,
+                  result_map: &HashMap<ResourceEnum, SupportIdType>,
+                  action_tx: mpsc::Sender<OwnedMessage>,
+                  mut ui: &mut conrod::UiCell) {
+    use conrod_chat::chat::{english, sprite};
     if let (Some(&SupportIdType::ImageId(rust_img)), Some(&SupportIdType::ImageId(key_pad))) =
         (result_map.get(&ResourceEnum::Sprite(Sprite::RUST)),
          result_map.get(&ResourceEnum::Sprite(Sprite::KEYPAD))) {
-                 
+
         let english_tuple = english::populate(key_pad, sprite::get_spriteinfo());
         let k = chatview_futures::ChatView::new(&mut gamedata.game_history,
                                                 &mut gamedata.game_textedit,
-                                                ids.master,
+                                                _ids.master,
                                                 &english_tuple,
                                                 Some(rust_img),
                                                 &gamedata.name,
                                                 action_tx,
                                                 Box::new(process));
         gamedata.keypad_on = w_id.set(k, &mut ui);
+    }
+}
+#[cfg(target_os="linux")]
+fn draw_game_chat(w_id: tabview::Item,
+                  _ids: &Ids,
+                  gamedata: &mut GameData,
+                  result_map: &HashMap<ResourceEnum, SupportIdType>,
+                  action_tx: mpsc::Sender<OwnedMessage>,
+                  mut ui: &mut conrod::UiCell) {
+    if let Some(&SupportIdType::ImageId(rust_img)) =
+        result_map.get(&ResourceEnum::Sprite(Sprite::RUST)) {
+        let k = chatview_futures::ChatView::new(&mut gamedata.game_history,
+                                                &mut gamedata.game_textedit,
+                                                Some(rust_img),
+                                                &gamedata.name,
+                                                action_tx,
+                                                Box::new(process));
+        w_id.set(k, &mut ui);
     }
 }
 fn process(_name: &String, text: &String) -> OwnedMessage {

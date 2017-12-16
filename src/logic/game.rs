@@ -22,12 +22,12 @@ impl<'a, T> GameProcess<'a, T>
     where T: Clone
 {
     pub fn new(ui: &mut conrod::Ui,
+               appdata: AppData,
                y: Box<Fn(&mut GameData,
                          &AppData,
                          &HashMap<ResourceEnum, SupportIdType>,
                          T) + 'a>)
                -> GameProcess<'a, T> {
-        let appdata = AppData::new(1200, 800, "Hardback");
         GameProcess {
             update_closure: y,
             appdata: appdata,
@@ -77,6 +77,7 @@ impl<'a, T> GameProcess<'a, T>
                    result_map: &HashMap<ResourceEnum, SupportIdType>,
                    action_tx: mpsc::Sender<OwnedMessage>) {
         animated_canvas::Canvas::new()
+            .pad_top(appdata.convert_h(40.0))
             .color(color::TRANSPARENT)
             .flow_down(&[(ids.body, animated_canvas::Canvas::new().color(color::TRANSPARENT)),
                          (ids.footer,

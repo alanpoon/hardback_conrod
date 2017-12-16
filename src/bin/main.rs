@@ -8,11 +8,12 @@ use hardback_conrod as game_conrod;
 use game_conrod::backend::glium::{self, glutin, Surface};
 use game_conrod::{app, logic};
 use game_conrod::backend::{OwnedMessage, SupportIdType};
-use game_conrod::backend::meta::app::{Font, ResourceEnum};
+use game_conrod::backend::meta::app::{Font, ResourceEnum, AppData};
 use game_conrod::backend::codec_lib::codec;
 use game_conrod::page_curl::{self, page, render};
 use game_conrod::opengl;
 use game_conrod::on_request;
+use game_conrod::support;
 use conrod_chat::backend::websocket::client;
 use conrod::event;
 use std::collections::HashMap;
@@ -21,7 +22,7 @@ use futures::sync::mpsc;
 use std::time::Instant;
 
 #[cfg(target_os="android")]
-const CONNECTION:&'static str = "ws://13.229.94.195:8080";
+const CONNECTION: &'static str = "ws://13.229.94.195:8080";
 #[cfg(not(target_os="android"))]
 const CONNECTION: &'static str = "ws://0.0.0.0:8080";
 #[derive(Clone)]
@@ -42,7 +43,10 @@ impl GameApp {
         let mut renderer = conrod::backend::glium::Renderer::new(&display).unwrap();
         // construct our `Ui`.
         let (screen_w, screen_h) = display.get_framebuffer_dimensions();
-        let mut ui = conrod::UiBuilder::new([screen_w as f64, screen_h as f64]).build();
+        let appdata = AppData::new(screen_w as f64, screen_h as f64, "Hardback");
+        let mut ui = conrod::UiBuilder::new([screen_w as f64, screen_h as f64])
+            .theme(support::theme(&appdata))
+            .build();
         let mut result_map = HashMap::<ResourceEnum, SupportIdType>::new();
         let mut image_map = conrod::image::Map::new();
         game_conrod::ui::load_resources_to_result_map(&mut result_map,
@@ -75,7 +79,7 @@ impl GameApp {
                 }
                 match toa_ping::run("www.google.com") {
                     Ok(_) => {
-                         println!("internet connection");
+                        println!("internet connection");
                         let (tx, rx) = mpsc::channel(3);
                         let mut ss_tx = ss_tx.lock().unwrap();
                         *ss_tx = tx;
@@ -83,13 +87,14 @@ impl GameApp {
                         match client::run_owned_message(CONNECTION, proxy_tx.clone(), rx) {
                             Ok(_) => {
                                 println!("connected");
-                                connected = true;},
+                                connected = true;
+                            }
                             Err(_err) => {
                                 println!("reconnecting");
                                 connected = false;
                             }
                         }
-                        
+
                     }
                     _ => {
                         /*for test*/
@@ -100,7 +105,8 @@ impl GameApp {
                         match client::run_owned_message(CONNECTION, proxy_tx.clone(), rx) {
                             Ok(_) => {
                                 println!("connected");
-                                connected = true;},
+                                connected = true;
+                            }
                             Err(_err) => {
                                 println!("reconnecting");
                                 connected = false;
@@ -132,6 +138,7 @@ impl GameApp {
         let mut last_update = std::time::Instant::now();
         let mut game_proc =
             logic::game::GameProcess::<OwnedMessage>::new(&mut ui,
+                                                          appdata,
                                                           Box::new(|gamedata,
                                                                     appdata,
                                                                     result_map,

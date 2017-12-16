@@ -13,6 +13,7 @@ use graphics_match::button;
 use graphics_match;
 use logic::in_game;
 use logic;
+use support;
 pub struct TableListTex<'a> {
     appdata: &'a AppData,
 }
@@ -40,19 +41,26 @@ pub fn render(ui: &mut conrod::UiCell,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
               action_tx: mpsc::Sender<OwnedMessage>) {
-                     let keypadlength = if gamedata.keypad_on {
-                250.0
-            } else {
-                0.0
-            };
-    animated_canvas::Canvas::new().flow_down(&[(ids.overlaybody_chat,
-                                 animated_canvas::Canvas::new().color(color::LIGHT_BLUE)),
-                                 (ids.overlaykeypad_chat,
-                                 animated_canvas::Canvas::new().color(color::LIGHT_BLUE).length(keypadlength))])
-                                 .color(color::TRANSPARENT).frame_rate(30).set(ids.master, ui);
-    
+    let keypadlength = if gamedata.keypad_on {
+        appdata.convert_h(250.0)
+    } else {
+        0.0
+    };
+    animated_canvas::Canvas::new()
+        .pad_top(appdata.convert_h(40.0))
+        .flow_down(&[(ids.overlaybody_chat,
+                      animated_canvas::Canvas::new().color(color::LIGHT_BLUE)),
+                     (ids.overlaykeypad_chat,
+                      animated_canvas::Canvas::new()
+                          .color(color::LIGHT_BLUE)
+                          .length(keypadlength))])
+        .color(color::TRANSPARENT)
+        .frame_rate(30)
+        .set(ids.master, ui);
+
     if let Some(mut items) = tabview::TabView::new(vec![appdata.texts.lobby, appdata.texts.chat])
            .padded_wh_of(ids.overlaybody_chat, 0.0)
+           .bar_thickness(appdata.convert_h(60.0))
            .middle_of(ids.overlaybody_chat)
            .set(ids.middle_tabview, ui) {
         let vec_closure = render_closure();
@@ -95,6 +103,7 @@ pub fn render(ui: &mut conrod::UiCell,
             logic::top_left::draw_lobby_chat(w_id, ids, &mut gamedata, result_map, action_tx, ui);
         })]
     }
+
     #[allow(unused_mut)]
     fn draw_lobby(ui: &mut conrod::UiCell,
                   w_id: tabview::Item,
@@ -109,7 +118,6 @@ pub fn render(ui: &mut conrod::UiCell,
             result_map.get(&ResourceEnum::Sprite(Sprite::BUTTON)) {
             let card_index = 7.0;
             let wh = ui.wh_of(ids.middle_tabview).unwrap();
-            // let wh = [200.0,200.0];
             if let (&app::GuiState::Lobby, None) = (&gamedata.guistate, gamedata.tablenumber) {
                 let button_sprite = graphics_match::button::get_style();
                 let hover_rect = spriteable_rect(button_sprite, card_index + 1.0);
@@ -145,20 +153,20 @@ pub fn render(ui: &mut conrod::UiCell,
                     .right_from(ids.name_text, 0.0)
                     .w_h(200.0, wh[1] * 0.06)
                     .set(ids.user_name, ui);
-                widget::Rectangle::fill_with([100.0, wh[1] * 0.06], color::WHITE)
-                    .right_from(ids.user_name, 0.0)
-                    .set(ids.name_rect, ui);
-                let k = &mut gamedata.name_text_edit;
-                for edit in widget::TextEdit::new(k)
-            .color(color::WHITE)
-            .w_h(98.0, wh[1]* 0.06)
-            .right_from(ids.user_name,wh[0]*0.025)
-            .left_justify()
-            .line_spacing(2.5)
-            .restrict_to_height(true) // Let the height grow infinitely and scroll.
-            .set(ids.name_text_edit, ui) {
-                    *k = edit;
-                }
+                widget::Rectangle::fill_with([appdata.convert_w(200.0), wh[1] * 0.06],
+                                             color::WHITE)
+                        .right_from(ids.user_name, 0.0)
+                        .set(ids.name_rect, ui);
+                support::textedit(&mut gamedata.name_text_edit,
+                                  ids.name_text_edit,
+                                  appdata,
+                                  result_map,
+                                  [appdata.convert_w(195.0), wh[1] * 0.06],
+                                  &mut gamedata.keypad_on,
+                                  ids.user_name,
+                                  wh[0] * 0.025,
+                                  ids.master,
+                                  ui);
                 let change_name_index = 9.0;
                 let button_sprite = graphics_match::button::get_style();
                 let hover_rect = spriteable_rect(button_sprite, change_name_index + 1.0);
@@ -175,10 +183,9 @@ pub fn render(ui: &mut conrod::UiCell,
                        .w_h(wh[0] * 0.3, wh[1] * 0.06)
                        .set(ids.name_change_but, ui)
                        .was_clicked() {
-                    gamedata.name = k.clone();
-                    *k = "".to_owned();
+                    gamedata.name_text_edit = "".to_owned();
                     let g = json!({
-                            "namechange": k
+                            "namechange": gamedata.name_text_edit.clone()
                             });
                     action_tx.clone()
                         .send(OwnedMessage::Text(g.to_string()))
@@ -194,12 +201,11 @@ pub fn render(ui: &mut conrod::UiCell,
             let _name_text_panel = ui.rect_of(ids.name_text).unwrap();
             let item_h = wh[1] * 0.2;
             let (mut items, scrollbar) = widget::List::flow_down(gamedata.tables.len())
-           // .item_size(wh[0])
-           .item_size(item_h)
-            .scrollbar_next_to()
-            .down_from(ids.name_text, 1.0)
-            .padded_wh_of(w_id.parent_id,4.0)
-            .set(ids.table_list, ui);
+                .item_size(item_h)
+                .scrollbar_next_to()
+                .down_from(ids.name_text, 1.0)
+                .padded_wh_of(w_id.parent_id, 4.0)
+                .set(ids.table_list, ui);
             if let Some(s) = scrollbar {
                 s.set(ui)
             }

@@ -10,6 +10,7 @@ pub extern crate glium;
 #[macro_use]
 extern crate cardgame_macros;
 extern crate conrod_chat;
+#[cfg(target_os="android")]
 extern crate conrod_keypad;
 extern crate cardgame_widgets;
 pub extern crate hardback_meta;

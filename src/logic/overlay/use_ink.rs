@@ -26,7 +26,7 @@ pub fn render(w_id: tabview::Item,
     widget::Text::new(&appdata.texts.use_ink)
         .color(color::WHITE)
         .font_size(60)
-        .h(100.0)
+        .h(appdata.convert_h(100.0))
         .w_of(w_id.parent_id)
         .top_left_of(w_id.parent_id)
         .set(ids.overlay_subject, ui);
@@ -36,8 +36,7 @@ pub fn render(w_id: tabview::Item,
                 OverlayStatus::Received(ref _img, ref _rect, ref _theme) => {
                     widget::Image::new(_img.clone())
                         .source_rectangle(_rect.clone())
-                        .w(150.0)
-                        .h(150.0)
+                        .wh(appdata.convert_dim([150.0, 150.0]))
                         .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
                         .set(ids.overlay_receivedimage, ui);
                 }
@@ -47,8 +46,7 @@ pub fn render(w_id: tabview::Item,
                         let spin_sprite = graphics_match::spinner_sprite();
                         FullCycleSprite::new(dwn_img, spin_sprite)
                             .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
-                            .w(100.0)
-                            .h(100.0)
+                            .wh(appdata.convert_dim([100.0, 100.0]))
                             .set(ids.overlay_receivedimage, ui);
                     }
                 }
@@ -56,7 +54,8 @@ pub fn render(w_id: tabview::Item,
                     if _player.ink > 0 {
                         for _c in widget::Button::new()
                                 .label(&appdata.texts.use_ink)
-                                .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
+                                .mid_bottom_with_margin_on(w_id.parent_id,
+                                                           appdata.convert_h(20.0))
                                 .set(ids.overlay_okbut, ui) {
                             overlay_receivedimage[0] = OverlayStatus::Loading;
                             let action_tx_c = action_tx.clone();
@@ -72,7 +71,7 @@ pub fn render(w_id: tabview::Item,
                         widget::Text::new(&appdata.texts.use_ink_insufficent)
                             .color(color::WHITE)
                             .font_size(24)
-                            .padded_wh_of(w_id.parent_id, 40.0)
+                            .padded_wh_of(w_id.parent_id, appdata.convert_h(40.0))
                             .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
                             .set(ids.overlay_insufficent_text, ui);
                     }

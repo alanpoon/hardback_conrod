@@ -37,18 +37,18 @@ pub fn render(ui: &mut conrod::UiCell,
                 let close_rect = spriteable_rect(graphics_match::keypad_sprite(), 2.0);
                 if animated_canvas::Canvas::new()
                        .middle_of(ids.master)
-                       .padded_wh_of(ids.master, 30.0)
+                       .padded_wh_of(ids.master, appdata.convert_h(30.0))
                        .flow_down(&[(ids.overlaytop,
                                      animated_canvas::Canvas::new()
                                          .color(color::LIGHT_BLUE)
-                                         .length(100.0)),
+                                         .length(appdata.convert_h(100.0))),
                                     (ids.overlaybody,
                                      animated_canvas::Canvas::new()
                                          .color(color::LIGHT_BLUE))])
                        .color(color::TRANSPARENT)
                        .parent(ids.master)
                        .close_icon_color(color::WHITE)
-                       .close_icon_dim([30.0, 30.0])
+                       .close_icon_dim(appdata.convert_dim([30.0, 30.0]))
                        .close_icon(keypad_image)
                        .close_icon_src_rect(Rect::from_corners(close_rect.0, close_rect.1))
                        .frame_rate(30)
@@ -74,17 +74,17 @@ pub fn render(ui: &mut conrod::UiCell,
                     .set(ids.overlay_player_info, ui);
 
                 if let (Some(_s), Some(_si), Some(xy)) = slist {
-                    let _dim = [300.0, 100.0];
+                    let _dim = appdata.convert_dim([300.0, 100.0]);
                     animated_canvas::Canvas::new()
                         .x(xy[0])
-                        .y(200.0)
+                        .y(appdata.convert_h(200.0))
                         .graphics_for(ids.master)
                         .parent(ids.master)
                         .color(default_color)
                         .wh(_dim)
                         .set(ids.overlay2_canvas, ui);
                     if let Some(&IconStruct(ref _image, _, ref _desc)) = icon_v.get(_s) {
-                        _image.wh([20.0, 20.0])
+                        _image.wh(appdata.convert_dim([20.0, 20.0]))
                             .mid_left_of(ids.overlay2_canvas)
                             .set(ids.overlay2_image, ui);
                         let fontsize = get_font_size_hn(_dim[1], 4.0);

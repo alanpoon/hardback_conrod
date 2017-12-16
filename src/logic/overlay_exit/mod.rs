@@ -44,13 +44,12 @@ pub fn render(ui: &mut conrod::UiCell,
                 .mid_top_of(ids.overlaybody_exit)
                 .color(default_color.plain_contrast())
                 .set(ids.overlaytext_exit, ui);
-                let button_color=color::LIGHT_ORANGE;
+            let button_color = color::LIGHT_ORANGE;
             for _i in widget::Button::new()
                     .label(&appdata.texts.yes)
                     .color(button_color)
                     .label_color(button_color.plain_contrast())
-                    .h(80.0)
-                    .w(100.0)
+                    .wh(appdata.convert_dim([120.0, 100.0]))
                     .bottom_left_with_margin_on(ids.overlaybody_exit, 20.0)
                     .set(ids.overlayyes_exit, ui) {
                 let promptsender = PromptSender(action_tx.clone());
@@ -65,8 +64,7 @@ pub fn render(ui: &mut conrod::UiCell,
                     .label(&appdata.texts.no)
                     .color(button_color)
                     .label_color(button_color.plain_contrast())
-                    .h(80.0)
-                    .w(100.0)
+                    .wh(appdata.convert_dim([120.0, 100.0]))
                     .bottom_right_with_margin_on(ids.overlaybody_exit, 20.0)
                     .set(ids.overlayno_exit, ui) {
                 gamedata.overlay_exit = false;

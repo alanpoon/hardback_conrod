@@ -6,8 +6,6 @@ authors = ["alanpoon"]
 [dependencies]
 conrod = { version ="0.56", features = ["glium","winit"]}
 conrod_derive = "0.1.0"
-conrod_chat = {path ="../conrod_chat", features=["default"]}
-conrod_keypad ={path ="../conrod_keypad"}
 futures ={ version = "0.1.14", features=["use_std"] }
 cardgame_widgets = {path ="../cardgame_widgets"}
 cardgame_macros = {path="../cardgame_macros"}
@@ -45,9 +43,11 @@ android_version = 19
 build_targets = ["arm-linux-androideabi"]
 assets = "assets"
 
+[target.'cfg(target_os="linux")'.dependencies]
+find_folder = "0.3.0"
+conrod_chat = {path ="../conrod_chat", features=["web_socket","backend_glium_winit"]}
+
 [target.'cfg(target_os="android")'.dependencies]
 android_glue = "0.2.3"
 rusttype = "*"
-
-[target.'cfg(not(target_os="android"))'.dependencies]
-find_folder = "0.3.0"
+conrod_keypad ={path ="../conrod_keypad"}

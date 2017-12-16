@@ -132,7 +132,7 @@ fn turn_to_submit_but(ui: &mut conrod::UiCell,
     if let Some(_) = widget::Button::new()
            .label(&appdata.texts.submit)
            .mid_bottom_of(ids.body)
-           .w_h(100.0, 80.0)
+           .wh(appdata.convert_dim([100.0, 80.0]))
            .set(ids.submit_but, ui)
            .next() {
 
@@ -187,7 +187,7 @@ fn show_draft(ui: &mut conrod::UiCell,
 
         let promptsender = PromptSender(action_tx);
         let instructions: Vec<(String, Box<Fn(PromptSender)>)> = vec![("Continue".to_owned(),
-                                                                     Box::new(move |ps| {
+                                                                       Box::new(move |ps| {
             let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
             let mut g = GameCommand::new();
             g.go_to_shuffle = Some(true);
@@ -360,7 +360,7 @@ fn buy(ui: &mut conrod::UiCell,
     widget::Text::new(appdata.texts.unused_coins)
         .color(color::GREY)
         .font_size(50)
-        .padded_w_of(ids.body,100.0)
+        .padded_w_of(ids.body, 100.0)
         .h(70.0)
         .down_from(ids.body_header_text, 0.0)
         .set(ids.body_subject_text, ui);

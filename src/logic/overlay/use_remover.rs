@@ -31,7 +31,7 @@ pub fn render(w_id: tabview::Item,
     widget::Text::new(&appdata.texts.use_remover)
         .color(color::WHITE)
         .font_size(60)
-        .h(100.0)
+        .h(appdata.convert_h(100.0))
         .w_of(w_id.parent_id)
         .top_left_of(w_id.parent_id)
         .set(ids.overlay_subject, ui);
@@ -42,13 +42,13 @@ pub fn render(w_id: tabview::Item,
                 .filter(|&&(ref _ci, ref _inked, ref _optstr, _)| _inked.clone())
                 .map(|&(_ci, _, _, _)| _ci.clone())
                 .collect::<Vec<usize>>();
-            let item_h = 230.0;
+            let item_h = appdata.convert_h(230.0);
             let (mut events, scrollbar) = widget::ListSelect::multiple(inked.len())
                 .flow_down()
                 .item_size(item_h)
                 .scrollbar_next_to()
                 .w_of(w_id.parent_id)
-                .h(260.0)
+                .h(appdata.convert_h(260.0))
                 .down_from(ids.overlay_subject, 0.0)
                 .set(ids.overlay_explainlistselect, ui);
             let card_images = in_game::card_images(result_map);
@@ -95,8 +95,7 @@ pub fn render(w_id: tabview::Item,
                 OverlayStatus::Received(ref _img, ref _rect, ref _theme) => {
                     widget::Image::new(_img.clone())
                         .source_rectangle(_rect.clone())
-                        .w(150.0)
-                        .h(150.0)
+                        .wh(appdata.convert_dim([150.0, 150.0]))
                         .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
                         .set(ids.overlay_receivedimage, ui);
                 }
@@ -106,8 +105,7 @@ pub fn render(w_id: tabview::Item,
                         let spinner_sprite = graphics_match::spinner_sprite();
                         FullCycleSprite::new(dwn_img, spinner_sprite)
                             .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
-                            .w(100.0)
-                            .h(100.0)
+                            .wh(appdata.convert_dim([150.0, 150.0]))
                             .set(ids.overlay_receivedimage, ui);
                     }
                 }

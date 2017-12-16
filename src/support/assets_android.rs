@@ -21,3 +21,9 @@ pub fn load_90image(filename: &str) -> DynamicImage {
         Err(_) => panic!("Can't load image."),
     }
 }
+pub fn load_270image(filename: &str) -> DynamicImage {
+    match android_glue::load_asset(filename) {
+        Ok(data) => image::load_from_memory(&data).unwrap().rotate270(),
+        Err(_) => panic!("Can't load image."),
+    }
+}

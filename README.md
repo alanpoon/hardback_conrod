@@ -4,5 +4,7 @@
     cargo apk build
     adb install -r target/android-artifacts/app/build/outputs/apk/app-debug.apk
 
-hand [144, 159, 157, 140, 146]
-draft [157, 159, 148, 144, 142, 146, 140, 151, 158, 153]
+android
+cargo apk build --example run
+-L ~/software/openssl-1.0.2l/libcrypto.a -l ssl -lcryto
+adb install -r target/android-artifacts/app/build/outputs/apk/outfile.apk

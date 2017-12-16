@@ -16,6 +16,11 @@ pub extern crate hardback_meta;
 pub extern crate hardback_codec;
 extern crate futures;
 extern crate image;
+#[cfg(target_os="android")]
+extern crate rusttype;
+#[cfg(target_os="android")]
+extern crate android_glue;
+#[cfg(not(target_os="android"))]
 extern crate find_folder;
 pub mod backend;
 pub mod page_curl;

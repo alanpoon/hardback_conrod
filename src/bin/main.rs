@@ -19,7 +19,11 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use futures::sync::mpsc;
 use std::time::Instant;
-const CONNECTION: &'static str = "ws://127.0.0.1:8080";
+
+#[cfg(target_os="android")]
+const CONNECTION:&'static str = "ws://13.229.94.195:8080";
+#[cfg(not(target_os="android"))]
+const CONNECTION: &'static str = "ws://0.0.0.0:8080";
 #[derive(Clone)]
 pub enum ConrodMessage {
     Event(Instant, conrod::event::Input),
@@ -71,17 +75,21 @@ impl GameApp {
                 }
                 match toa_ping::run("www.google.com") {
                     Ok(_) => {
+                         println!("internet connection");
                         let (tx, rx) = mpsc::channel(3);
                         let mut ss_tx = ss_tx.lock().unwrap();
                         *ss_tx = tx;
                         drop(ss_tx);
                         match client::run_owned_message(CONNECTION, proxy_tx.clone(), rx) {
-                            Ok(_) => connected = true,
+                            Ok(_) => {
+                                println!("connected");
+                                connected = true;},
                             Err(_err) => {
                                 println!("reconnecting");
                                 connected = false;
                             }
                         }
+                        
                     }
                     _ => {
                         /*for test*/
@@ -90,7 +98,9 @@ impl GameApp {
                         *ss_tx = tx;
                         drop(ss_tx);
                         match client::run_owned_message(CONNECTION, proxy_tx.clone(), rx) {
-                            Ok(_) => connected = true,
+                            Ok(_) => {
+                                println!("connected");
+                                connected = true;},
                             Err(_err) => {
                                 println!("reconnecting");
                                 connected = false;

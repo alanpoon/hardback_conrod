@@ -8,7 +8,7 @@ use futures::{Future, Sink};
 use app::{self, GameData, Ids};
 use backend::OwnedMessage;
 use backend::SupportIdType;
-use backend::meta::app::{AppData, ResourceEnum, Sprite};
+use backend::meta::app::{AppData, ResourceEnum, Sprite, Font};
 use graphics_match::button;
 use graphics_match;
 use logic::in_game;
@@ -114,8 +114,12 @@ pub fn render(ui: &mut conrod::UiCell,
                   action_tx: mpsc::Sender<OwnedMessage>) {
         let _style = button::get_style();
         let _table_list_texts = TableListTex { appdata: &appdata };
-        if let Some(&SupportIdType::ImageId(rust_logo)) =
-            result_map.get(&ResourceEnum::Sprite(Sprite::BUTTON)) {
+        if let (Some(&SupportIdType::ImageId(rust_logo)),
+                Some(&SupportIdType::FontId(bold_font)),
+                Some(&SupportIdType::FontId(italic_font))) =
+            (result_map.get(&ResourceEnum::Sprite(Sprite::BUTTON)),
+             result_map.get(&ResourceEnum::Font(Font::BOLD)),
+             result_map.get(&ResourceEnum::Font(Font::ITALIC))) {
             let card_index = 7.0;
             let wh = ui.wh_of(ids.middle_tabview).unwrap();
             if let (&app::GuiState::Lobby, None) = (&gamedata.guistate, gamedata.tablenumber) {
@@ -125,7 +129,6 @@ pub fn render(ui: &mut conrod::UiCell,
                 let normal_rect = spriteable_rect(button_sprite, card_index);
                 if animated_button::AnimatedButton::image(rust_logo)
                        .label(appdata.texts.newtable)
-                       .label_font_size(14)
                        .label_color(color::WHITE)
                        .normal_rect(Rect::from_corners(normal_rect.0, normal_rect.1))
                        .hover_rect(Rect::from_corners(hover_rect.0, hover_rect.1))
@@ -145,13 +148,16 @@ pub fn render(ui: &mut conrod::UiCell,
                 let _button_panel = ui.rect_of(ids.new_table_but).unwrap();
                 widget::Text::new(appdata.texts.playername)
                     .color(color::WHITE)
+                    .font_id(italic_font)
                     .down_from(ids.new_table_but, 2.0)
-                    .w_h(200.0, wh[1] * 0.06)
+                    .w_h(appdata.convert_w(200.0), appdata.convert_h(wh[1] * 0.06))
                     .set(ids.name_text, ui);
+
                 widget::Text::new(&gamedata.name)
                     .color(color::WHITE)
+                    .font_id(bold_font)
                     .right_from(ids.name_text, 0.0)
-                    .w_h(200.0, wh[1] * 0.06)
+                    .w_h(appdata.convert_w(200.0), appdata.convert_h(wh[1] * 0.06))
                     .set(ids.user_name, ui);
                 widget::Rectangle::fill_with([appdata.convert_w(200.0), wh[1] * 0.06],
                                              color::WHITE)
@@ -183,6 +189,7 @@ pub fn render(ui: &mut conrod::UiCell,
                        .w_h(wh[0] * 0.3, wh[1] * 0.06)
                        .set(ids.name_change_but, ui)
                        .was_clicked() {
+                    gamedata.name = gamedata.name_text_edit.clone();
                     gamedata.name_text_edit = "".to_owned();
                     let g = json!({
                             "namechange": gamedata.name_text_edit.clone()

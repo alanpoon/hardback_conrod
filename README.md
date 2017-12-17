@@ -7,7 +7,7 @@
 android
 cargo apk run
 -L ~/software/openssl-1.0.2l/libcrypto.a -l ssl -lcryto
-adb install -r target/android-artifacts/app/build/outputs/apk/outfile.apk
+adb install -r target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk
 
 need to add this line to android in cargo.toml
 conrod_chat = {path ="../conrod_chat", features=["keypad"]}

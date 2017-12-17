@@ -1,5 +1,6 @@
 use cardgame_widgets::custom_widget::instructionset::Instructable;
 use conrod::{Sizeable, Positionable, widget, color};
+use conrod::widget::primitive::shape::oval::Full;
 use conrod::widget::button::{Button, Flat};
 use conrod::widget::{Oval, Rectangle};
 pub struct Instruction<'a>(pub &'a str, pub &'a [f64; 4], pub &'a Option<[f64; 4]>, pub widget::Id);
@@ -16,7 +17,7 @@ impl<'a> Instructable<'a> for Instruction<'a> {
     fn button(&self, _wh: [f64; 2]) -> Button<Flat> {
         widget::Button::new().w_h(100.0, 50.0).mid_bottom()
     }
-    fn oval_one(&self, wh: [f64; 2]) -> Option<Oval> {
+    fn oval_one(&self, wh: [f64; 2]) -> Option<Oval<Full>> {
         if let Some(_dim) = self.2.clone() {
             Some(widget::Oval::outline_styled([_dim[2] * wh[0], _dim[3] * wh[1]],
                                               widget::line::Style::new().thickness(5.0))
@@ -28,7 +29,7 @@ impl<'a> Instructable<'a> for Instruction<'a> {
         }
 
     }
-    fn oval_two(&self, wh: [f64; 2]) -> Option<Oval> {
+    fn oval_two(&self, wh: [f64; 2]) -> Option<Oval<Full>> {
         if let Some(_dim) = self.2.clone() {
             Some(widget::Oval::outline_styled([_dim[2] * wh[0] * 1.2, _dim[3] * wh[1]],
                                               widget::line::Style::new().thickness(5.0))

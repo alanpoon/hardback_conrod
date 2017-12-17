@@ -31,10 +31,17 @@ pub enum ConrodMessage {
     Thread(Instant),
 }
 pub struct GameApp {}
-
+#[cfg(target_os="android")]
+fn window() -> glutin::WindowBuilder {
+    glutin::WindowBuilder::new()
+}
+#[cfg(target_os="linux")]
+fn window() -> glutin::WindowBuilder {
+    glutin::WindowBuilder::new().with_dimensions(1040, 542)
+}
 impl GameApp {
     pub fn new() -> Result<(), String> {
-        let window = glutin::WindowBuilder::new();
+        let window = window();
         let context =
             glium::glutin::ContextBuilder::new()
                 .with_gl(glium::glutin::GlRequest::Specific(glium::glutin::Api::OpenGlEs, (3, 0)));

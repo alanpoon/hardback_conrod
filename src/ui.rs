@@ -27,7 +27,7 @@ pub fn load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, Suppo
     (ResourceEnum::Sprite(Sprite::PAGE4F),"texture","images/characters/player4.jpg"),
     (ResourceEnum::Sprite(Sprite::RUST),"image","images/rust.png"),
     (ResourceEnum::Sprite(Sprite::KEYPAD),"image","images/keypad.png"),
-    (ResourceEnum::Sprite(Sprite::CARDS1),"image","images/cards/p01-1.jpg"),
+  /*  (ResourceEnum::Sprite(Sprite::CARDS1),"image","images/cards/p01-1.jpg"),
     (ResourceEnum::Sprite(Sprite::CARDS2),"image","images/cards/p02-1.jpg"),
     (ResourceEnum::Sprite(Sprite::CARDS3),"image","images/cards/p03-1.jpg"),
     (ResourceEnum::Sprite(Sprite::CARDS4),"image","images/cards/p04-1.jpg"),
@@ -54,6 +54,7 @@ pub fn load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, Suppo
     (ResourceEnum::Sprite(Sprite::CARDS25),"image270","images/cards/p11-1.jpg"),
     (ResourceEnum::Sprite(Sprite::CARDS26),"image270","images/cards/p14-1.jpg"),
     (ResourceEnum::Sprite(Sprite::CARDS27),"image270","images/cards/p15-1.jpg"),
+    */
     (ResourceEnum::Sprite(Sprite::DOWNLOAD),"image","images/download.png"),
     (ResourceEnum::Sprite(Sprite::BACKCARD),"image","images/cards/backside.jpg"),
     (ResourceEnum::Sprite(Sprite::GAMEICONS),"image","images/gameicon.png"),

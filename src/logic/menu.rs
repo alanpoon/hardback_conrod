@@ -15,7 +15,7 @@ pub fn render(ui: &mut conrod::UiCell,
               _action_tx: mpsc::Sender<OwnedMessage>) {
     animated_canvas::Canvas::new().color(color::TRANSPARENT).frame_rate(30).set(ids.master, ui);
     if widget::Button::new()
-           .wh(_appdata.convert_dim([200.0, 50.0]))
+           .wh(_appdata.convert_dim([400.0, 100.0]))
            .mid_left_of(ids.master)
            .rgb(0.4, 0.75, 0.6)
            .label("Multiplayer")

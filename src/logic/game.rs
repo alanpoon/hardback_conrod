@@ -2,8 +2,10 @@ use hardback_meta::app::{AppData, ResourceEnum};
 use conrod::{self, color, widget, Colorable, Widget};
 use std::collections::HashMap;
 use futures::sync::mpsc;
+use backend::codec_lib::cards::*;
+use backend::codec_lib::cards;
 use logic;
-use app::{GameData, Ids, GuiState};
+use app::{GameData, Ids, GuiState, BoardStruct};
 use backend::OwnedMessage;
 use backend::SupportIdType;
 use cardgame_widgets::custom_widget::animated_canvas;
@@ -36,6 +38,7 @@ impl<'a, T> GameProcess<'a, T>
     }
     pub fn run(&mut self,
                ui: &mut conrod::Ui,
+               cardmeta: &[cards::ListCard<BoardStruct>; 180],
                mut gamedata: &mut GameData,
                result_map: &HashMap<ResourceEnum, SupportIdType>,
                action_tx: mpsc::Sender<OwnedMessage>) {
@@ -46,6 +49,7 @@ impl<'a, T> GameProcess<'a, T>
                                  &ids,
                                  &mut gamedata,
                                  &self.appdata,
+                                 &cardmeta,
                                  result_map,
                                  action_tx);
 
@@ -74,6 +78,7 @@ impl<'a, T> GameProcess<'a, T>
                    ids: &Ids,
                    mut gamedata: &mut GameData,
                    appdata: &AppData,
+                   cardmeta: &[cards::ListCard<BoardStruct>; 180],
                    result_map: &HashMap<ResourceEnum, SupportIdType>,
                    action_tx: mpsc::Sender<OwnedMessage>) {
         animated_canvas::Canvas::new()
@@ -88,6 +93,7 @@ impl<'a, T> GameProcess<'a, T>
                             ids,
                             &mut gamedata,
                             &appdata,
+                            &cardmeta,
                             result_map,
                             action_tx.clone());
 
@@ -95,6 +101,7 @@ impl<'a, T> GameProcess<'a, T>
                               ids,
                               &mut gamedata,
                               &appdata,
+                              &cardmeta,
                               result_map,
                               action_tx.clone());
         logic::overlay::render(ui,

@@ -1,9 +1,9 @@
 use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,
-             Borderable, Rect};
+             Borderable, Rect, text, Color};
 use conrod::widget::primitive::image::Image;
 use cardgame_widgets::custom_widget::image_hover::{Hoverable, ImageHover};
 use cardgame_widgets::custom_widget::arrange_list::{ArrangeList, ExitBy};
-use custom_widget::arrange_list_item::ItemWidget;
+use custom_widget::arrange_list_tile::ItemWidget;
 use cardgame_widgets::custom_widget::instructionset::InstructionSet;
 use cardgame_widgets::custom_widget::animated_canvas;
 use cardgame_widgets::text::get_font_size_hn;
@@ -17,23 +17,26 @@ use app::{self, GameData, Ids};
 use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
-use backend::meta::{cards, local};
+use backend::meta::{self, local};
 use graphics_match;
 use graphics_match::ImageHoverable;
 use logic::in_game;
 use instruction::Instruction;
 use cardgame_widgets::custom_widget::promptview::PromptSendable;
-use app::PromptSender;
+use app::{BoardStruct, PromptSender};
+use backend::codec_lib;
 pub fn render(ui: &mut conrod::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
               appdata: &AppData,
+              cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
               result_map: &HashMap<ResourceEnum, SupportIdType>,
               _action_tx: mpsc::Sender<OwnedMessage>) {
     let GameData { ref page_index,
                    ref mut boardcodec,
                    ref mut print_instruction_set,
                    ref mut personal,
+                   ref mut hand_selected,
                    ref mut overlay,
                    ref mut overlay2,
                    ref mut overlay_chat,
@@ -41,7 +44,6 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref mut buy_selected,
                    .. } = *gamedata;
     if let &mut Some(ref mut boardcodec) = boardcodec {
-        let card_images = in_game::card_images(result_map);
         if let Some(ref mut _player) = boardcodec.players.get_mut(*page_index) {
             match gamedata.guistate {
                 app::GuiState::Game(GameState::ShowDraft) => {
@@ -51,9 +53,10 @@ pub fn render(ui: &mut conrod::UiCell,
                     spell(ui,
                           ids,
                           _player,
-                          &card_images,
                           &appdata,
+                          &cardmeta,
                           personal,
+                          hand_selected,
                           overlay,
                           overlay_chat,
                           overlay_exit,
@@ -64,9 +67,10 @@ pub fn render(ui: &mut conrod::UiCell,
                     spell(ui,
                           ids,
                           _player,
-                          &card_images,
                           &appdata,
+                          &cardmeta,
                           personal,
+                          hand_selected,
                           overlay,
                           overlay_chat,
                           overlay_exit,
@@ -113,9 +117,10 @@ pub fn render(ui: &mut conrod::UiCell,
 fn spell(ui: &mut conrod::UiCell,
          ids: &Ids,
          _player: &mut Player,
-         card_images: &[Option<image::Id>; 27],
          appdata: &AppData,
+         cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
          personal: &mut Option<Personal>,
+         hand_selected: &mut Option<usize>,
          overlay: &mut bool,
          overlay_chat: &mut bool,
          overlay_exit: &mut bool,
@@ -127,46 +132,53 @@ fn spell(ui: &mut conrod::UiCell,
             .clone()
             .iter()
             .map(|ref x| {
-                let (_image_id, _rect, _theme) =
-                    in_game::get_card_widget_image_portrait(x.clone().clone(),
-                                                            card_images,
-                                                            appdata);
-                (x.clone().clone(), _image_id, _rect)
-            })
-            .collect::<Vec<(usize, image::Id, Rect)>>();
+                     let (_timeless, _string, _color, _app_font, _rect) =
+                    in_game::get_tile_image_withcost(*x.clone(), cardmeta, appdata);
+                     (x.clone().clone(), _timeless, _string, _color, _app_font, _rect)
+                 })
+            .collect::<Vec<(usize, bool, &str, Color, meta::app::Font, Rect)>>();
         if let (Some(&SupportIdType::ImageId(spinner_image)),
                 Some(&SupportIdType::ImageId(back_image)),
                 Some(&SupportIdType::ImageId(arrows_image)),
+                Some(&SupportIdType::ImageId(cloudy)),
+                Some(&SupportIdType::ImageId(coin_info)),
+                Some(&SupportIdType::ImageId(coin_info270)),
                 Some(&SupportIdType::ImageId(icon_image))) =
             (result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)),
              result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)),
              result_map.get(&ResourceEnum::Sprite(Sprite::ARROWS)),
+             result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
+             result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
+             result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
              result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
             let spinner_rect = graphics_match::spinner_sprite();
-            let (_l, _t, _r, _b) = graphics_match::all_arrows(arrows_image);
-            let (exitid, exitby, scrollbar) =
-                ArrangeList::new(&mut handvec,
-                                 Box::new(move |(_v_index, v_blowup, v_rect)| {
-                    let i_h_struct =
-                        ImageHoverable(Image::new(v_blowup).source_rectangle(v_rect), Some(Image::new(v_blowup).source_rectangle(graphics_match::cards_btm(v_rect))), Some(Image::new(v_blowup).source_rectangle(graphics_match::cards_btm(v_rect))));
-                    let t_i_h_struct =
-                        ImageHoverable(Image::new(back_image.clone())
-                                           .source_rectangle(graphics_match::backcard()),
-                                       None,
-                                       None);
-                    ItemWidget::new(i_h_struct, t_i_h_struct)
-                        .spinner_image(spinner_image, spinner_rect)
-                        .border_color(color::YELLOW)
-                        .border(20.0)
-                }),
-                                 200.0)
-                        .padded_h_of(ids.footer, 10.0)
-                        .padded_w_of(ids.footer, 150.0)
-                        .top_left_with_margin_on(ids.footer, 10.0)
-                        .left_arrow(_l)
-                        .right_arrow(_r)
-                        .top_arrow(_t)
-                        .set(ids.footerdragdroplistview, ui);
+            let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
+            let (exitid, exitby, scrollbar) = ArrangeList::new(&mut handvec,
+                                                               hand_selected,
+                                                               Box::new(move |(_v_index,
+                                                                               _timelessbool,
+                                                                               _string,
+                                                                               _color,
+                                                                               _font,
+                                                                               _rect)| {
+                ItemWidget::new(back_image, _timelessbool, &_string, _rect, "timeless")
+                    .cloudy_image(cloudy)
+                    .coin_info(coin_info)
+                    .coin_info270(coin_info270)
+                    .spinner_image(spinner_image, spinner_rect)
+                    .border_color(color::YELLOW)
+                    .border(20.0)
+                    .color(_color)
+            }),
+                                                               200.0)
+                    .padded_h_of(ids.footer, 10.0)
+                    .padded_w_of(ids.footer, 150.0)
+                    .top_left_with_margin_on(ids.footer, 10.0)
+                    .left_arrow(_l)
+                    .right_arrow(_r)
+                    .top_arrow(_t)
+                    .corner_arrow(_c)
+                    .set(ids.footerdragdroplistview, ui);
             match (exitid, exitby) {                
                 (Some(_x), ExitBy::Top) => {
                     _personal.arranged.push((_x.0, false, None, false));
@@ -176,7 +188,8 @@ fn spell(ui: &mut conrod::UiCell,
             if let Some(s) = scrollbar {
                 s.set(ui);
             }
-            _personal.hand = handvec.iter().map(|&(x_index, _, _)| x_index).collect::<Vec<usize>>();
+            _personal.hand =
+                handvec.iter().map(|&(x_index, _, _, _, _, _)| x_index).collect::<Vec<usize>>();
             if (*_personal).clone() != temp {
                 let promptsender = PromptSender(_action_tx);
                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();

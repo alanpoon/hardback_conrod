@@ -17,18 +17,6 @@ impl Hoverable for ImageHoverable {
         self.2
     }
 }
-pub mod button {
-    use graphics_match::SpriteInfo;
-    pub fn get_style() -> SpriteInfo {
-        SpriteInfo {
-            first: (0.0, 535.0),
-            num_in_row: 3,
-            num_in_col: 11,
-            w_h: (180.0, 60.0),
-            pad: (0.0, 10.0, 0.0, 10.0),
-        }
-    }
-}
 
 pub fn keypad_sprite() -> SpriteInfo {
     SpriteInfo {
@@ -84,13 +72,14 @@ pub fn arrow_sprite() -> SpriteInfo {
     SpriteInfo {
         first: (0.0, 400.0), //left corner of first
         num_in_row: 4,
-        num_in_col: 2,
+        num_in_col: 3,
         w_h: (200.0, 200.0),
         pad: (0.0, 0.0, 0.0, 0.0),
     }
 }
-pub fn all_arrows(button: image::Id)
-                  -> (ImageHoverable, ImageHoverable, ImageHoverable, ImageHoverable) {
+pub fn all_arrows
+    (button: image::Id)
+     -> (ImageHoverable, ImageHoverable, ImageHoverable, ImageHoverable, ImageHoverable) {
     let b_s = arrow_sprite();
     let l_0 = spriteable_rect(b_s, 4.0);
     let l_1 = spriteable_rect(b_s, 6.0);
@@ -100,6 +89,8 @@ pub fn all_arrows(button: image::Id)
     let r_1 = spriteable_rect(b_s, 3.0);
     let b_0 = spriteable_rect(b_s, 5.0);
     let b_1 = spriteable_rect(b_s, 7.0);
+    let c_0 = spriteable_rect(b_s, 8.0);
+    let c_1 = spriteable_rect(b_s, 10.0);
     let left_arrow_z =
         ImageHoverable(Image::new(button).source_rectangle(Rect::from_corners(l_0.0, l_0.1)),
                        Some(Image::new(button).source_rectangle(Rect::from_corners(l_1.0, l_1.1))),
@@ -116,7 +107,11 @@ pub fn all_arrows(button: image::Id)
         ImageHoverable(Image::new(button).source_rectangle(Rect::from_corners(b_0.0, b_0.1)),
                        Some(Image::new(button).source_rectangle(Rect::from_corners(b_1.0, b_1.1))),
                        None);
-    (left_arrow_z, top_arrow_z, right_arrow_z, btm_arrow_z)
+    let corner_arrow_z =
+        ImageHoverable(Image::new(button).source_rectangle(Rect::from_corners(c_0.0, c_0.1)),
+                       Some(Image::new(button).source_rectangle(Rect::from_corners(c_1.0, c_1.1))),
+                       None);
+    (left_arrow_z, top_arrow_z, right_arrow_z, btm_arrow_z, corner_arrow_z)
 }
 pub fn cards_btm(recz: Rect) -> Rect {
     let topleft_c = recz.top_left();
@@ -124,4 +119,22 @@ pub fn cards_btm(recz: Rect) -> Rect {
     topleft_cm.set_x(topleft_c.get_x() + 136.0);
     topleft_cm.set_y(topleft_c.get_y() - 400.0);
     Rect::from_corners(topleft_cm, recz.bottom_right())
+}
+pub fn get_cost_info_sprite() -> SpriteInfo {
+    SpriteInfo {
+        first: (0.0, 400.0), //left corner of first
+        num_in_row: 10,
+        num_in_col: 1,
+        w_h: (41.0, 400.0),
+        pad: (0.0, 0.0, 0.0, 0.0),
+    }
+}
+pub fn get_cost_info270_sprite() -> SpriteInfo {
+    SpriteInfo {
+        first: (0.0, 400.0), //left corner of first
+        num_in_row: 1,
+        num_in_col: 10,
+        w_h: (400.0, 41.0),
+        pad: (0.0, 0.0, 0.0, 0.0),
+    }
 }

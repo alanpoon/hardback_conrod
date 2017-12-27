@@ -1,10 +1,10 @@
 use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,
-             Borderable, Rect};
+             Borderable, Rect, text, Color};
 use conrod::widget::primitive::image::Image;
 use conrod::widget::envelope_editor::EnvelopePoint;
 use cardgame_widgets::custom_widget::image_hover::{Hoverable, ImageHover};
 use cardgame_widgets::custom_widget::arrange_list::{ArrangeList, ExitBy};
-use custom_widget::arrange_list_item::ItemWidget;
+use custom_widget::arrange_list_tile::ItemWidget;
 use custom_widget::buy_list_item;
 use cardgame_widgets::custom_widget::shuffle::Shuffle;
 use cardgame_widgets::custom_widget::promptview::{PromptView, PromptSendable};
@@ -14,6 +14,7 @@ use backend::codec_lib::codec::*;
 use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
+use backend::meta;
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use futures::{Future, Sink};
@@ -23,12 +24,13 @@ use logic::in_game;
 use logic;
 use graphics_match;
 use graphics_match::ImageHoverable;
-use app::PromptSender;
-
+use app::{BoardStruct, PromptSender};
+use backend::codec_lib;
 pub fn render(ui: &mut conrod::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
               appdata: &AppData,
+              cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
               result_map: &HashMap<ResourceEnum, SupportIdType>,
               _action_tx: mpsc::Sender<OwnedMessage>) {
     let GameData { ref page_index,
@@ -36,6 +38,7 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref mut print_instruction_set,
                    ref mut guistate,
                    ref mut initial_draft,
+                   ref mut arrange_selected,
                    ref player_index,
                    ref notification,
                    ref mut personal,
@@ -43,7 +46,6 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref mut overlay2,
                    .. } = *gamedata;
     if let &mut Some(ref mut boardcodec) = boardcodec {
-        let card_images = in_game::card_images(result_map);
         if let (Some(ref mut _player), ref offer_row) =
             (boardcodec.players.get_mut(*page_index), &boardcodec.offer_row) {
             match guistate {
@@ -51,7 +53,7 @@ pub fn render(ui: &mut conrod::UiCell,
                     show_draft(ui,
                                ids,
                                _player,
-                               &card_images,
+                               &cardmeta,
                                &appdata,
                                print_instruction_set,
                                initial_draft,
@@ -62,7 +64,7 @@ pub fn render(ui: &mut conrod::UiCell,
                     shuffle(ui,
                             ids,
                             _player,
-                            &card_images,
+                            &cardmeta,
                             &appdata,
                             &initial_draft,
                             player_index,
@@ -74,8 +76,9 @@ pub fn render(ui: &mut conrod::UiCell,
 
                     spell(ui,
                           ids,
-                          &card_images,
+                          &cardmeta,
                           personal,
+                          arrange_selected,
                           appdata,
                           result_map,
                           _action_tx.clone());
@@ -83,24 +86,32 @@ pub fn render(ui: &mut conrod::UiCell,
                 &mut app::GuiState::Game(GameState::TurnToSubmit) => {
                     spell(ui,
                           ids,
-                          &card_images,
+                          &cardmeta,
                           personal,
+                          arrange_selected,
                           appdata,
                           result_map,
                           _action_tx.clone());
                     turn_to_submit_but(ui, ids, &appdata, _action_tx.clone());
                 }
                 &mut app::GuiState::Game(GameState::Buy) => {
-                    buy(ui, ids, &card_images, offer_row, buy_selected, appdata);
+                    buy(ui,
+                        ids,
+                        &cardmeta,
+                        offer_row,
+                        buy_selected,
+                        appdata,
+                        result_map);
                 }
                 &mut app::GuiState::Game(GameState::TrashOther(_otherthanthis)) => {
                     trash_other(ui,
                                 ids,
                                 _player,
                                 _otherthanthis,
-                                &card_images,
+                                &cardmeta,
                                 buy_selected,
-                                &appdata);
+                                appdata,
+                                result_map);
                 }
 
                 _ => {}
@@ -146,7 +157,7 @@ fn turn_to_submit_but(ui: &mut conrod::UiCell,
 fn show_draft(ui: &mut conrod::UiCell,
               ids: &Ids,
               player: &mut Player,
-              card_images: &[Option<image::Id>; 27],
+              cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
               appdata: &AppData,
               print_instruction_set: &mut Vec<bool>,
               initial_draft: &mut Vec<usize>,
@@ -169,19 +180,10 @@ fn show_draft(ui: &mut conrod::UiCell,
             s.set(ui)
         }
         while let (Some(item), Some(card_index)) = (items.next(ui), dealt_iter.next()) {
-            let (_image_id, _rect, _) =
-                in_game::get_card_widget_image_portrait(card_index.clone(), card_images, appdata);
-            //zoom rect
-            let mut top_left_c = _rect.top_left().clone();
-            top_left_c.set_x(_rect.top_left().get_x() + 100.0);
-            top_left_c.set_y(_rect.top_left().get_y() - 120.0);
-            let btm_right = _rect.bottom_right().clone();
-            let _zoom_rect = Rect::from_corners(top_left_c, btm_right);
-            let _ih = ImageHoverable(Image::new(_image_id).source_rectangle(_rect),
-                                     Some(Image::new(_image_id).source_rectangle(_zoom_rect)),
-                                     None);
-            let j = ImageHover::new(_ih);
-            item.set(j, ui);
+            let (_timeless, _string, _color, _app_font, _rect) =
+                in_game::get_tile_image_withcost(card_index.clone(), cardmeta, appdata);
+            //  let j = ImageHover::new(_ih);
+            //  item.set(j, ui);
         }
     } else {
 
@@ -207,22 +209,32 @@ fn show_draft(ui: &mut conrod::UiCell,
 fn shuffle(ui: &mut conrod::UiCell,
            ids: &Ids,
            player: &Player,
-           card_images: &[Option<image::Id>; 27],
+           cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
            appdata: &AppData,
            initial_draft: &Vec<usize>,
            player_index: &Option<usize>,
            guistate: &mut GuiState,
            personal: &mut Option<Personal>,
-           _result_map: &HashMap<ResourceEnum, SupportIdType>) {
-    if let (Some(&SupportIdType::ImageId(back_logo)), &Some(_player_index)) =
-        (_result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)), player_index) {
+           result_map: &HashMap<ResourceEnum, SupportIdType>) {
+    if let (Some(&SupportIdType::ImageId(back_logo)),
+            Some(&SupportIdType::ImageId(cloudy)),
+            Some(&SupportIdType::ImageId(coin_info)),
+            Some(&SupportIdType::ImageId(coin_info270)),
+            Some(&SupportIdType::ImageId(spinner_image)),
+            &Some(_player_index)) =
+        (result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)),
+         player_index) {
         let card_vec = initial_draft.iter()
             .map(|x| {
-                     let (_image_id, _rect, _) =
-                    in_game::get_card_widget_image_portrait(x.clone(), card_images, appdata);
-                     Image::new(_image_id).source_rectangle(_rect)
+                     let (_timeless, _string, _color, _app_font, _rect) =
+                    in_game::get_tile_image_withcost(x.clone(), cardmeta, appdata);
+                     (x.clone(), _timeless, _string, _color, _app_font, _rect)
                  })
-            .collect::<Vec<Image>>();
+            .collect::<Vec<(usize, bool, &str, Color, meta::app::Font, Rect)>>();
         let give_out_vec = player.hand
             .iter()
             .enumerate()
@@ -238,7 +250,23 @@ fn shuffle(ui: &mut conrod::UiCell,
             .filter(|x| if let &Some(_) = x { true } else { false })
             .map(|x| x.unwrap())
             .collect::<Vec<usize>>();
-        if !Shuffle::new(card_vec,
+        if !Shuffle::new(&card_vec,
+                         Box::new(move |(_v_index,
+                                         _timelessbool,
+                                         _string,
+                                         _color,
+                                         _font,
+                                         _rect)| {
+            let spinner_rect = graphics_match::spinner_sprite();
+            ItemWidget::new(back_logo, _timelessbool, _string, _rect, "timeless")
+                .cloudy_image(cloudy)
+                .coin_info(coin_info)
+                .coin_info270(coin_info270)
+                .spinner_image(spinner_image, spinner_rect)
+                .border_color(color::YELLOW)
+                .border(20.0)
+                .color(_color)
+        }),
                          Image::new(back_logo).source_rectangle(graphics_match::backcard()))
                     .give_out(give_out_vec)
                     .bottom_left_of(ids.body)
@@ -266,54 +294,79 @@ fn cache_personal(player: &Player, personal: &mut Option<Personal>) {
 
 fn spell(ui: &mut conrod::UiCell,
          ids: &Ids,
-         card_images: &[Option<image::Id>; 27],
+         cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
          personal: &mut Option<Personal>,
+         arrange_selected: &mut Option<usize>,
          appdata: &AppData,
          result_map: &HashMap<ResourceEnum, SupportIdType>,
          _action_tx: mpsc::Sender<OwnedMessage>) {
     if let &mut Some(ref mut _personal) = personal {
         let temp = (*_personal).clone();
-        let mut arrangedvec =
-            _personal.arranged
-                .clone()
-                .iter()
-                .map(|&(ref x, ref ink, ref op_string, ref _timeless)| {
-                    let (_image_id, _rect, _) =
-                        in_game::get_card_widget_image_portrait(x.clone(), card_images, appdata);
-                    (x.clone(), _image_id, _rect, ink.clone(), op_string.clone(), _timeless.clone())
-                })
-                .collect::<Vec<(usize, image::Id, conrod::Rect, bool, Option<String>, bool)>>();
+        let mut arrangedvec = _personal.arranged
+            .clone()
+            .iter()
+            .map(|&(ref x, ref ink, ref op_string, ref _timeless)| {
+                let (_timeless, _string, _color, _font, _rect) =
+                    in_game::get_tile_image_withcost(x.clone(), cardmeta, appdata);
+                (x.clone(),
+                 _timeless,
+                 _string,
+                 _color,
+                 _font,
+                 _rect,
+                 ink.clone(),
+                 op_string.clone())
+            })
+            .collect::<Vec<(usize,
+                 bool,
+                 &str,
+                 conrod::Color,
+                 meta::app::Font,
+                 conrod::Rect,
+                 bool,
+                 Option<String>)>>();
         if let (Some(&SupportIdType::ImageId(spinner_image)),
                 Some(&SupportIdType::ImageId(back_image)),
-                Some(&SupportIdType::ImageId(arrows_image))) =
+                Some(&SupportIdType::ImageId(arrows_image)),
+                Some(&SupportIdType::ImageId(cloudy)),
+                Some(&SupportIdType::ImageId(coin_info)),
+                Some(&SupportIdType::ImageId(coin_info270))) =
             (result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)),
              result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)),
-             result_map.get(&ResourceEnum::Sprite(Sprite::ARROWS))) {
+             result_map.get(&ResourceEnum::Sprite(Sprite::ARROWS)),
+             result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
+             result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
+             result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270))) {
             let spinner_rect = graphics_match::spinner_sprite();
-            let (_l, _t, _r, _b) = graphics_match::all_arrows(arrows_image);
-            let (exitid, exitby, scrollbar) =
-                ArrangeList::new(&mut arrangedvec,
-                                 Box::new(move |(_v_index, v_blowup, v_rect, _, _, _)| {
-                    let i_h_struct =
-                        ImageHoverable(Image::new(v_blowup).source_rectangle(v_rect), Some(Image::new(v_blowup).source_rectangle(graphics_match::cards_btm(v_rect))), Some(Image::new(v_blowup).source_rectangle(graphics_match::cards_btm(v_rect))));
-                    let t_i_h_struct =
-                        ImageHoverable(Image::new(back_image.clone())
-                                           .source_rectangle(graphics_match::backcard()),
-                                       None,
-                                       None);
-                    ItemWidget::new(i_h_struct, t_i_h_struct)
-                        .spinner_image(spinner_image, spinner_rect)
-                        .border_color(color::YELLOW)
-                        .border(20.0)
-                }),
-                                 200.0)
-                        .h(260.0)
-                        .padded_w_of(ids.body, 20.0)
-                        .mid_bottom_with_margin_on(ids.body, 80.0)
-                        .left_arrow(_l)
-                        .right_arrow(_r)
-                        .bottom_arrow(_b)
-                        .set(ids.bodydragdroplistview, ui);
+            let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
+            let (exitid, exitby, scrollbar) = ArrangeList::new(&mut arrangedvec,
+                                                               arrange_selected,
+                                                               Box::new(move |(_v_index,
+                                                                               _timelessbool,
+                                                                               _string,
+                                                                               _color,
+                                                                               _font,
+                                                                               _rect,
+                                                                               _inked,
+                                                                               _opstring)| {
+                ItemWidget::new(back_image, _timelessbool, _string, _rect, "timeless")
+                    .cloudy_image(cloudy)
+                    .coin_info(coin_info)
+                    .coin_info270(coin_info270)
+                    .spinner_image(spinner_image, spinner_rect)
+                    .border_color(color::YELLOW)
+                    .border(20.0)
+                    .color(_color)
+            }),
+                                                               200.0)
+                    .h(260.0)
+                    .padded_w_of(ids.body, 20.0)
+                    .mid_bottom_with_margin_on(ids.body, 80.0)
+                    .left_arrow(_l)
+                    .right_arrow(_r)
+                    .bottom_arrow(_b)
+                    .corner_arrow(_c)
+                    .set(ids.bodydragdroplistview, ui);
 
             match (exitid, exitby) {                
                 (Some(_x), ExitBy::Bottom) => {
@@ -326,8 +379,15 @@ fn spell(ui: &mut conrod::UiCell,
             }
 
             _personal.arranged = arrangedvec.iter()
-                .map(|&(ref x_index, _, _, ref ink, ref op_string, ref timeless)| {
-                         (x_index.clone(), ink.clone(), op_string.clone(), timeless.clone())
+                .map(|&(ref x_index,
+                        ref _timeless,
+                        ref _string,
+                        _,
+                        ref _font,
+                        ref _rect,
+                        ref _inked,
+                        ref op_string)| {
+                         (x_index.clone(), _inked.clone(), op_string.clone(), _timeless.clone())
                      })
                 .collect::<Vec<(usize, bool, Option<String>, bool)>>();
 
@@ -345,10 +405,11 @@ fn spell(ui: &mut conrod::UiCell,
 }
 fn buy(ui: &mut conrod::UiCell,
        ids: &Ids,
-       card_images: &[Option<image::Id>; 27],
+       cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
        offer_row: &Vec<usize>,
        buyselected: &mut Option<usize>,
-       appdata: &AppData) {
+       appdata: &AppData,
+       result_map: &HashMap<ResourceEnum, SupportIdType>) {
 
     widget::Text::new(appdata.texts.buy)
         .color(color::WHITE)
@@ -377,31 +438,34 @@ fn buy(ui: &mut conrod::UiCell,
     if let Some(s) = scrollbar {
         s.set(ui)
     }
-    while let Some(event) = events.next(ui, |i| {
-        let mut y = false;
-        if let &mut Some(_x) = buyselected {
-            if _x == i {
-                y = true;
+    if let (Some(&SupportIdType::ImageId(back_logo)),
+            Some(&SupportIdType::ImageId(cloudy)),
+            Some(&SupportIdType::ImageId(coin_info)),
+            Some(&SupportIdType::ImageId(coin_info270)),
+            Some(&SupportIdType::ImageId(spinner_image))) =
+        (result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD))) {
+        while let Some(event) = events.next(ui, |i| {
+            let mut y = false;
+            if let &mut Some(_x) = buyselected {
+                if _x == i {
+                    y = true;
+                }
             }
-        }
-        y
-    }) {
-        use conrod::widget::list_select::Event;
-        match event {
-            // For the `Item` events we instantiate the `List`'s items.
-            Event::Item(item) => {
-                let card_index = offer_row.get(item.i).unwrap();
-                let (_image_id, _rect, _) =
-                    in_game::get_card_widget_image_portrait(card_index.clone(),
-                                                            card_images,
-                                                            appdata);
-                //zoom rect
-                let _zoom_rect = graphics_match::cards_btm(_rect);
-                let i_h_struct =
-                    ImageHoverable(Image::new(_image_id).source_rectangle(_rect),
-                                   Some(Image::new(_image_id).source_rectangle(_zoom_rect)),
-                                   Some(Image::new(_image_id).source_rectangle(_zoom_rect)));
-                let mut j = buy_list_item::ItemWidget::new(i_h_struct)
+            y
+        }) {
+            use conrod::widget::list_select::Event;
+            match event {
+                // For the `Item` events we instantiate the `List`'s items.
+                Event::Item(item) => {
+                    let card_index = offer_row.get(item.i).unwrap();
+                    let (_timeless, _string, _color, _app_font, _rect) =
+                        in_game::get_tile_image_withcost(card_index.clone(), cardmeta, appdata);
+
+                    /*let mut j = buy_list_item::ItemWidget::new(i_h_struct) 
                     .border_color(color::YELLOW)
                     .border(20.0);
                 if let &mut Some(_s) = buyselected {
@@ -409,31 +473,42 @@ fn buy(ui: &mut conrod::UiCell,
                         j = j.bordered();
                     }
                 }
-                item.set(j, ui);
-            }
-            Event::Selection(selected_id) => {
-                if let &mut Some(_s) = buyselected {
-                    if _s == selected_id {
-                        *buyselected = None;
+                */
+                    let spinner_rect = graphics_match::spinner_sprite();
+                    let j = ItemWidget::new(back_logo, _timeless, _string, _rect, "timeless")
+                        .cloudy_image(cloudy)
+                        .coin_info(coin_info)
+                        .coin_info270(coin_info270)
+                        .spinner_image(spinner_image, spinner_rect)
+                        .border_color(color::YELLOW)
+                        .border(20.0)
+                        .color(_color);
+                    item.set(j, ui);
+                }
+                Event::Selection(selected_id) => {
+                    if let &mut Some(_s) = buyselected {
+                        if _s == selected_id {
+                            *buyselected = None;
+                        } else {
+                            *buyselected = Some(selected_id);
+                        }
                     } else {
                         *buyselected = Some(selected_id);
                     }
-                } else {
-                    *buyselected = Some(selected_id);
                 }
+                _ => {}
             }
-            _ => {}
         }
     }
-
 }
 fn trash_other(ui: &mut conrod::UiCell,
                ids: &Ids,
                player: &Player,
                otherthanthis: usize,
-               card_images: &[Option<image::Id>; 27],
+               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
                buyselected: &mut Option<usize>,
-               appdata: &AppData) {
+               appdata: &AppData,
+               result_map: &HashMap<ResourceEnum, SupportIdType>) {
     let mut hand = player.hand.clone();
     let arranged = player.arranged
         .iter()
@@ -473,55 +548,66 @@ fn trash_other(ui: &mut conrod::UiCell,
     if let Some(s) = scrollbar {
         s.set(ui)
     }
-    while let Some(event) = events.next(ui, |i| {
-        let mut y = false;
-        if let &mut Some(_x) = buyselected {
-            if _x == i {
-                y = true;
+    if let (Some(&SupportIdType::ImageId(back_logo)),
+            Some(&SupportIdType::ImageId(cloudy)),
+            Some(&SupportIdType::ImageId(coin_info)),
+            Some(&SupportIdType::ImageId(coin_info270)),
+            Some(&SupportIdType::ImageId(spinner_image))) =
+        (result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD))) {
+        while let Some(event) = events.next(ui, |i| {
+            let mut y = false;
+            if let &mut Some(_x) = buyselected {
+                if _x == i {
+                    y = true;
+                }
             }
-        }
-        y
-    }) {
-        use conrod::widget::list_select::Event;
-        match event {
-            // For the `Item` events we instantiate the `List`'s items.
-            Event::Item(item) => {
-                let card_index = hand.get(item.i).unwrap();
-                let (_image_id, _rect, _) =
-                    in_game::get_card_widget_image_portrait(card_index.clone(),
-                                                            card_images,
-                                                            appdata);
-                //zoom rect
-                let _zoom_rect = graphics_match::cards_btm(_rect);
-                let i_h_struct =
-                    ImageHoverable(Image::new(_image_id).source_rectangle(_rect),
-                                   Some(Image::new(_image_id).source_rectangle(_zoom_rect)),
-                                   Some(Image::new(_image_id).source_rectangle(_zoom_rect)));
-                let mut j = buy_list_item::ItemWidget::new(i_h_struct)
+            y
+        }) {
+            use conrod::widget::list_select::Event;
+            match event {
+                // For the `Item` events we instantiate the `List`'s items.
+                Event::Item(item) => {
+                    let card_index = hand.get(item.i).unwrap();
+                    let spinner_rect = graphics_match::spinner_sprite();
+                    let (_timeless, _string, _color, _app_font, _rect) =
+                        in_game::get_tile_image_withcost(card_index.clone(), cardmeta, appdata);
+                    let j = ItemWidget::new(back_logo, _timeless, _string, _rect, "timeless")
+                        .cloudy_image(cloudy)
+                        .coin_info(coin_info)
+                        .coin_info270(coin_info270)
+                        .spinner_image(spinner_image, spinner_rect)
+                        .border_color(color::YELLOW)
+                        .border(20.0)
+                        .color(_color);
+                    /*   let mut j = buy_list_item::ItemWidget::new(i_h_struct)
                     .border_color(color::YELLOW)
                     .border(20.0);
                 if let &mut Some(_s) = buyselected {
                     if _s == item.i {
                         j = j.bordered();
                     }
+                }*/
+                    item.set(j, ui);
                 }
-                item.set(j, ui);
-            }
-            Event::Selection(selected_id) => {
-                if let &mut Some(_s) = buyselected {
-                    if _s == selected_id {
-                        *buyselected = None;
+                Event::Selection(selected_id) => {
+                    if let &mut Some(_s) = buyselected {
+                        if _s == selected_id {
+                            *buyselected = None;
+                        } else {
+                            *buyselected = Some(selected_id);
+                        }
                     } else {
                         *buyselected = Some(selected_id);
                     }
-                } else {
-                    *buyselected = Some(selected_id);
                 }
+                _ => {}
             }
-            _ => {}
         }
     }
-
 }
 fn show_result(ui: &mut conrod::UiCell,
                ids: &Ids,

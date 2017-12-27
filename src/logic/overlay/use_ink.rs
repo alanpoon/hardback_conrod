@@ -33,12 +33,12 @@ pub fn render(w_id: tabview::Item,
     if let (&mut Some(ref mut boardcodec), &Some(ref _player_index)) = (boardcodec, player_index) {
         if let Some(_player) = boardcodec.players.get_mut(_player_index.clone()) {
             match overlay_receivedimage[0] {
-                OverlayStatus::Received(ref _img, ref _rect, ref _theme) => {
-                    widget::Image::new(_img.clone())
+                OverlayStatus::Received(cardindex) => {
+                    /*widget::Image::new(_img.clone())
                         .source_rectangle(_rect.clone())
                         .wh(appdata.convert_dim([150.0, 150.0]))
                         .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
-                        .set(ids.overlay_receivedimage, ui);
+                        .set(ids.overlay_receivedimage, ui);*/
                 }
                 OverlayStatus::Loading => {
                     if let Some(&SupportIdType::ImageId(dwn_img)) =

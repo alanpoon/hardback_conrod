@@ -1,5 +1,5 @@
 use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
-use cardgame_widgets::custom_widget::{tabview, animated_button, table_list};
+use cardgame_widgets::custom_widget::{tabview, table_list};
 use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
 use cardgame_widgets::custom_widget::animated_canvas;
 use std::collections::HashMap;
@@ -9,7 +9,6 @@ use app::{self, GameData, Ids};
 use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite, Font};
-use graphics_match::button;
 use graphics_match;
 use logic::in_game;
 use logic;
@@ -112,27 +111,15 @@ pub fn render(ui: &mut conrod::UiCell,
                   appdata: &AppData,
                   result_map: &HashMap<ResourceEnum, SupportIdType>,
                   action_tx: mpsc::Sender<OwnedMessage>) {
-        let _style = button::get_style();
         let _table_list_texts = TableListTex { appdata: &appdata };
-        if let (Some(&SupportIdType::ImageId(rust_logo)),
-                Some(&SupportIdType::FontId(bold_font)),
+        if let (Some(&SupportIdType::FontId(bold_font)),
                 Some(&SupportIdType::FontId(italic_font))) =
-            (result_map.get(&ResourceEnum::Sprite(Sprite::BUTTON)),
-             result_map.get(&ResourceEnum::Font(Font::BOLD)),
+            (result_map.get(&ResourceEnum::Font(Font::BOLD)),
              result_map.get(&ResourceEnum::Font(Font::ITALIC))) {
             let card_index = 7.0;
             let wh = ui.wh_of(ids.middle_tabview).unwrap();
             if let (&app::GuiState::Lobby, None) = (&gamedata.guistate, gamedata.tablenumber) {
-                let button_sprite = graphics_match::button::get_style();
-                let hover_rect = spriteable_rect(button_sprite, card_index + 1.0);
-                let press_rect = spriteable_rect(button_sprite, card_index + 2.0);
-                let normal_rect = spriteable_rect(button_sprite, card_index);
-                if animated_button::AnimatedButton::image(rust_logo)
-                       .label(appdata.texts.newtable)
-                       .label_color(color::WHITE)
-                       .normal_rect(Rect::from_corners(normal_rect.0, normal_rect.1))
-                       .hover_rect(Rect::from_corners(hover_rect.0, hover_rect.1))
-                       .press_rect(Rect::from_corners(press_rect.0, press_rect.1))
+                if widget::Button::new()
                        .top_left_with_margins_on(w_id.parent_id, 0.0, 0.0)
                        .w_h(wh[0] * 0.3, wh[1] * 0.06)
                        .set(ids.new_table_but, ui)
@@ -174,17 +161,10 @@ pub fn render(ui: &mut conrod::UiCell,
                                   ids.master,
                                   ui);
                 let change_name_index = 9.0;
-                let button_sprite = graphics_match::button::get_style();
-                let hover_rect = spriteable_rect(button_sprite, change_name_index + 1.0);
-                let press_rect = spriteable_rect(button_sprite, change_name_index + 2.0);
-                let normal_rect = spriteable_rect(button_sprite, change_name_index);
-                if animated_button::AnimatedButton::image(rust_logo)
+                if widget::Button::new()
                        .label(appdata.texts.changename)
                        .label_font_size(14)
                        .label_color(color::WHITE)
-                       .normal_rect(Rect::from_corners(normal_rect.0, normal_rect.1))
-                       .hover_rect(Rect::from_corners(hover_rect.0, hover_rect.1))
-                       .press_rect(Rect::from_corners(press_rect.0, press_rect.1))
                        .right_from(ids.name_rect, 2.0)
                        .w_h(wh[0] * 0.3, wh[1] * 0.06)
                        .set(ids.name_change_but, ui)

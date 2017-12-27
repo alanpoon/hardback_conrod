@@ -3,6 +3,7 @@ use backend::meta::app::Sprite;
 use backend::meta::cards;
 use conrod_chat::custom_widget::Message;
 use backend::codec_lib::codec::*;
+use backend::codec_lib::cards::{Board, WaitForInputType};
 use conrod::{image, Rect};
 use std::collections::hash_map::RandomState;
 use std::collections::HashSet;
@@ -93,7 +94,7 @@ pub enum GuiState {
 #[derive(Debug,Clone,PartialEq)]
 pub enum OverlayStatus {
     Loading,
-    Received(image::Id, Rect, cards::CardType),
+    Received(usize), //card index
     None,
 }
 #[derive(Clone)]
@@ -140,6 +141,8 @@ pub struct GameData {
     pub overlay_prompt: Option<(f64, String, Vec<(String, Box<Fn(PromptSender)>)>)>,
     pub buy_selected: Option<usize>,
     pub notification: Option<(String, Instant)>,
+    pub arrange_selected: Option<usize>,
+    pub hand_selected: Option<usize>,
 }
 impl GameData {
     pub fn new() -> GameData {
@@ -182,6 +185,8 @@ impl GameData {
             overlay_prompt: None,
             buy_selected: None,
             notification: None,
+            arrange_selected: None,
+            hand_selected: None,
         }
     }
 }
@@ -189,4 +194,58 @@ impl GameData {
 pub enum Footer {
     ShowHand,
     None,
+}
+pub struct BoardStruct {}
+
+impl Board for BoardStruct {
+    fn two_cent_per_adv(&mut self,
+                        _player_id: usize,
+                        _card_id: usize,
+                        _wait_for_input: &mut [WaitForInputType; 4]) {
+
+    }
+    fn minus_other_ink(&mut self,
+                       _player_id: usize,
+                       _card_id: usize,
+                       _wait_for_input: &mut [WaitForInputType; 4]) {
+
+    }
+    fn lockup_offer(&mut self,
+                    _player_id: usize,
+                    _card_id: usize,
+                    _wait_for_input: &mut [WaitForInputType; 4]) {
+
+
+    }
+
+    fn uncover_adjacent(&mut self,
+                        _player_id: usize,
+                        _card_id: usize,
+                        _wait_for_input: &mut [WaitForInputType; 4]) {
+
+    }
+    fn double_adjacent(&mut self,
+                       _player_id: usize,
+                       _card_id: usize,
+                       _wait_for_input: &mut [WaitForInputType; 4]) {
+
+
+    }
+    fn trash_other(&mut self,
+                   _player_id: usize,
+                   _card_id: usize,
+                   _wait_for_input: &mut [WaitForInputType; 4]) {
+
+    }
+    fn one_vp_per_wild(&mut self,
+                       _player_id: usize,
+                       _card_id: usize,
+                       _wait_for_input: &mut [WaitForInputType; 4]) {
+
+    }
+    fn putback_or_discard_three(&mut self,
+                                _player_id: usize,
+                                _card_id: usize,
+                                _wait_for_input: &mut [WaitForInputType; 4]) {
+    }
 }

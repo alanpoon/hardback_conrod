@@ -63,7 +63,7 @@ pub fn render(w_id: tabview::Item,
         .set(ids.overlay_subject, ui);
     //normal_stuff don't need mut borrow
     let mut normal_stuff: Vec<(Option<String>, Option<ImageRectType>, Vec<ImageRectType>)> = vec![];
-    let card_images = in_game::card_images(result_map);
+    // let card_images = in_game::card_images(result_map);
     if let Some(&SupportIdType::ImageId(rust_logo)) =
         result_map.get(&ResourceEnum::Sprite(Sprite::RUST)) {
         if let (&mut Some(ref mut _boardcodec),
@@ -82,13 +82,15 @@ pub fn render(w_id: tabview::Item,
                         let mut r = None;
                         for (_ci, _inkbool, _, _timeless) in _personal.arranged.clone() {
                             if *x != _ci {
-                                let (_image_id, _rect, _) =
+                                /*  let (_image_id, _rect, _) =
                                     in_game::get_card_widget_image_flexible(x.clone(),
                                                                             &card_images,
                                                                             appdata);
                                 let top_left = _rect.top_left();
                                 let btm_right = _rect.bottom_right();
                                 r = Some((_image_id, Some((top_left, btm_right)), _ci));
+                                */
+                                r = None;
                             }
                         }
                         r

@@ -51,7 +51,6 @@ pub fn render(w_id: tabview::Item,
                 .h(appdata.convert_h(260.0))
                 .down_from(ids.overlay_subject, 0.0)
                 .set(ids.overlay_explainlistselect, ui);
-            let card_images = in_game::card_images(result_map);
             // Handle the `ListSelect`s events.
             while let Some(event) = events.next(ui, |i| overlay_remover_selected.contains(&i)) {
                 use conrod::widget::list_select::Event;
@@ -59,8 +58,8 @@ pub fn render(w_id: tabview::Item,
                     // For the `Item` events we instantiate the `List`'s items.
                     Event::Item(item) => {
                         let card_index = inked.get(item.i).unwrap();
-                        let selected = overlay_remover_selected.contains(&item.i);
-                        let (_image_id, _rect, _) =
+                        let _selected = overlay_remover_selected.contains(&item.i);
+                        /*   let (_image_id, _rect, _) =
                             in_game::get_card_widget_image_portrait(card_index.clone(),
                                                                     &card_images,
                                                                     appdata);
@@ -72,6 +71,7 @@ pub fn render(w_id: tabview::Item,
                             button = button.bordered();
                         }
                         item.set(button, ui);
+                        */
                     }
 
                     // The selection has changed.
@@ -92,12 +92,13 @@ pub fn render(w_id: tabview::Item,
             }
 
             match overlay_receivedimage[1] {
-                OverlayStatus::Received(ref _img, ref _rect, ref _theme) => {
-                    widget::Image::new(_img.clone())
+                OverlayStatus::Received(ref _card_index) => {
+                    /*widget::Image::new(_img.clone())
                         .source_rectangle(_rect.clone())
                         .wh(appdata.convert_dim([150.0, 150.0]))
                         .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
                         .set(ids.overlay_receivedimage, ui);
+                        */
                 }
                 OverlayStatus::Loading => {
                     if let Some(&SupportIdType::ImageId(dwn_img)) =

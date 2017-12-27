@@ -4,6 +4,7 @@ extern crate conrod_chat;
 extern crate futures;
 extern crate toa_ping;
 
+#[allow(non_snake_case)]
 use hardback_conrod as game_conrod;
 use game_conrod::backend::glium::{self, glutin, Surface};
 use game_conrod::{app, logic};
@@ -14,6 +15,9 @@ use game_conrod::page_curl::{self, page, render};
 use game_conrod::opengl;
 use game_conrod::on_request;
 use game_conrod::support;
+use game_conrod::backend::codec_lib;
+use game_conrod::backend::codec_lib::cards;
+use game_conrod::app::BoardStruct;
 use conrod_chat::backend::websocket::client;
 use conrod::event;
 use std::collections::HashMap;
@@ -73,6 +77,8 @@ impl GameApp {
         let (ss_tx, _ss_rx) = (s_tx.clone(), s_rx.clone());
         let mut gamedata = app::GameData::new();
         gamedata.guistate = app::GuiState::Menu;
+        let cardmeta: [codec_lib::cards::ListCard<BoardStruct>; 180] =
+            cards::populate::<BoardStruct>();
         std::thread::spawn(move || {
             let mut connected = false;
             let mut last_update = std::time::Instant::now();
@@ -222,6 +228,7 @@ impl GameApp {
                     // Set the widgets.
 
                     game_proc.run(&mut ui,
+                                  &cardmeta,
                                   &mut (gamedata),
                                   &result_map,
                                   proxy_action_tx.clone());
@@ -230,6 +237,7 @@ impl GameApp {
                 Some(ConrodMessage::Thread(_t)) => {
                     // Set the widgets.
                     game_proc.run(&mut ui,
+                                  &cardmeta,
                                   &mut (gamedata),
                                   &result_map,
                                   proxy_action_tx.clone());

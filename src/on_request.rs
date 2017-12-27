@@ -63,15 +63,9 @@ pub fn update(s: ClientReceivedMsg,
     if let (&Some(Some(ref _request)), Some(ref _overlay_index)) =
         (&request, gamedata.overlay_index) {
         //request
-        let card_images = in_game::card_images(result_map);
         let (ref _p_i, ref _c_i, ref _string, ref _vecstring, ref _opt) = *_request;
-        let (_image_id, _rect, _theme) = if _overlay_index.clone() <= 1 {
-            in_game::get_card_widget_image_portrait(_c_i.clone(), &card_images, appdata)
-        } else {
-            in_game::get_card_widget_image_flexible(_c_i.clone(), &card_images, appdata)
-        };
         gamedata.overlay_receivedimage[_overlay_index.clone()] =
-            OverlayStatus::Received(_image_id, _rect, _theme);
+            OverlayStatus::Received(_c_i.clone());
     }
     if let Some(Some(ref _request)) = request {
         //request for the prompts

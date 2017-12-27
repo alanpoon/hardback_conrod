@@ -1,20 +1,25 @@
-use cardgame_widgets::custom_widget::image_hover::{Hoverable, TimesClicked};
+use cardgame_widgets::custom_widget::image_hover::TimesClicked;
 use conrod::{widget, Color, Colorable, Borderable, Positionable, UiCell, Widget, event, input,
-             image, Theme, Sizeable};
+             image, Theme, Sizeable, text, FontSize};
 
 use conrod::position::{Rect, Scalar, Dimensions, Point};
+use cardgame_widgets::text::get_font_size_hn;
 use conrod::widget::Rectangle;
 
 /// The type upon which we'll implement the `Widget` trait.
 #[derive(WidgetCommon)]
-pub struct ItemWidget<H>
-    where H: Hoverable
-{
+pub struct ItemWidget<'a> {
     /// An object that handles some of the dirty work of rendering a GUI. We don't
     /// really have to worry about it.
     #[conrod(common_builder)]
     common: widget::CommonBuilder,
-    pub image: H,
+    pub timeless: bool,
+    pub cost_rect: Rect,
+    pub alphabet: &'a str,
+    pub timelesstext: &'a str,
+    pub cloudy_image: Option<image::Id>,
+    pub coin_info: Option<image::Id>,
+    pub coin_info270: Option<image::Id>,
     pub bordered: bool,
     /// See the Style struct below.
     style: Style,
@@ -31,13 +36,25 @@ pub struct Style {
     /// The color of the border.
     #[conrod(default = "theme.border_color")]
     pub border_color: Option<Color>,
+    /// Alphabet Font Id
+    #[conrod(default="theme.font_id")]
+    pub alphabet_font_id: Option<Option<text::font::Id>>,
+    /// Timeless Font Id
+    #[conrod(default="theme.font_id")]
+    pub timeless_font_id: Option<Option<text::font::Id>>,
 }
 
 widget_ids! {
     struct Ids {
         background,
         rect,
-        image,
+        cloudy,
+        alphabet,
+        coin_info,
+        coin_info_timeless,
+        textedit_background,
+        textedit_blinkline,
+        textedit_at_toggle,
     }
 }
 
@@ -46,29 +63,52 @@ pub struct State {
     ids: Ids,
 }
 
-impl<H> ItemWidget<H>
-    where H: Hoverable
-{
+impl<'a> ItemWidget<'a> {
     /// Create a button context to be built upon.
-    pub fn new(image: H) -> Self {
+    pub fn new(timeless: bool, alphabet: &'a str, cost_rect: Rect, timelesstext: &'a str) -> Self {
         ItemWidget {
-            image: image,
             common: widget::CommonBuilder::default(),
             bordered: false,
             style: Style::default(),
+            alphabet: alphabet,
+            timeless: timeless,
+            timelesstext: timelesstext,
+            cost_rect: cost_rect,
+            cloudy_image: None,
+            coin_info: None,
+            coin_info270: None,
         }
     }
     pub fn bordered(mut self) -> Self {
         self.bordered = true;
         self
     }
+    pub fn cloudy_image(mut self, image: image::Id) -> Self {
+        self.cloudy_image = Some(image);
+        self
+    }
+    pub fn coin_info(mut self, coin_info: image::Id) -> Self {
+        self.coin_info = Some(coin_info);
+        self
+    }
+    pub fn coin_info270(mut self, coin_info270: image::Id) -> Self {
+        self.coin_info270 = Some(coin_info270);
+        self
+    }
+
+    pub fn alphabet_font_id(mut self, font_id: text::font::Id) -> Self {
+        self.style.alphabet_font_id = Some(Some(font_id));
+        self
+    }
+    pub fn timeless_font_id(mut self, font_id: text::font::Id) -> Self {
+        self.style.timeless_font_id = Some(Some(font_id));
+        self
+    }
 }
 
 /// A custom Conrod widget must implement the Widget trait. See the **Widget** trait
 /// documentation for more details.
-impl<H> Widget for ItemWidget<H>
-    where H: Hoverable
-{
+impl<'a> Widget for ItemWidget<'a> {
     /// The State struct that we defined above.
     type State = State;
     /// The Style struct that we defined using the `widget_style!` macro.
@@ -94,7 +134,7 @@ impl<H> Widget for ItemWidget<H>
         // necessary primitive graphics widgets.
         //
 
-        let (interaction, _times_triggered) = interaction_and_times_triggered(id, ui);
+        let (_, _times_triggered) = interaction_and_times_triggered(id, ui);
         let (_, _, w, h) = rect.x_y_w_h();
         let border = if self.bordered {
             self.style.border(ui.theme())
@@ -118,18 +158,50 @@ impl<H> Widget for ItemWidget<H>
                                                                                    ui);
         }
 
-        let _image = match interaction {
-            Interaction::Idle => self.image.idle(),
-            Interaction::Hover => self.image.hover().unwrap_or(self.image.idle()),
-            Interaction::Press => self.image.press().unwrap_or(self.image.idle()),
-        };
-        _image.w_h(w - border, h - border)
+        if let (Some(_cloudy), Some(_coin_info), Some(_coin_info270)) =
+            (self.cloudy_image, self.coin_info, self.coin_info270) {
+            widget::Image::new(_cloudy)
+                .w_h(w - border, h - border)
+                .middle_of(id)
+                .parent(id)
+                .graphics_for(id)
+                .set(state.ids.cloudy, ui);
+            if self.timeless {
+                widget::Image::new(_coin_info270)
+                    .source_rectangle(self.cost_rect)
+                    .wh([w, h * 0.2])
+                    .mid_bottom_of(id)
+                    .parent(id)
+                    .set(state.ids.coin_info, ui);
+                let fontsize = get_font_size_hn(h * 0.2, 1.0);
+                let timeless_font_id =
+                    self.style.timeless_font_id(&ui.theme).or(ui.fonts.ids().next());
+                widget::Text::new(self.timelesstext)
+                    .middle_of(state.ids.coin_info)
+                    .font_size(fontsize)
+                    .and_then(timeless_font_id, widget::Text::font_id)
+                    .set(state.ids.coin_info_timeless, ui);
+            } else {
+                widget::Image::new(_coin_info)
+                    .source_rectangle(self.cost_rect)
+                    .wh([w * 0.2, h])
+                    .mid_left_of(id)
+                    .parent(id)
+                    .set(state.ids.coin_info, ui);
+            }
+        }
+
+        let fontsize = get_font_size_hn(h, 2.0);
+        let alphabet_font_id = self.style.alphabet_font_id(&ui.theme).or(ui.fonts.ids().next());
+        let j = self.alphabet.to_uppercase();
+
+        widget::Text::new(&j)
             .middle_of(id)
             .parent(id)
+            .font_size(fontsize)
+            .and_then(alphabet_font_id, widget::Text::font_id)
             .graphics_for(id)
-            .set(state.ids.image, ui);
-
-
+            .set(state.ids.alphabet, ui);
     }
 }
 fn interaction_and_times_triggered(button_id: widget::Id, ui: &UiCell) -> (Interaction, u16) {
@@ -157,14 +229,10 @@ fn rectangle_fill(button_id: widget::Id,
 }
 
 
-impl<H> Colorable for ItemWidget<H>
-    where H: Hoverable
-{
+impl<'a> Colorable for ItemWidget<'a> {
     builder_method!(color { style.color = Some(Color) });
 }
-impl<H> Borderable for ItemWidget<H>
-    where H: Hoverable
-{
+impl<'a> Borderable for ItemWidget<'a> {
     builder_methods!{
         border { style.border = Some(Scalar) }
         border_color { style.border_color = Some(Color) }

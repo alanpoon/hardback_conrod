@@ -116,10 +116,11 @@ pub fn render(ui: &mut conrod::UiCell,
                 Some(&SupportIdType::FontId(italic_font))) =
             (result_map.get(&ResourceEnum::Font(Font::BOLD)),
              result_map.get(&ResourceEnum::Font(Font::ITALIC))) {
-            let card_index = 7.0;
             let wh = ui.wh_of(ids.middle_tabview).unwrap();
             if let (&app::GuiState::Lobby, None) = (&gamedata.guistate, gamedata.tablenumber) {
                 if widget::Button::new()
+                       .label(appdata.texts.newtable)
+                       .label_color(color::BLACK)
                        .top_left_with_margins_on(w_id.parent_id, 0.0, 0.0)
                        .w_h(wh[0] * 0.3, wh[1] * 0.06)
                        .set(ids.new_table_but, ui)
@@ -160,11 +161,10 @@ pub fn render(ui: &mut conrod::UiCell,
                                   wh[0] * 0.025,
                                   ids.master,
                                   ui);
-                let change_name_index = 9.0;
                 if widget::Button::new()
                        .label(appdata.texts.changename)
                        .label_font_size(14)
-                       .label_color(color::WHITE)
+                       .label_color(color::BLACK)
                        .right_from(ids.name_rect, 2.0)
                        .w_h(wh[0] * 0.3, wh[1] * 0.06)
                        .set(ids.name_change_but, ui)

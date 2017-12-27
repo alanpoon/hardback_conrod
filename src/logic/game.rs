@@ -86,7 +86,9 @@ impl<'a, T> GameProcess<'a, T>
             .color(color::TRANSPARENT)
             .flow_down(&[(ids.body, animated_canvas::Canvas::new().color(color::TRANSPARENT)),
                          (ids.footer,
-                          animated_canvas::Canvas::new().color(color::DARK_GREEN).length(210.0))])
+                          animated_canvas::Canvas::new()
+                              .color(color::DARK_GREEN)
+                              .length(appdata.convert_h(210.0)))])
             .frame_rate(30)
             .set(ids.master, ui);
         logic::body::render(ui,

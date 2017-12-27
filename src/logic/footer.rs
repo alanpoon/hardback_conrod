@@ -133,10 +133,10 @@ fn spell(ui: &mut conrod::UiCell,
             .iter()
             .map(|ref x| {
                      let (_timeless, _string, _color, _app_font, _rect) =
-                    in_game::get_tile_image_withcost(*x.clone(), cardmeta, appdata);
-                     (x.clone().clone(), _timeless, _string, _color, _app_font, _rect)
+                    in_game::get_tile_image_withcost(*x.clone(), cardmeta, appdata, result_map);
+                     (*x.clone(), _timeless, _string, _color, _app_font, _rect)
                  })
-            .collect::<Vec<(usize, bool, &str, Color, meta::app::Font, Rect)>>();
+            .collect::<Vec<(usize, bool, &str, Color, text::font::Id, Rect)>>();
         if let (Some(&SupportIdType::ImageId(spinner_image)),
                 Some(&SupportIdType::ImageId(back_image)),
                 Some(&SupportIdType::ImageId(arrows_image)),
@@ -153,6 +153,7 @@ fn spell(ui: &mut conrod::UiCell,
              result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
             let spinner_rect = graphics_match::spinner_sprite();
             let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
+            let footer_list_w = ui.w_of(ids.footer).unwrap() - 300.0;
             let (exitid, exitby, scrollbar) = ArrangeList::new(&mut handvec,
                                                                hand_selected,
                                                                Box::new(move |(_v_index,
@@ -167,10 +168,11 @@ fn spell(ui: &mut conrod::UiCell,
                     .coin_info270(coin_info270)
                     .spinner_image(spinner_image, spinner_rect)
                     .border_color(color::YELLOW)
-                    .border(20.0)
+                    .border(15.0)
+                    .alphabet_font_id(_font)
                     .color(_color)
             }),
-                                                               200.0)
+                                                               footer_list_w / 7.0)
                     .padded_h_of(ids.footer, 10.0)
                     .padded_w_of(ids.footer, 150.0)
                     .top_left_with_margin_on(ids.footer, 10.0)

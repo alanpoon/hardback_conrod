@@ -161,10 +161,10 @@ fn show_draft(ui: &mut conrod::UiCell,
               appdata: &AppData,
               print_instruction_set: &mut Vec<bool>,
               initial_draft: &mut Vec<usize>,
-              _result_map: &HashMap<ResourceEnum, SupportIdType>,
+              result_map: &HashMap<ResourceEnum, SupportIdType>,
               action_tx: mpsc::Sender<OwnedMessage>) {
     let body_w = ui.w_of(ids.body).unwrap();
-    let item_h = body_w / 5.0;
+    let item_h = body_w / 7.0;
     *initial_draft = player.draft.clone();
     let mut dealt_iter = player.draft.iter();
     if let Some(&mut true) = print_instruction_set.get_mut(0) {
@@ -181,7 +181,7 @@ fn show_draft(ui: &mut conrod::UiCell,
         }
         while let (Some(item), Some(card_index)) = (items.next(ui), dealt_iter.next()) {
             let (_timeless, _string, _color, _app_font, _rect) =
-                in_game::get_tile_image_withcost(card_index.clone(), cardmeta, appdata);
+                in_game::get_tile_image_withcost(card_index.clone(), cardmeta, appdata, result_map);
             //  let j = ImageHover::new(_ih);
             //  item.set(j, ui);
         }
@@ -231,10 +231,10 @@ fn shuffle(ui: &mut conrod::UiCell,
         let card_vec = initial_draft.iter()
             .map(|x| {
                      let (_timeless, _string, _color, _app_font, _rect) =
-                    in_game::get_tile_image_withcost(x.clone(), cardmeta, appdata);
+                    in_game::get_tile_image_withcost(x.clone(), cardmeta, appdata, result_map);
                      (x.clone(), _timeless, _string, _color, _app_font, _rect)
                  })
-            .collect::<Vec<(usize, bool, &str, Color, meta::app::Font, Rect)>>();
+            .collect::<Vec<(usize, bool, &str, Color, text::font::Id, Rect)>>();
         let give_out_vec = player.hand
             .iter()
             .enumerate()
@@ -264,7 +264,8 @@ fn shuffle(ui: &mut conrod::UiCell,
                 .coin_info270(coin_info270)
                 .spinner_image(spinner_image, spinner_rect)
                 .border_color(color::YELLOW)
-                .border(20.0)
+                .border(15.0)
+                .alphabet_font_id(_font)
                 .color(_color)
         }),
                          Image::new(back_logo).source_rectangle(graphics_match::backcard()))
@@ -307,7 +308,7 @@ fn spell(ui: &mut conrod::UiCell,
             .iter()
             .map(|&(ref x, ref ink, ref op_string, ref _timeless)| {
                 let (_timeless, _string, _color, _font, _rect) =
-                    in_game::get_tile_image_withcost(x.clone(), cardmeta, appdata);
+                    in_game::get_tile_image_withcost(x.clone(), cardmeta, appdata, result_map);
                 (x.clone(),
                  _timeless,
                  _string,
@@ -321,7 +322,7 @@ fn spell(ui: &mut conrod::UiCell,
                  bool,
                  &str,
                  conrod::Color,
-                 meta::app::Font,
+                 text::font::Id,
                  conrod::Rect,
                  bool,
                  Option<String>)>>();
@@ -339,6 +340,7 @@ fn spell(ui: &mut conrod::UiCell,
              result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270))) {
             let spinner_rect = graphics_match::spinner_sprite();
             let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
+            let body_list_w = ui.w_of(ids.body).unwrap() - 40.0;
             let (exitid, exitby, scrollbar) = ArrangeList::new(&mut arrangedvec,
                                                                arrange_selected,
                                                                Box::new(move |(_v_index,
@@ -355,11 +357,12 @@ fn spell(ui: &mut conrod::UiCell,
                     .coin_info270(coin_info270)
                     .spinner_image(spinner_image, spinner_rect)
                     .border_color(color::YELLOW)
-                    .border(20.0)
+                    .border(15.0)
+                    .alphabet_font_id(_font)
                     .color(_color)
             }),
-                                                               200.0)
-                    .h(260.0)
+                                                               body_list_w / 7.0)
+                    .h(appdata.convert_h(260.0))
                     .padded_w_of(ids.body, 20.0)
                     .mid_bottom_with_margin_on(ids.body, 80.0)
                     .left_arrow(_l)
@@ -413,20 +416,20 @@ fn buy(ui: &mut conrod::UiCell,
 
     widget::Text::new(appdata.texts.buy)
         .color(color::WHITE)
-        .font_size(50)
-        .h(100.0)
+        .font_size(40)
+        .h(80.0)
         .w_of(ids.body)
         .top_left_of(ids.body)
         .set(ids.body_header_text, ui);
     widget::Text::new(appdata.texts.unused_coins)
         .color(color::GREY)
-        .font_size(50)
+        .font_size(35)
         .padded_w_of(ids.body, 100.0)
         .h(70.0)
         .down_from(ids.body_header_text, 0.0)
         .set(ids.body_subject_text, ui);
     let body_w = ui.w_of(ids.body).unwrap();
-    let item_h = body_w / 5.0;
+    let item_h = body_w / 7.0;
     let (mut events, scrollbar) = widget::ListSelect::single(offer_row.len())
         .flow_right()
         .item_size(item_h)
@@ -463,26 +466,25 @@ fn buy(ui: &mut conrod::UiCell,
                 Event::Item(item) => {
                     let card_index = offer_row.get(item.i).unwrap();
                     let (_timeless, _string, _color, _app_font, _rect) =
-                        in_game::get_tile_image_withcost(card_index.clone(), cardmeta, appdata);
+                        in_game::get_tile_image_withcost(card_index.clone(),
+                                                         cardmeta,
+                                                         appdata,
+                                                         result_map);
 
-                    /*let mut j = buy_list_item::ItemWidget::new(i_h_struct) 
-                    .border_color(color::YELLOW)
-                    .border(20.0);
-                if let &mut Some(_s) = buyselected {
-                    if _s == item.i {
-                        j = j.bordered();
+                    let mut j =
+                        buy_list_item::ItemWidget::new(_timeless, _string, _rect, "timeless")
+                            .cloudy_image(cloudy)
+                            .coin_info(coin_info)
+                            .coin_info270(coin_info270)
+                            .border_color(color::YELLOW)
+                            .border(15.0)
+                            .alphabet_font_id(_app_font)
+                            .color(_color);
+                    if let &mut Some(_s) = buyselected {
+                        if _s == item.i {
+                            j = j.bordered();
+                        }
                     }
-                }
-                */
-                    let spinner_rect = graphics_match::spinner_sprite();
-                    let j = ItemWidget::new(back_logo, _timeless, _string, _rect, "timeless")
-                        .cloudy_image(cloudy)
-                        .coin_info(coin_info)
-                        .coin_info270(coin_info270)
-                        .spinner_image(spinner_image, spinner_rect)
-                        .border_color(color::YELLOW)
-                        .border(20.0)
-                        .color(_color);
                     item.set(j, ui);
                 }
                 Event::Selection(selected_id) => {
@@ -574,18 +576,22 @@ fn trash_other(ui: &mut conrod::UiCell,
                     let card_index = hand.get(item.i).unwrap();
                     let spinner_rect = graphics_match::spinner_sprite();
                     let (_timeless, _string, _color, _app_font, _rect) =
-                        in_game::get_tile_image_withcost(card_index.clone(), cardmeta, appdata);
+                        in_game::get_tile_image_withcost(card_index.clone(),
+                                                         cardmeta,
+                                                         appdata,
+                                                         result_map);
                     let j = ItemWidget::new(back_logo, _timeless, _string, _rect, "timeless")
                         .cloudy_image(cloudy)
                         .coin_info(coin_info)
                         .coin_info270(coin_info270)
                         .spinner_image(spinner_image, spinner_rect)
                         .border_color(color::YELLOW)
-                        .border(20.0)
+                        .border(15.0)
+                        .alphabet_font_id(_app_font)
                         .color(_color);
                     /*   let mut j = buy_list_item::ItemWidget::new(i_h_struct)
                     .border_color(color::YELLOW)
-                    .border(20.0);
+                    .border(15.0);
                 if let &mut Some(_s) = buyselected {
                     if _s == item.i {
                         j = j.bordered();

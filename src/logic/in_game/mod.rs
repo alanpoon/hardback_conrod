@@ -12,10 +12,11 @@ use graphics_match;
 
 pub fn get_tile_image_withcost<'a>(card_index: usize,
                                    cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
-                                   appdata: &AppData)
-                                   -> (bool, &'a str, Color, Font, Rect) {
+                                   appdata: &AppData,
+                                   result_map: &HashMap<ResourceEnum, SupportIdType>)
+                                   -> (bool, &'a str, Color, text::font::Id, Rect) {
 
-    let &meta::cards::BlowupCard { ref theme, 
+    let &meta::cards::BlowupCard { ref _theme, 
  //ref crop,ref genre_string,ref non_genre_string,
   .. } =
         appdata.blowupcards.get(&card_index).unwrap();
@@ -27,11 +28,11 @@ pub fn get_tile_image_withcost<'a>(card_index: usize,
      //ref id,ref cost,ref purchase_giveables,ref giveables,ref genre_giveables,ref trash,ref timeless,..
  } = cardmeta[card_index.clone()];
     let color = match genre {
-        &Genre::MYSTERY => color::BLUE,
-        &Genre::HORROR => color::GREEN,
-        &Genre::ADVENTURE => color::YELLOW,
-        &Genre::ROMANCE => color::RED,
-        _ => color::WHITE,
+        &Genre::MYSTERY => color::LIGHT_BLUE,
+        &Genre::HORROR => color::LIGHT_GREEN,
+        &Genre::ADVENTURE => color::LIGHT_YELLOW,
+        &Genre::ROMANCE => color::LIGHT_RED,
+        _ => color::LIGHT_GRAY,
     };
     let font = match genre {
         &Genre::MYSTERY => Font::MYSTERY,
@@ -40,6 +41,10 @@ pub fn get_tile_image_withcost<'a>(card_index: usize,
         &Genre::ROMANCE => Font::ROMANCE,
         _ => Font::BOLD,
     };
+    let mut _font = None;
+    if let Some(&SupportIdType::FontId(__font)) = result_map.get(&ResourceEnum::Font(font)) {
+        _font = Some(__font.clone());
+    }
     let source_rect = if *timeless {
         let rect_dim = spriteable_rect(graphics_match::get_cost_info_sprite(), cost.clone() as f64);
         Rect::from_corners(rect_dim.0, rect_dim.1)
@@ -47,7 +52,7 @@ pub fn get_tile_image_withcost<'a>(card_index: usize,
         let rect_dim = spriteable_rect(graphics_match::get_cost_info_sprite(), cost.clone() as f64);
         Rect::from_corners(rect_dim.0, rect_dim.1)
     };
-    (timeless.clone(), letter, color, font, source_rect)
+    (timeless.clone(), letter, color, _font.unwrap(), source_rect)
 }
 /*
 pub fn get_tile_info(card_index:usize,cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],appdata:&AppData){

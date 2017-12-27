@@ -4,6 +4,7 @@ use conrod::{widget, Color, Colorable, Borderable, Positionable, UiCell, Widget,
 
 use conrod::position::{Rect, Scalar, Dimensions, Point};
 use cardgame_widgets::sprite::{Spriteable, spriteable_rect};
+use cardgame_widgets::text::get_font_size_hn;
 use conrod::widget::Rectangle;
 
 /// The type upon which we'll implement the `Widget` trait.
@@ -188,10 +189,8 @@ impl<'a, S> Widget for ItemWidget<'a, S>
                 maybe_thickness: Some(border),
                 maybe_cap: None,
             };
-            Rectangle::outline_styled([w, h],_style).middle_of(id)
-            .parent(id)
-            //.graphics_for(id)
-            .set(state.ids.rect, ui);
+            Rectangle::outline_styled([w, h], _style).middle_of(id).parent(id).set(state.ids.rect,
+                                                                                   ui);
         }
         // Instantiate the image.
         if toggle_bool {
@@ -213,20 +212,23 @@ impl<'a, S> Widget for ItemWidget<'a, S>
                 if self.timeless {
                     widget::Image::new(_coin_info270)
                         .source_rectangle(self.cost_rect)
-                        .wh([w, h * 0.1])
+                        .wh([w, h * 0.2])
                         .mid_bottom_of(id)
                         .parent(id)
                         .set(state.ids.coin_info, ui);
+                    let fontsize = get_font_size_hn(h * 0.2, 1.0);
                     let timeless_font_id =
                         self.style.timeless_font_id(&ui.theme).or(ui.fonts.ids().next());
                     widget::Text::new(self.timelesstext)
                         .middle_of(state.ids.coin_info)
+                        .font_size(fontsize)
+                        .color(color::WHITE)
                         .and_then(timeless_font_id, widget::Text::font_id)
                         .set(state.ids.coin_info_timeless, ui);
                 } else {
                     widget::Image::new(_coin_info)
                         .source_rectangle(self.cost_rect)
-                        .wh([w * 0.1, h])
+                        .wh([w * 0.2, h])
                         .mid_left_of(id)
                         .parent(id)
                         .set(state.ids.coin_info, ui);
@@ -234,11 +236,14 @@ impl<'a, S> Widget for ItemWidget<'a, S>
             }
         }
 
-
+        let fontsize = get_font_size_hn(h, 2.0);
         let alphabet_font_id = self.style.alphabet_font_id(&ui.theme).or(ui.fonts.ids().next());
-        widget::Text::new(self.alphabet)
+        let j = self.alphabet.to_uppercase();
+
+        widget::Text::new(&j)
             .middle_of(id)
             .parent(id)
+            .font_size(fontsize)
             .and_then(alphabet_font_id, widget::Text::font_id)
             .graphics_for(id)
             .set(state.ids.alphabet, ui);

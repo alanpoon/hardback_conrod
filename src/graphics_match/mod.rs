@@ -70,7 +70,7 @@ pub fn backcard() -> Rect {
 }
 pub fn arrow_sprite() -> SpriteInfo {
     SpriteInfo {
-        first: (0.0, 400.0), //left corner of first
+        first: (0.0, 600.0), //left corner of first
         num_in_row: 4,
         num_in_col: 3,
         w_h: (200.0, 200.0),

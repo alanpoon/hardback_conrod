@@ -37,10 +37,10 @@ pub fn load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, Suppo
     (ResourceEnum::Font(Font::BOLD),"font","fonts/NotoSans/NotoSans-Bold.ttf"),
     (ResourceEnum::Font(Font::BOLDITALIC),"font","fonts/NotoSans/NotoSans-BoldItalic.ttf"),
     (ResourceEnum::Font(Font::ITALIC),"font","fonts/NotoSans/NotoSans-Italic.ttf"),
-    (ResourceEnum::Font(Font::MYSTERY),"font","fonts/NotoSans/NotoSans-Italic.ttf"),
-    (ResourceEnum::Font(Font::HORROR),"font","fonts/NotoSans/NotoSans-Italic.ttf"),
-    (ResourceEnum::Font(Font::ADVENTURE),"font","fonts/NotoSans/NotoSans-Italic.ttf"),
-    (ResourceEnum::Font(Font::ROMANCE),"font","fonts/NotoSans/NotoSans-Italic.ttf"),
+    (ResourceEnum::Font(Font::MYSTERY),"font","fonts/MysteryQuest-Regular.ttf"),
+    (ResourceEnum::Font(Font::HORROR),"font","fonts/Mortified.ttf"),
+    (ResourceEnum::Font(Font::ADVENTURE),"font","fonts/TradeWinds-Regular.ttf"),
+    (ResourceEnum::Font(Font::ROMANCE),"font","fonts/Babylove.ttf"),
   }
     let g = ImageIds::new();
     g.pump(result_map, display, ui, image_map);

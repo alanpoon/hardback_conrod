@@ -1,6 +1,6 @@
 use cardgame_widgets::custom_widget::arrange_list::{Hoverable, Arrangeable, TimesClicked};
 use conrod::{widget, Color, Colorable, Borderable, Positionable, UiCell, Widget, event, input,
-             image, Theme, Sizeable, text, FontSize};
+             image, Theme, Sizeable, text, FontSize, color};
 
 use conrod::position::{Rect, Scalar, Dimensions, Point};
 use cardgame_widgets::sprite::{Spriteable, spriteable_rect};

@@ -16,7 +16,7 @@ pub fn get_tile_image_withcost<'a>(card_index: usize,
                                    result_map: &HashMap<ResourceEnum, SupportIdType>)
                                    -> (bool, &'a str, Color, text::font::Id, Rect) {
 
-    let &meta::cards::BlowupCard { ref _theme, 
+    let &meta::cards::BlowupCard { ref theme, 
  //ref crop,ref genre_string,ref non_genre_string,
   .. } =
         appdata.blowupcards.get(&card_index).unwrap();

@@ -33,7 +33,7 @@ pub fn render(w_id: tabview::Item,
     if let (&mut Some(ref mut boardcodec), &Some(ref _player_index)) = (boardcodec, player_index) {
         if let Some(_player) = boardcodec.players.get_mut(_player_index.clone()) {
             match overlay_receivedimage[0] {
-                OverlayStatus::Received(cardindex) => {
+                OverlayStatus::Received(_cardindex) => {
                     /*widget::Image::new(_img.clone())
                         .source_rectangle(_rect.clone())
                         .wh(appdata.convert_dim([150.0, 150.0]))

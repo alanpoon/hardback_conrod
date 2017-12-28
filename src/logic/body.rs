@@ -179,7 +179,7 @@ fn show_draft(ui: &mut conrod::UiCell,
         if let Some(s) = scrollbar {
             s.set(ui)
         }
-        while let (Some(item), Some(card_index)) = (items.next(ui), dealt_iter.next()) {
+        while let (Some(_item), Some(card_index)) = (items.next(ui), dealt_iter.next()) {
             let (_timeless, _string, _color, _app_font, _rect) =
                 in_game::get_tile_image_withcost(card_index.clone(), cardmeta, appdata, result_map);
             //  let j = ImageHover::new(_ih);
@@ -271,8 +271,9 @@ fn shuffle(ui: &mut conrod::UiCell,
                          Image::new(back_logo).source_rectangle(graphics_match::backcard()))
                     .give_out(give_out_vec)
                     .bottom_left_of(ids.body)
-                    .h(260.0)
+                    .h(appdata.convert_h(220.0))
                     .w_of(ids.body)
+                    .image_dim(appdata.convert_dim([190.0, 220.0]))
                     .close_frame_rate(25)
                     .set(ids.shuffleview, ui) {
             if _player_index == 0 {
@@ -441,16 +442,12 @@ fn buy(ui: &mut conrod::UiCell,
     if let Some(s) = scrollbar {
         s.set(ui)
     }
-    if let (Some(&SupportIdType::ImageId(back_logo)),
-            Some(&SupportIdType::ImageId(cloudy)),
+    if let (Some(&SupportIdType::ImageId(cloudy)),
             Some(&SupportIdType::ImageId(coin_info)),
-            Some(&SupportIdType::ImageId(coin_info270)),
-            Some(&SupportIdType::ImageId(spinner_image))) =
-        (result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)),
-         result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
+            Some(&SupportIdType::ImageId(coin_info270))) =
+        (result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
-         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
-         result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD))) {
+         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270))) {
         while let Some(event) = events.next(ui, |i| {
             let mut y = false;
             if let &mut Some(_x) = buyselected {

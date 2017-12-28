@@ -57,7 +57,7 @@ pub fn render(w_id: tabview::Item,
                 match event {
                     // For the `Item` events we instantiate the `List`'s items.
                     Event::Item(item) => {
-                        let card_index = inked.get(item.i).unwrap();
+                        let _card_index = inked.get(item.i).unwrap();
                         let _selected = overlay_remover_selected.contains(&item.i);
                         /*   let (_image_id, _rect, _) =
                             in_game::get_card_widget_image_portrait(card_index.clone(),

@@ -29,18 +29,27 @@ pub fn load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, Suppo
     (ResourceEnum::Sprite(Sprite::CLOUDY),"image","images/cards/cloudy.png"),
     (ResourceEnum::Sprite(Sprite::COININFO),"image","images/allcoin_info.png"),
     (ResourceEnum::Sprite(Sprite::COININFO270),"image270","images/allcoin_info.png"),
-    (ResourceEnum::Sprite(Sprite::DOWNLOAD),"image","images/download.png"),
+    (ResourceEnum::Sprite(Sprite::DOWNLOAD),"image","images/download.png"), //10
     (ResourceEnum::Sprite(Sprite::BACKCARD),"image","images/cards/backside.jpg"),
     (ResourceEnum::Sprite(Sprite::GAMEICONS),"image","images/gameicon.png"),
     (ResourceEnum::Sprite(Sprite::ARROWS),"image","images/arrows_but.png"),
-    (ResourceEnum::Font(Font::REGULAR),"font","fonts/NotoSans/NotoSans-Regular.ttf"),
     (ResourceEnum::Font(Font::BOLD),"font","fonts/NotoSans/NotoSans-Bold.ttf"),
     (ResourceEnum::Font(Font::BOLDITALIC),"font","fonts/NotoSans/NotoSans-BoldItalic.ttf"),
     (ResourceEnum::Font(Font::ITALIC),"font","fonts/NotoSans/NotoSans-Italic.ttf"),
     (ResourceEnum::Font(Font::MYSTERY),"font","fonts/MysteryQuest-Regular.ttf"),
     (ResourceEnum::Font(Font::HORROR),"font","fonts/Mortified.ttf"),
     (ResourceEnum::Font(Font::ADVENTURE),"font","fonts/TradeWinds-Regular.ttf"),
-    (ResourceEnum::Font(Font::ROMANCE),"font","fonts/Babylove.ttf"),
+    (ResourceEnum::Font(Font::ROMANCE),"font","fonts/Babylove.ttf"), //20
+  }
+    let g = ImageIds::new();
+    g.pump(result_map, display, ui, image_map);
+}
+pub fn init_load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, SupportIdType>,
+                                         image_map: &mut conrod::image::Map<glium::Texture2d>,
+                                         display: &glium::Display,
+                                         ui: &mut conrod::Ui) {
+    CGM_image_map!{
+    (ResourceEnum::Font(Font::REGULAR),"font","fonts/NotoSans/NotoSans-Regular.ttf"),
   }
     let g = ImageIds::new();
     g.pump(result_map, display, ui, image_map);

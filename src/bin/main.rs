@@ -60,10 +60,14 @@ impl GameApp {
             .build();
         let mut result_map = HashMap::<ResourceEnum, SupportIdType>::new();
         let mut image_map = conrod::image::Map::new();
-        game_conrod::ui::load_resources_to_result_map(&mut result_map,
-                                                      &mut image_map,
-                                                      &display,
-                                                      &mut ui);
+        game_conrod::ui::init_load_resources_to_result_map(&mut result_map,
+                                                           &mut image_map,
+                                                           &display,
+                                                           &mut ui);
+        let mut going_load = game_conrod::ui::load_resources_to_result_map(&mut result_map,
+                                                                           &mut image_map,
+                                                                           &display,
+                                                                           &mut ui);
         if let Some(&SupportIdType::FontId(regular)) =
             result_map.get(&ResourceEnum::Font(Font::REGULAR)) {
             ui.theme.font_id = Some(regular);

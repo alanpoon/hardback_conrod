@@ -81,6 +81,8 @@ widget_ids! {
          overlay_prompt,
          overlayerbody_prompt,
          overlaypromptview_prompt,
+         //loading
+         progress_bar
     }
 }
 

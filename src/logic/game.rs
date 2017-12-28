@@ -70,6 +70,13 @@ impl<'a, T> GameProcess<'a, T>
                                      result_map,
                                      action_tx);
             }
+            &GuiState::Loading => {
+                logic::loading::render(&mut ui.set_widgets(),
+                                       &ids,
+                                       &mut gamedata,
+                                       &self.appdata,
+                                       result_map);
+            }
             _ => {}
         }
     }
@@ -81,6 +88,7 @@ impl<'a, T> GameProcess<'a, T>
                    cardmeta: &[cards::ListCard<BoardStruct>; 180],
                    result_map: &HashMap<ResourceEnum, SupportIdType>,
                    action_tx: mpsc::Sender<OwnedMessage>) {
+
         animated_canvas::Canvas::new()
             .pad_top(appdata.convert_h(40.0))
             .color(color::TRANSPARENT)

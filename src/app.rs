@@ -251,3 +251,9 @@ impl Board for BoardStruct {
                                 _wait_for_input: &mut [WaitForInputType; 4]) {
     }
 }
+#[derive(PartialEq)]
+pub enum LoadAssetStatus {
+    START,
+    NOSTART,
+    DONE,
+}

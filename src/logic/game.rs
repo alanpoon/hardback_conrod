@@ -5,10 +5,11 @@ use futures::sync::mpsc;
 use backend::codec_lib::cards::*;
 use backend::codec_lib::cards;
 use logic;
-use app::{GameData, Ids, GuiState, BoardStruct};
+use app::{GameData, Ids, GuiState, BoardStruct, LoadAssetStatus};
 use backend::OwnedMessage;
 use backend::SupportIdType;
 use cardgame_widgets::custom_widget::animated_canvas;
+use std::sync::{Arc, Mutex};
 pub struct GameProcess<'a, T>
     where T: Clone
 {
@@ -41,18 +42,26 @@ impl<'a, T> GameProcess<'a, T>
                cardmeta: &[cards::ListCard<BoardStruct>; 180],
                mut gamedata: &mut GameData,
                result_map: &HashMap<ResourceEnum, SupportIdType>,
+               need_to_load_asset: Arc<Mutex<LoadAssetStatus>>,
                action_tx: mpsc::Sender<OwnedMessage>) {
         let ids = &self.ids;
         match &gamedata.guistate {
             &GuiState::Game(_) => {
-                self.set_game_ui(&mut ui.set_widgets(),
-                                 &ids,
-                                 &mut gamedata,
-                                 &self.appdata,
-                                 &cardmeta,
-                                 result_map,
-                                 action_tx);
-
+                if result_map.len() < 2 {
+                    gamedata.guistate = GuiState::Loading;
+                    let mut need_to_load_asset_ = need_to_load_asset.lock().unwrap();
+                    if *need_to_load_asset_ == LoadAssetStatus::NOSTART {
+                        *need_to_load_asset_ = LoadAssetStatus::START;
+                    }
+                } else {
+                    self.set_game_ui(&mut ui.set_widgets(),
+                                     &ids,
+                                     &mut gamedata,
+                                     &self.appdata,
+                                     &cardmeta,
+                                     result_map,
+                                     action_tx);
+                }
             }
             &GuiState::Menu => {
                 logic::menu::render(&mut ui.set_widgets(),
@@ -71,11 +80,7 @@ impl<'a, T> GameProcess<'a, T>
                                      action_tx);
             }
             &GuiState::Loading => {
-                logic::loading::render(&mut ui.set_widgets(),
-                                       &ids,
-                                       &mut gamedata,
-                                       &self.appdata,
-                                       result_map);
+                logic::loading::render(&mut ui.set_widgets(), &ids, &self.appdata, result_map);
             }
             _ => {}
         }

@@ -17,7 +17,7 @@ use game_conrod::on_request;
 use game_conrod::support;
 use game_conrod::backend::codec_lib;
 use game_conrod::backend::codec_lib::cards;
-use game_conrod::app::BoardStruct;
+use game_conrod::app::{LoadAssetStatus, BoardStruct};
 use conrod_chat::backend::websocket::client;
 use conrod::event;
 use std::collections::HashMap;
@@ -45,12 +45,13 @@ fn window() -> glutin::WindowBuilder {
 }
 impl GameApp {
     pub fn new() -> Result<(), String> {
-        let window = window();
+        let window_z = window();
         let context =
             glium::glutin::ContextBuilder::new()
                 .with_gl(glium::glutin::GlRequest::Specific(glium::glutin::Api::OpenGlEs, (3, 0)));
         let mut events_loop = glutin::EventsLoop::new();
-        let display = glium::Display::new(window, context, &events_loop).unwrap();
+        let display = glium::Display::new(window_z, context, &events_loop).unwrap();
+
         let mut renderer = conrod::backend::glium::Renderer::new(&display).unwrap();
         // construct our `Ui`.
         let (screen_w, screen_h) = display.get_framebuffer_dimensions();
@@ -64,16 +65,11 @@ impl GameApp {
                                                            &mut image_map,
                                                            &display,
                                                            &mut ui);
-        let mut going_load = game_conrod::ui::load_resources_to_result_map(&mut result_map,
-                                                                           &mut image_map,
-                                                                           &display,
-                                                                           &mut ui);
         if let Some(&SupportIdType::FontId(regular)) =
             result_map.get(&ResourceEnum::Font(Font::REGULAR)) {
             ui.theme.font_id = Some(regular);
         }
 
-        //<logic::game::ConrodMessage<OwnedMessage>>
         let (proxy_tx, proxy_rx) = std::sync::mpsc::channel();
         let (proxy_action_tx, proxy_action_rx) = mpsc::channel(2);
         let s_tx = Arc::new(Mutex::new(proxy_action_tx));
@@ -83,7 +79,15 @@ impl GameApp {
         gamedata.guistate = app::GuiState::Menu;
         let cardmeta: [codec_lib::cards::ListCard<BoardStruct>; 180] =
             cards::populate::<BoardStruct>();
+        let need_to_load_asset = Arc::new(Mutex::new(LoadAssetStatus::NOSTART));
+        let need_to_load_asset_c = need_to_load_asset.clone();
+        let image_map_arc = Arc::new(Mutex::new(image_map));
+        let result_map_arc = Arc::new(Mutex::new(result_map));
+        let ui_arc = Arc::new(Mutex::new(ui));
         std::thread::spawn(move || {
+
+            let mut events_loop = glutin::EventsLoop::new();
+
             let mut connected = false;
             let mut last_update = std::time::Instant::now();
             let mut c = 0;
@@ -135,6 +139,33 @@ impl GameApp {
                 last_update = std::time::Instant::now();
                 c += 1;
             }
+            let mut events_loop = glutin::EventsLoop::new();
+            while connected {
+                let sixteen_ms = std::time::Duration::from_millis(1000);
+                let now = std::time::Instant::now();
+                let duration_since_last_update = now.duration_since(last_update);
+                if (duration_since_last_update < sixteen_ms) & (c > 0) {
+                    std::thread::sleep(sixteen_ms - duration_since_last_update);
+                }
+                let mut need_to_load_asset_ = need_to_load_asset.lock().unwrap();
+                if let LoadAssetStatus::START = *need_to_load_asset_ {
+                    let context = glium::glutin::ContextBuilder::new()
+                        .with_gl(glium::glutin::GlRequest::Specific(glium::glutin::Api::OpenGlEs,
+                                                                    (3, 0)));
+                    let window_z = window();
+                    let display = glium::Display::new(window_z, context, &events_loop).unwrap();
+                    game_conrod::ui::load_resources_to_result_map(&mut result_map_arc.lock()
+                                                                           .unwrap(),
+                                                                  &mut image_map_arc.lock()
+                                                                           .unwrap(),
+                                                                  &display,
+                                                                  &mut ui_arc.lock().unwrap());
+
+                    *need_to_load_asset_ = LoadAssetStatus::DONE;
+                } else {
+                    drop(need_to_load_asset_);
+                }
+            }
 
         });
         let mut _page = page::Page::new();
@@ -176,6 +207,7 @@ impl GameApp {
         'render: loop {
             let ss_tx = s_tx.lock().unwrap();
             let proxy_action_tx = ss_tx.clone();
+
             let mut to_break = false;
             let mut to_continue = false;
             events_loop.poll_events(|event| {
@@ -235,6 +267,7 @@ impl GameApp {
                                   &cardmeta,
                                   &mut (gamedata),
                                   &result_map,
+                                  need_to_load_asset_c.clone(),
                                   proxy_action_tx.clone());
 
                 }
@@ -244,6 +277,7 @@ impl GameApp {
                                   &cardmeta,
                                   &mut (gamedata),
                                   &result_map,
+                                  need_to_load_asset_c.clone(),
                                   proxy_action_tx.clone());
                 }
                 None => {

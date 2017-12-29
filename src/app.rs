@@ -1,5 +1,5 @@
 use page_curl::page::Page;
-use backend::meta::app::Sprite;
+use backend::meta::app::{Texture,Sprite};
 use backend::meta::cards;
 use conrod_chat::custom_widget::Message;
 use backend::codec_lib::codec::*;
@@ -113,7 +113,7 @@ impl PromptSendable for PromptSender {
 pub struct GameData {
     pub guistate: GuiState,
     pub footer: Footer,
-    pub page_vec: Vec<(Page, Sprite)>,
+    pub page_vec: Vec<(Page, Texture)>,
     pub page_index: usize,
     pub player_size: usize,
     pub lobby_history: Vec<Message>,
@@ -151,10 +151,10 @@ impl GameData {
         GameData {
             guistate: GuiState::Menu,
             footer: Footer::ShowHand,
-            page_vec: vec![(Page::new(), Sprite::PAGE1F),
-                           (Page::new(), Sprite::PAGE2F),
-                           (Page::new(), Sprite::PAGE3F),
-                           (Page::new(), Sprite::PAGE4F)],
+            page_vec: vec![(Page::new(), Texture::PAGE1F),
+                           (Page::new(), Texture::PAGE2F),
+                           (Page::new(), Texture::PAGE3F),
+                           (Page::new(), Texture::PAGE4F)],
             page_index: 0,
             player_size: 4,
             lobby_history: vec![],

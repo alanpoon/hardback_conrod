@@ -5,7 +5,7 @@
     adb install -r target/android-artifacts/app/build/outputs/apk/app-debug.apk
 
 android
-cargo apk run
+cargo apk run --release
 -L ~/software/openssl-1.0.2l/libcrypto.a -l ssl -lcryto
 adb install -r target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk
 

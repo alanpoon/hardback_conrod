@@ -6,6 +6,7 @@ use cardgame_widgets::custom_widget::image_hover::{Hoverable, ImageHover};
 use cardgame_widgets::custom_widget::arrange_list::{ArrangeList, ExitBy};
 use custom_widget::arrange_list_tile::ItemWidget;
 use custom_widget::buy_list_item;
+use custom_widget::show_draft_item;
 use cardgame_widgets::custom_widget::shuffle::Shuffle;
 use cardgame_widgets::custom_widget::promptview::{PromptView, PromptSendable};
 use cardgame_widgets::custom_widget::instructionset::InstructionSet;
@@ -167,6 +168,12 @@ fn show_draft(ui: &mut conrod::UiCell,
     let item_h = body_w / 7.0;
     *initial_draft = player.draft.clone();
     let mut dealt_iter = player.draft.iter();
+    if let (Some(&SupportIdType::ImageId(cloudy)),
+            Some(&SupportIdType::ImageId(coin_info)),
+            Some(&SupportIdType::ImageId(coin_info270))) =
+        (result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270))) {
     if let Some(&mut true) = print_instruction_set.get_mut(0) {
         let (mut items, scrollbar) = widget::List::flow_right(player.draft.len())
             .item_size(item_h)
@@ -179,11 +186,16 @@ fn show_draft(ui: &mut conrod::UiCell,
         if let Some(s) = scrollbar {
             s.set(ui)
         }
-        while let (Some(_item), Some(card_index)) = (items.next(ui), dealt_iter.next()) {
-            let (_timeless, _string, _color, _app_font, _rect) =
+        while let (Some(item), Some(card_index)) = (items.next(ui), dealt_iter.next()) {
+            let (_timeless, _string, _color, _font, _rect) =
                 in_game::get_tile_image_withcost(card_index.clone(), cardmeta, appdata, result_map);
-            //  let j = ImageHover::new(_ih);
-            //  item.set(j, ui);
+            let j=show_draft_item::ItemWidget::new(_timeless, _string, _rect, "timeless")
+                .cloudy_image(cloudy)
+                .coin_info(coin_info)
+                .coin_info270(coin_info270)
+                .alphabet_font_id(_font)
+                .color(_color);
+                item.set(j,ui);
         }
     } else {
 
@@ -204,6 +216,7 @@ fn show_draft(ui: &mut conrod::UiCell,
             .color(color::LIGHT_GREY)
             .middle_of(ids.master);
         prompt_j.set(ids.promptview, ui);
+    }
     }
 }
 fn shuffle(ui: &mut conrod::UiCell,

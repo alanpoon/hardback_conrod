@@ -59,6 +59,7 @@ pub fn render(ui: &mut conrod::UiCell,
                 h.set_gamecommand(g);
                 promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
                 gamedata.guistate = GuiState::Menu;
+                gamedata.reset();
             }
             for _i in widget::Button::new()
                     .label(&appdata.texts.no)

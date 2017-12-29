@@ -12,7 +12,6 @@ impl<'a> Instructable<'a> for Instruction<'a> {
         widget::Rectangle::fill_with([self.1[2].clone() * wh[0], self.1[3].clone() * wh[1]],
                                      color::BLACK.with_alpha(0.3))
                 .top_left_with_margins_on(self.3, self.1[1] * wh[1], self.1[0] * wh[0])
-
     }
     fn button(&self, _wh: [f64; 2]) -> Button<Flat> {
         widget::Button::new().w_h(100.0, 50.0).mid_bottom()
@@ -39,6 +38,5 @@ impl<'a> Instructable<'a> for Instruction<'a> {
         } else {
             None
         }
-
     }
 }

@@ -1,15 +1,18 @@
 use hardback_meta::app::{AppData, ResourceEnum};
-use conrod::{self, color, widget, Colorable, Widget};
+use conrod::{self, color, widget, Colorable, Widget, text};
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use backend::codec_lib::cards::*;
 use backend::codec_lib::cards;
 use logic;
-use app::{GameData, Ids, GuiState, BoardStruct, LoadAssetStatus};
+use app::{GameData, Ids, GuiState, BoardStruct};
+use ui::{Vala, load_resources_iter, iter_resource_enum_vala_next};
 use backend::OwnedMessage;
 use backend::SupportIdType;
 use cardgame_widgets::custom_widget::animated_canvas;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
+use std;
+use image;
 pub struct GameProcess<'a, T>
     where T: Clone
 {
@@ -42,17 +45,25 @@ impl<'a, T> GameProcess<'a, T>
                cardmeta: &[cards::ListCard<BoardStruct>; 180],
                mut gamedata: &mut GameData,
                result_map: &HashMap<ResourceEnum, SupportIdType>,
-               need_to_load_asset: Arc<Mutex<LoadAssetStatus>>,
+               load_asset_tx: Sender<(ResourceEnum,
+                                      Option<image::RgbaImage>,
+                                      Option<text::Font>)>,
                action_tx: mpsc::Sender<OwnedMessage>) {
         let ids = &self.ids;
         match &gamedata.guistate {
             &GuiState::Game(_) => {
-                if result_map.len() < 2 {
+                if result_map.len() < 8 {
                     gamedata.guistate = GuiState::Loading;
-                    let mut need_to_load_asset_ = need_to_load_asset.lock().unwrap();
-                    if *need_to_load_asset_ == LoadAssetStatus::NOSTART {
-                        *need_to_load_asset_ = LoadAssetStatus::START;
-                    }
+                    std::thread::spawn(move || {
+                        let mut map: HashMap<ResourceEnum, Vala> = HashMap::new();
+                        load_resources_iter(&mut map);
+                        let mut _iter_resource_enum_vala = map.iter();
+                        while let Some((k, v)) = _iter_resource_enum_vala.next() {
+                            let _send_this = iter_resource_enum_vala_next((*k).clone(),
+                                                                          (*v).clone());
+                            load_asset_tx.send(_send_this).unwrap();
+                        }
+                    });
                 } else {
                     self.set_game_ui(&mut ui.set_widgets(),
                                      &ids,
@@ -80,7 +91,11 @@ impl<'a, T> GameProcess<'a, T>
                                      action_tx);
             }
             &GuiState::Loading => {
-                logic::loading::render(&mut ui.set_widgets(), &ids, &self.appdata, result_map);
+                logic::loading::render(&mut ui.set_widgets(),
+                                       &ids,
+                                       &mut gamedata,
+                                       &self.appdata,
+                                       result_map);
             }
             _ => {}
         }

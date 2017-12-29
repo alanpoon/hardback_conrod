@@ -2,7 +2,7 @@ use glium;
 use glium::Surface;
 use std::collections::HashMap;
 use page_curl;
-use backend::meta::app::{ResourceEnum, Sprite,Texture};
+use backend::meta::app::{ResourceEnum, Sprite, Texture};
 use backend::SupportIdType;
 pub fn draw(display: &glium::Display,
             vertex_buffer: &glium::VertexBuffer<page_curl::page::Vertex>,

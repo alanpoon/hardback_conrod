@@ -1,5 +1,5 @@
 use page_curl::page::Page;
-use backend::meta::app::{Texture,Sprite};
+use backend::meta::app::{Texture, Sprite};
 use backend::meta::cards;
 use conrod_chat::custom_widget::Message;
 use backend::codec_lib::codec::*;
@@ -191,6 +191,32 @@ impl GameData {
             hand_selected: None,
         }
     }
+    pub fn reset(&mut self) {
+        self.footer = Footer::ShowHand;
+        self.game_history = vec![];
+        self.game_textedit = "".to_owned();
+        self.boardcodec = None;
+        self.personal = None;
+        self.player_index = None;
+        self.print_instruction_set = vec![true];
+        self.initial_draft = vec![];
+        self.keypad_on = false;
+        self.overlay = false;
+        self.overlay_chat = false;
+        self.overlay_exit = false;
+        self.overlay_receivedimage =
+            [OverlayStatus::None, OverlayStatus::None, OverlayStatus::None];
+        self.overlay_index = None;
+        self.overlay_remover_selected = HashSet::new();
+        self.overlay_timeless_selected =
+            vec![HashSet::new(),HashSet::new(),HashSet::new(),HashSet::new()];
+        self.overlay2 = false;
+        self.overlay_prompt = None;
+        self.buy_selected = None;
+        self.notification = None;
+        self.arrange_selected = None;
+        self.hand_selected = None;
+    }
 }
 #[derive( Debug, Clone,PartialEq)]
 pub enum Footer {
@@ -250,10 +276,4 @@ impl Board for BoardStruct {
                                 _card_id: usize,
                                 _wait_for_input: &mut [WaitForInputType; 4]) {
     }
-}
-#[derive(PartialEq)]
-pub enum LoadAssetStatus {
-    START,
-    NOSTART,
-    DONE,
 }

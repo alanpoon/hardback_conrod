@@ -17,8 +17,7 @@ use game_conrod::on_request;
 use game_conrod::support;
 use game_conrod::backend::codec_lib;
 use game_conrod::backend::codec_lib::cards;
-use game_conrod::ui::{Vala,load_resources_iter,iter_resource_enum_vala_next};
-use game_conrod::app::{LoadAssetStatus, BoardStruct};
+use game_conrod::app::BoardStruct;
 use conrod_chat::backend::websocket::client;
 use conrod::event;
 use std::collections::HashMap;
@@ -80,19 +79,13 @@ impl GameApp {
         gamedata.guistate = app::GuiState::Menu;
         let cardmeta: [codec_lib::cards::ListCard<BoardStruct>; 180] =
             cards::populate::<BoardStruct>();
-        let need_to_load_asset = Arc::new(Mutex::new(LoadAssetStatus::NOSTART));
-        let need_to_load_asset_c = need_to_load_asset.clone();
-        let (load_asset_tx,load_asset_rx) = std::sync::mpsc::channel();
+        let (load_asset_tx, load_asset_rx) = std::sync::mpsc::channel();
 
         std::thread::spawn(move || {
-
-            let mut events_loop = glutin::EventsLoop::new();
-
             let mut connected = false;
             let mut last_update = std::time::Instant::now();
             let mut c = 0;
-            let map:HashMap<ResourceEnum,Vala> =HashMap::new();
-           
+
             while !connected {
                 let sixteen_ms = std::time::Duration::from_millis(500);
                 let now = std::time::Instant::now();
@@ -140,33 +133,6 @@ impl GameApp {
                 }
                 last_update = std::time::Instant::now();
                 c += 1;
-            }
-            let mut events_loop = glutin::EventsLoop::new();
-            while connected {
-                let sixteen_ms = std::time::Duration::from_millis(1000);
-                let now = std::time::Instant::now();
-                let duration_since_last_update = now.duration_since(last_update);
-                if (duration_since_last_update < sixteen_ms) & (c > 0) {
-                    std::thread::sleep(sixteen_ms - duration_since_last_update);
-                }
-                let mut need_to_load_asset_ = need_to_load_asset.lock().unwrap();
-                if let LoadAssetStatus::START = *need_to_load_asset_ {
-                    let windowz=window();
-                    let context = glium::glutin::ContextBuilder::new()
-                        .with_gl(glium::glutin::GlRequest::Specific(glium::glutin::Api::OpenGlEs,
-                                                                    (3, 0)));
-                    let display = glium::Display::new(window_z, context, &events_loop).unwrap();
-                     load_resources_iter(&mut map);
-                     let mut _iter_ResourceEnum_Vala =map.iter();
-                    while let Some((ref k,ref v)) = _iter_ResourceEnum_Vala.next(){
-                        let _send_this = iter_resource_enum_vala_next(&display,*k.clone(),*v.clone());
-                        load_asset_tx.send(_send_this).unwrap();
-                    }
-                                                                   
-                    *need_to_load_asset_ = LoadAssetStatus::DONE;
-                } else {
-                    drop(need_to_load_asset_);
-                }
             }
 
         });
@@ -269,7 +235,7 @@ impl GameApp {
                                   &cardmeta,
                                   &mut (gamedata),
                                   &result_map,
-                                  need_to_load_asset_c.clone(),
+                                  load_asset_tx.clone(),
                                   proxy_action_tx.clone());
 
                 }
@@ -279,7 +245,7 @@ impl GameApp {
                                   &cardmeta,
                                   &mut (gamedata),
                                   &result_map,
-                                  need_to_load_asset_c.clone(),
+                                  load_asset_tx.clone(),
                                   proxy_action_tx.clone());
                 }
                 None => {
@@ -296,19 +262,29 @@ impl GameApp {
             while let Ok(s) = proxy_rx.try_recv() {
                 game_proc.update_state(&mut gamedata, &result_map, s);
             }
-            while let Ok(s) =load_asset_rx.try_recv(){
+            while let Ok(s) = load_asset_rx.try_recv() {
                 match s {
-                    (ResourceEnum::Sprite(_s),Some(_texture),None)=>{
-                         let id_i = image_map.insert(_texture);
-                        result_map.insert(ResourceEnum::Sprite(_s),SupportIdType::ImageId(id_i));
-                    },
-                    (ResourceEnum::Texture(_t),Some(_texture),None)=>{
-                        result_map.insert(ResourceEnum::Texture(_t),SupportIdType::TextureId(_texture));
-                    },
-                    (re,None,Some(_font))=>{
-                        let _font_id = ui.fonts.insert(_font);
-                         result_map.insert(re,SupportIdType::FontId(_font_id));
+                    (ResourceEnum::Sprite(_s), Some(rgba_image), None) => {
+                        let image_dimensions = rgba_image.dimensions();
+                        let raw_image = glium::texture::RawImage2d::from_raw_rgba_reversed(&rgba_image.into_raw(),
+                                                                                        image_dimensions);
+                        let texture = glium::texture::Texture2d::new(&display, raw_image).unwrap();
+                        let id_i = image_map.insert(texture);
+                        result_map.insert(ResourceEnum::Sprite(_s), SupportIdType::ImageId(id_i));
                     }
+                    (ResourceEnum::Texture(_t), Some(rgba_image), None) => {
+                        let image_dimensions = rgba_image.dimensions();
+                        let raw_image = glium::texture::RawImage2d::from_raw_rgba_reversed(&rgba_image.into_raw(),
+                                                                                        image_dimensions);
+                        let texture = glium::texture::Texture2d::new(&display, raw_image).unwrap();
+                        result_map.insert(ResourceEnum::Texture(_t),
+                                          SupportIdType::TextureId(texture));
+                    }
+                    (re, None, Some(_font)) => {
+                        let _font_id = ui.fonts.insert(_font);
+                        result_map.insert(re, SupportIdType::FontId(_font_id));
+                    }
+                    _ => {}
                 }
             }
             // Draw the `Ui` if it has changed.

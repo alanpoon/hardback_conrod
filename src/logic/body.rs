@@ -424,9 +424,9 @@ fn buy(ui: &mut conrod::UiCell,
         .set(ids.body_header_text, ui);
     widget::Text::new(appdata.texts.unused_coins)
         .color(color::GREY)
-        .font_size(35)
-        .padded_w_of(ids.body, 100.0)
-        .h(70.0)
+        .font_size(30)
+        .padded_w_of(ids.body, 90.0)
+        .h(60.0)
         .down_from(ids.body_header_text, 0.0)
         .set(ids.body_subject_text, ui);
     let body_w = ui.w_of(ids.body).unwrap();

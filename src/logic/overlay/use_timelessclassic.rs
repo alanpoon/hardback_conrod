@@ -26,11 +26,11 @@ pub struct PanelInfo<'a> {
     display_pic: Option<ImageRectType>,
     values: &'a Vec<(bool, &'a str, Color, text::font::Id, Rect, usize)>,
     list_selected: &'a mut HashSet<usize, RandomState>,
-    widget_closure: Box<Fn((bool, &str, Color, text::font::Id, Rect, usize))
-                           -> buy_list_item::ItemWidget<'static>>,
+    widget_closure: Box<Fn((bool, &'a str, Color, text::font::Id, Rect, usize))
+                           -> buy_list_item::ItemWidget<'a>>,
 }
 impl<'b> Panelable for PanelInfo<'b> {
-    type BorderableBorderedWidget = buy_list_item::ItemWidget<'static>;
+    type BorderableBorderedWidget = buy_list_item::ItemWidget<'b>;
     fn text(&self) -> Option<String> {
         self.text.clone()
     }
@@ -116,6 +116,8 @@ pub fn render(w_id: tabview::Item,
                                                                  cardmeta,
                                                                  appdata,
                                                                  result_map);
+                            // let mut k="".to_owned();
+                            // k.push_str(_str);
                             (_timeless, _str, _color, _font, _rect, x.unwrap().clone())
                         })
                         .collect::<Vec<(bool, &str, Color, text::font::Id, Rect, usize)>>();
@@ -137,13 +139,14 @@ pub fn render(w_id: tabview::Item,
                                                             _font,
                                                             _rect,
                                                             _)| {
+
                                 buy_list_item::ItemWidget::new(_timeless,
-                                                               _string,
+                                                               &_string,
                                                                _rect,
                                                                "timeless")
-                                        .cloudy_image(cloudy.clone())
-                                        .coin_info(coin_info.clone())
-                                        .coin_info270(coin_info270.clone())
+                                        .cloudy_image(cloudy)
+                                        .coin_info(coin_info)
+                                        .coin_info270(coin_info270)
                                         .alphabet_font_id(_font)
                                         .color(_color)
                             }),
@@ -166,12 +169,9 @@ pub fn render(w_id: tabview::Item,
                             for &PanelInfo { ref values, ref list_selected, .. } in vec_p.iter() {
                                 //list_image ->Vec<ImageRectType>
                                 for _selected in list_selected.iter() {
-                                    if let Some(&(_timeless,
-                                                  _string,
-                                                  ref _color,
-                                                  _font,
-                                                  _rect,
-                                                  _ci)) = values.get(_selected.clone()) {
+                                    if let Some(&(_timeless, _, _color, _font, _rect, _ci)) =
+                                        values.get(_selected.clone()) {
+
                                         _personal.arranged.push((_ci.clone(), false, None, true));
                                     }
                                 }

@@ -209,7 +209,7 @@ impl GameData {
         self.overlay_index = None;
         self.overlay_remover_selected = HashSet::new();
         self.overlay_timeless_selected =
-            vec![HashSet::new(),HashSet::new(),HashSet::new(),HashSet::new()];
+            vec![HashSet::new(), HashSet::new(), HashSet::new(), HashSet::new()];
         self.overlay2 = false;
         self.overlay_prompt = None;
         self.buy_selected = None;

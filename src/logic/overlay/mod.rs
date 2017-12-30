@@ -7,10 +7,11 @@ use cardgame_widgets::custom_widget::player_info::list::List;
 use cardgame_widgets::custom_widget::player_info::item::IconStruct;
 use cardgame_widgets::text::get_font_size_hn;
 use backend::codec_lib::codec::*;
+use backend::codec_lib;
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use futures::{Future, Sink};
-use app::{self, GameData, Ids};
+use app::{self, GameData, Ids, BoardStruct};
 use graphics_match;
 use backend::OwnedMessage;
 use backend::SupportIdType;
@@ -23,6 +24,7 @@ pub mod use_remover;
 pub mod use_timelessclassic;
 pub fn render(ui: &mut conrod::UiCell,
               ids: &Ids,
+              cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
               gamedata: &mut GameData,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
@@ -76,7 +78,7 @@ pub fn render(ui: &mut conrod::UiCell,
                 if let (Some(_s), Some(_si), Some(xy)) = slist {
                     let _dim = appdata.convert_dim([300.0, 100.0]);
                     animated_canvas::Canvas::new()
-                        .x(xy[0])
+                        .x(appdata.convert_w(xy[0]))
                         .y(appdata.convert_h(200.0))
                         .graphics_for(ids.master)
                         .parent(ids.master)
@@ -114,6 +116,7 @@ pub fn render(ui: &mut conrod::UiCell,
                     let action_tx_clone = action_tx.clone();
                     (*a)(item,
                          ids,
+                         cardmeta,
                          gamedata,
                          appdata,
                          result_map,
@@ -130,36 +133,40 @@ pub fn render(ui: &mut conrod::UiCell,
 fn render_closure()
     -> Vec<Box<Fn(tabview::Item,
                   &Ids,
+                  &[codec_lib::cards::ListCard<BoardStruct>; 180],
                   &mut GameData,
                   &AppData,
                   &HashMap<ResourceEnum, SupportIdType>,
                   mpsc::Sender<OwnedMessage>,
                   &mut conrod::UiCell)>>
 {
-    vec![Box::new(|w_id, ids, mut gamedata, appdata, result_map, action_tx, ui| {
+    vec![Box::new(|w_id, ids, cardmeta,mut gamedata, appdata, result_map, action_tx, ui| {
         //draw use ink
         overlay::use_ink::render(w_id,
                                  ids,
+                                 &cardmeta,
                                  &mut gamedata,
                                  &appdata,
                                  result_map,
                                  action_tx,
                                  ui);
     }),
-         Box::new(|w_id, ids, mut gamedata, _appdata, result_map, action_tx, ui| {
+         Box::new(|w_id, ids, cardmeta,mut gamedata, _appdata, result_map, action_tx, ui| {
         //draw use remover
         overlay::use_remover::render(w_id,
                                      ids,
+                                     &cardmeta,
                                      &mut gamedata,
                                      _appdata,
                                      result_map,
                                      action_tx,
                                      ui);
     }),
-         Box::new(|w_id, ids, mut gamedata, _appdata, result_map, action_tx, ui| {
+         Box::new(|w_id, ids, cardmeta,mut gamedata, _appdata, result_map, action_tx, ui| {
         //draw use timeless classics
         overlay::use_timelessclassic::render(w_id,
                                              ids,
+                                             &cardmeta,
                                              &mut gamedata,
                                              _appdata,
                                              result_map,

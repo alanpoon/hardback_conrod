@@ -135,7 +135,7 @@ impl<'a> Widget for ItemWidget<'a> {
                        rect,
                        self.style.color(&ui.theme),
                        ui);
-        
+
         if let (Some(_cloudy), Some(_coin_info), Some(_coin_info270)) =
             (self.cloudy_image, self.coin_info, self.coin_info270) {
             widget::Image::new(_cloudy)

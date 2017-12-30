@@ -1,13 +1,18 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable};
+use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,
+             Borderable};
 use cardgame_widgets::custom_widget::tabview;
 use cardgame_widgets::custom_widget::full_cycle_sprite::FullCycleSprite;
 use cardgame_widgets::custom_widget::bordered_image::BorderedImage;
+use cardgame_widgets::custom_widget::bordered_image::Bordered;
+use custom_widget::buy_list_item;
+use custom_widget::show_draft_item;
 use cardgame_widgets::sprite::SpriteInfo;
 use backend::codec_lib::codec::*;
+use backend::codec_lib;
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use futures::{Future, Sink};
-use app::{GameData, Ids, OverlayStatus};
+use app::{GameData, Ids, OverlayStatus, BoardStruct};
 use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
@@ -17,6 +22,7 @@ use logic::in_game;
 use instruction::Instruction;
 pub fn render(w_id: tabview::Item,
               ids: &Ids,
+              cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
               gamedata: &mut GameData,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
@@ -51,87 +57,112 @@ pub fn render(w_id: tabview::Item,
                 .h(appdata.convert_h(260.0))
                 .down_from(ids.overlay_subject, 0.0)
                 .set(ids.overlay_explainlistselect, ui);
-            // Handle the `ListSelect`s events.
-            while let Some(event) = events.next(ui, |i| overlay_remover_selected.contains(&i)) {
-                use conrod::widget::list_select::Event;
-                match event {
-                    // For the `Item` events we instantiate the `List`'s items.
-                    Event::Item(item) => {
-                        let _card_index = inked.get(item.i).unwrap();
-                        let _selected = overlay_remover_selected.contains(&item.i);
-                        /*   let (_image_id, _rect, _) =
-                            in_game::get_card_widget_image_portrait(card_index.clone(),
-                                                                    &card_images,
-                                                                    appdata);
-                        let mut button = BorderedImage::new(_image_id)
-                            .source_rectangle(_rect)
-                            .border_color(color::YELLOW)
-                            .border(20.0);
-                        if selected {
-                            button = button.bordered();
+            if let (Some(&SupportIdType::ImageId(cloudy)),
+                    Some(&SupportIdType::ImageId(coin_info)),
+                    Some(&SupportIdType::ImageId(coin_info270)),
+                    Some(&SupportIdType::ImageId(dwn_img))) =
+                (result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
+                 result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
+                 result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
+                 result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD))) {
+                // Handle the `ListSelect`s events.
+                while let Some(event) = events.next(ui, |i| overlay_remover_selected.contains(&i)) {
+                    use conrod::widget::list_select::Event;
+                    match event {
+                        // For the `Item` events we instantiate the `List`'s items.
+                        Event::Item(item) => {
+                            let card_index = inked.get(item.i).unwrap();
+                            let selected = overlay_remover_selected.contains(&item.i);
+                            let (_timeless, _string, _color, _font, _rect) =
+                                in_game::get_tile_image_withcost(card_index.clone(),
+                                                                 cardmeta,
+                                                                 appdata,
+                                                                 result_map);
+
+                            let mut j = buy_list_item::ItemWidget::new(_timeless,
+                                                                       _string,
+                                                                       _rect,
+                                                                       "timeless")
+                                    .wh(appdata.convert_dim([150.0, 190.0]))
+                                    .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
+                                    .cloudy_image(cloudy)
+                                    .coin_info(coin_info)
+                                    .coin_info270(coin_info270)
+                                    .alphabet_font_id(_font)
+                                    .border_color(color::YELLOW)
+                                    .border(20.0)
+                                    .color(_color);
+                            if selected {
+                                j = j.bordered();
+                            }
+                            item.set(j, ui);
+
                         }
-                        item.set(button, ui);
-                        */
-                    }
 
-                    // The selection has changed.
-                    Event::Selection(selection) => {
-                        if overlay_remover_selected.len() < _player.remover {
-                            selection.update_index_set(overlay_remover_selected);
+                        // The selection has changed.
+                        Event::Selection(selection) => {
+                            if overlay_remover_selected.len() < _player.remover {
+                                selection.update_index_set(overlay_remover_selected);
+                            }
                         }
+
+                        // The remaining events indicate interactions with the `ListSelect` widget.
+                        event => println!("{:?}", &event),
                     }
-
-                    // The remaining events indicate interactions with the `ListSelect` widget.
-                    event => println!("{:?}", &event),
                 }
-            }
 
-            // Instantiate the scrollbar for the list.
-            if let Some(s) = scrollbar {
-                s.set(ui);
-            }
-
-            match overlay_receivedimage[1] {
-                OverlayStatus::Received(ref _card_index) => {
-                    /*widget::Image::new(_img.clone())
-                        .source_rectangle(_rect.clone())
-                        .wh(appdata.convert_dim([150.0, 150.0]))
-                        .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
-                        .set(ids.overlay_receivedimage, ui);
-                        */
+                // Instantiate the scrollbar for the list.
+                if let Some(s) = scrollbar {
+                    s.set(ui);
                 }
-                OverlayStatus::Loading => {
-                    if let Some(&SupportIdType::ImageId(dwn_img)) =
-                        result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)) {
+
+                match overlay_receivedimage[1] {
+                    OverlayStatus::Received(ref card_index) => {
+                        let (_timeless, _string, _color, _font, _rect) =
+                            in_game::get_tile_image_withcost(card_index.clone(),
+                                                             cardmeta,
+                                                             appdata,
+                                                             result_map);
+                        show_draft_item::ItemWidget::new(_timeless, _string, _rect, "timeless")
+                            .wh(appdata.convert_dim([150.0, 190.0]))
+                            .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
+                            .cloudy_image(cloudy)
+                            .coin_info(coin_info)
+                            .coin_info270(coin_info270)
+                            .alphabet_font_id(_font)
+                            .color(_color)
+                            .set(ids.overlay_receivedimage, ui);
+                    }
+                    OverlayStatus::Loading => {
                         let spinner_sprite = graphics_match::spinner_sprite();
                         FullCycleSprite::new(dwn_img, spinner_sprite)
                             .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
                             .wh(appdata.convert_dim([150.0, 150.0]))
                             .set(ids.overlay_receivedimage, ui);
                     }
-                }
-                OverlayStatus::None => {
-                    if overlay_remover_selected.len() > 0 {
-                        for _c in widget::Button::new()
-                                .label(&appdata.texts.use_remover)
-                                .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
-                                .set(ids.overlay_okbut, ui) {
-                            overlay_receivedimage[0] = OverlayStatus::Loading;
-                            let action_tx_c = action_tx.clone();
-                            let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
-                            let mut g = GameCommand::new();
-                            let selected_vec = overlay_remover_selected.iter()
-                                .map(|x| inked.get(x.clone()).unwrap().clone())
-                                .collect::<Vec<usize>>();
-                            g.use_remover = Some(selected_vec);
-                            h.set_gamecommand(g);
-                            action_tx_c.send(OwnedMessage::Text(ServerReceivedMsg::serialize_send(h).unwrap()))
+                    OverlayStatus::None => {
+                        if overlay_remover_selected.len() > 0 {
+                            for _c in widget::Button::new()
+                                    .label(&appdata.texts.use_remover)
+                                    .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
+                                    .set(ids.overlay_okbut, ui) {
+                                overlay_receivedimage[0] = OverlayStatus::Loading;
+                                let action_tx_c = action_tx.clone();
+                                let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
+                                let mut g = GameCommand::new();
+                                let selected_vec = overlay_remover_selected.iter()
+                                    .map(|x| inked.get(x.clone()).unwrap().clone())
+                                    .collect::<Vec<usize>>();
+                                g.use_remover = Some(selected_vec);
+                                h.set_gamecommand(g);
+                                action_tx_c.send(OwnedMessage::Text(ServerReceivedMsg::serialize_send(h).unwrap()))
                             .wait()
                             .unwrap();
+                            }
                         }
                     }
-                }
 
+                }
             }
         }
     }

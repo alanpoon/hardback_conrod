@@ -3,10 +3,11 @@ use cardgame_widgets::custom_widget::full_cycle_sprite::FullCycleSprite;
 use cardgame_widgets::custom_widget::tabview;
 use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
 use backend::codec_lib::codec::*;
+use backend::codec_lib;
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use futures::{Future, Sink};
-use app::{GameData, Ids, OverlayStatus};
+use app::{GameData, Ids, OverlayStatus, BoardStruct};
 use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
@@ -14,8 +15,10 @@ use backend::meta::{cards, local};
 use graphics_match;
 use logic::in_game;
 use instruction::Instruction;
+use custom_widget::show_draft_item;
 pub fn render(w_id: tabview::Item,
               ids: &Ids,
+              cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
               gamedata: &mut GameData,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
@@ -33,12 +36,28 @@ pub fn render(w_id: tabview::Item,
     if let (&mut Some(ref mut boardcodec), &Some(ref _player_index)) = (boardcodec, player_index) {
         if let Some(_player) = boardcodec.players.get_mut(_player_index.clone()) {
             match overlay_receivedimage[0] {
-                OverlayStatus::Received(_cardindex) => {
-                    /*widget::Image::new(_img.clone())
-                        .source_rectangle(_rect.clone())
-                        .wh(appdata.convert_dim([150.0, 150.0]))
-                        .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
-                        .set(ids.overlay_receivedimage, ui);*/
+                OverlayStatus::Received(card_index) => {
+                    let (_timeless, _string, _color, _font, _rect) =
+                        in_game::get_tile_image_withcost(card_index.clone(),
+                                                         cardmeta,
+                                                         appdata,
+                                                         result_map);
+                    if let (Some(&SupportIdType::ImageId(cloudy)),
+                            Some(&SupportIdType::ImageId(coin_info)),
+                            Some(&SupportIdType::ImageId(coin_info270))) =
+                        (result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
+                         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
+                         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270))) {
+                        show_draft_item::ItemWidget::new(_timeless, _string, _rect, "timeless")
+                            .wh(appdata.convert_dim([150.0, 190.0]))
+                            .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
+                            .cloudy_image(cloudy)
+                            .coin_info(coin_info)
+                            .coin_info270(coin_info270)
+                            .alphabet_font_id(_font)
+                            .color(_color)
+                            .set(ids.overlay_receivedimage, ui);
+                    }
                 }
                 OverlayStatus::Loading => {
                     if let Some(&SupportIdType::ImageId(dwn_img)) =

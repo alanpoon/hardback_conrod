@@ -4,6 +4,7 @@ use conrod::{widget, Color, Colorable, Borderable, Positionable, UiCell, Widget,
 
 use conrod::position::{Rect, Scalar, Dimensions, Point};
 use cardgame_widgets::text::get_font_size_hn;
+use cardgame_widgets::custom_widget::bordered_image::Bordered;
 use conrod::widget::Rectangle;
 
 /// The type upon which we'll implement the `Widget` trait.
@@ -79,10 +80,7 @@ impl<'a> ItemWidget<'a> {
             coin_info270: None,
         }
     }
-    pub fn bordered(mut self) -> Self {
-        self.bordered = true;
-        self
-    }
+
     pub fn cloudy_image(mut self, image: image::Id) -> Self {
         self.cloudy_image = Some(image);
         self
@@ -236,6 +234,13 @@ impl<'a> Borderable for ItemWidget<'a> {
     builder_methods!{
         border { style.border = Some(Scalar) }
         border_color { style.border_color = Some(Color) }
+    }
+}
+
+impl<'a> Bordered for ItemWidget<'a> {
+    fn bordered(mut self) -> Self {
+        self.bordered = true;
+        self
     }
 }
 #[derive(Copy, Clone,Debug)]

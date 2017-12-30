@@ -55,4 +55,3 @@ conrod_chat = {path ="../conrod_chat", features=["web_socket","backend_glium_win
 android_glue = "0.2.3"
 rusttype = "*"
 conrod_keypad ={path ="../conrod_keypad"}
-conrod_chat = {path ="../conrod_chat", features=["keypad"]}

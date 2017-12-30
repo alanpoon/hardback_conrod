@@ -1,5 +1,6 @@
 use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,
              Borderable, Rect, text, Color};
+use cardgame_widgets::custom_widget::bordered_image::Bordered;
 use conrod::widget::primitive::image::Image;
 use conrod::widget::envelope_editor::EnvelopePoint;
 use cardgame_widgets::custom_widget::image_hover::{Hoverable, ImageHover};
@@ -174,33 +175,36 @@ fn show_draft(ui: &mut conrod::UiCell,
         (result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270))) {
-    if let Some(&mut true) = print_instruction_set.get_mut(0) {
-        let (mut items, scrollbar) = widget::List::flow_right(player.draft.len())
-            .item_size(item_h)
-            .instantiate_all_items()
-            .mid_bottom_of(ids.body)
-            .h(item_h * 1.2)
-            .padded_w_of(ids.body, 20.0)
-            .scrollbar_next_to()
-            .set(ids.listview, ui);
-        if let Some(s) = scrollbar {
-            s.set(ui)
-        }
-        while let (Some(item), Some(card_index)) = (items.next(ui), dealt_iter.next()) {
-            let (_timeless, _string, _color, _font, _rect) =
-                in_game::get_tile_image_withcost(card_index.clone(), cardmeta, appdata, result_map);
-            let j=show_draft_item::ItemWidget::new(_timeless, _string, _rect, "timeless")
-                .cloudy_image(cloudy)
-                .coin_info(coin_info)
-                .coin_info270(coin_info270)
-                .alphabet_font_id(_font)
-                .color(_color);
-                item.set(j,ui);
-        }
-    } else {
+        if let Some(&mut true) = print_instruction_set.get_mut(0) {
+            let (mut items, scrollbar) = widget::List::flow_right(player.draft.len())
+                .item_size(item_h)
+                .instantiate_all_items()
+                .mid_bottom_of(ids.body)
+                .h(item_h * 1.2)
+                .padded_w_of(ids.body, 20.0)
+                .scrollbar_next_to()
+                .set(ids.listview, ui);
+            if let Some(s) = scrollbar {
+                s.set(ui)
+            }
+            while let (Some(item), Some(card_index)) = (items.next(ui), dealt_iter.next()) {
+                let (_timeless, _string, _color, _font, _rect) =
+                    in_game::get_tile_image_withcost(card_index.clone(),
+                                                     cardmeta,
+                                                     appdata,
+                                                     result_map);
+                let j = show_draft_item::ItemWidget::new(_timeless, _string, _rect, "timeless")
+                    .cloudy_image(cloudy)
+                    .coin_info(coin_info)
+                    .coin_info270(coin_info270)
+                    .alphabet_font_id(_font)
+                    .color(_color);
+                item.set(j, ui);
+            }
+        } else {
 
-        let promptsender = PromptSender(action_tx);
-        let instructions: Vec<(String, Box<Fn(PromptSender)>)> = vec![("Continue".to_owned(),
+            let promptsender = PromptSender(action_tx);
+            let instructions: Vec<(String, Box<Fn(PromptSender)>)> = vec![("Continue".to_owned(),
                                                                        Box::new(move |ps| {
             let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
             let mut g = GameCommand::new();
@@ -209,14 +213,14 @@ fn show_draft(ui: &mut conrod::UiCell,
             ps.send(ServerReceivedMsg::serialize_send(h).unwrap());
         }))];
 
-        let mut prompt =
-            Some((0.5f64, "Lets' start to Shuffle the cards".to_owned(), instructions));
-        let prompt_j = PromptView::new(&mut prompt, promptsender)
-            .wh_of(ids.master)
-            .color(color::LIGHT_GREY)
-            .middle_of(ids.master);
-        prompt_j.set(ids.promptview, ui);
-    }
+            let mut prompt =
+                Some((0.5f64, "Lets' start to Shuffle the cards".to_owned(), instructions));
+            let prompt_j = PromptView::new(&mut prompt, promptsender)
+                .wh_of(ids.master)
+                .color(color::LIGHT_GREY)
+                .middle_of(ids.master);
+            prompt_j.set(ids.promptview, ui);
+        }
     }
 }
 fn shuffle(ui: &mut conrod::UiCell,

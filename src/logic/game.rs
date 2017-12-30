@@ -136,6 +136,7 @@ impl<'a, T> GameProcess<'a, T>
                               action_tx.clone());
         logic::overlay::render(ui,
                                ids,
+                               &cardmeta,
                                &mut gamedata,
                                &appdata,
                                result_map,

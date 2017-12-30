@@ -141,9 +141,9 @@ pub fn render(w_id: tabview::Item,
                                                                _string,
                                                                _rect,
                                                                "timeless")
-                                        .cloudy_image(cloudy)
-                                        .coin_info(coin_info)
-                                        .coin_info270(coin_info270)
+                                        .cloudy_image(cloudy.clone())
+                                        .coin_info(coin_info.clone())
+                                        .coin_info270(coin_info270.clone())
                                         .alphabet_font_id(_font)
                                         .color(_color)
                             }),

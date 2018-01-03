@@ -24,12 +24,14 @@ pub fn render(ui: &mut conrod::UiCell,
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270))) {
         let w = ui.w_of(ids.master).unwrap();
-        let (mut items, _scrollbar) = widget::List::flow_right(4)
-            .item_size(w / 12.0)
+        let word_arr = vec![22,48,86,143];
+        let (mut items, _scrollbar) = widget::List::flow_right(word_arr.len())
+            .item_size(w / 10.0)
+            .w(w)
             .h(appdata.convert_h(200.0))
             .mid_top_with_margin_on(ids.master, appdata.convert_h(40.0))
             .set(ids.menu_title_list1, ui);
-        let word_arr = vec![22,48,86,143];
+
         let mut word_iter = word_arr.iter();
         while let (Some(item), Some(&card_index)) = (items.next(ui), word_iter.next()) {
             let (_timeless, _str, _color, _font, _rect) =
@@ -42,17 +44,16 @@ pub fn render(ui: &mut conrod::UiCell,
                 .color(_color);
             item.set(j, ui);
         }
+
         let blackjack_arr = vec![127,32,140,2,99,43,0,142,118];
         let mut blackjack_iter = blackjack_arr.iter();
-        let (mut items2, _scrollbar) = widget::List::flow_right(blackjack_arr.len())
-            .item_size(w / 12.0)
+        let (mut items2, _scrollbar2) = widget::List::flow_right(blackjack_arr.len())
+            .item_size(w / 10.0)
+            .w(w)
             .h(appdata.convert_h(200.0))
-            .down_from(ids.menu_title_list1, appdata.convert_h(20.0))
+            .mid_left_of(ids.master)
             .set(ids.menu_title_list2, ui);
-        let mut c =0;
         while let (Some(item), Some(&card_index)) = (items2.next(ui), blackjack_iter.next()) {
-            println!("c :{:?}",c);
-            c+=1;
             let (_timeless, _str, _color, _font, _rect) =
                 in_game::get_tile_image_withcost(card_index, cardmeta, appdata, result_map);
             let j = show_draft_item::ItemWidget::new(_timeless, _str, _rect, "timeless")
@@ -63,6 +64,7 @@ pub fn render(ui: &mut conrod::UiCell,
                 .color(_color);
             item.set(j, ui);
         }
+
     }
     if widget::Button::new()
            .wh(appdata.convert_dim([400.0, 100.0]))

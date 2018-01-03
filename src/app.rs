@@ -71,6 +71,7 @@ widget_ids! {
          body_header_text,
          body_subject_text,
          listselect_view,
+         corner_arrow,
          //chat
          overlay_chat,
          overlaybody_chat,
@@ -86,6 +87,7 @@ widget_ids! {
          overlaypromptview_prompt,
          //loading
          progress_bar,
+         loading_gif,
          //blow_up
          blow_up_card,
          blow_up_word,
@@ -158,6 +160,7 @@ pub struct GameData {
     pub overlay_blowup: Option<usize>,
     pub buy_selected: Option<usize>,
     pub notification: Option<(String, Instant)>,
+    pub last_send: Option<Instant>,
 }
 impl GameData {
     pub fn new() -> GameData {
@@ -201,6 +204,7 @@ impl GameData {
             overlay_blowup: None,
             buy_selected: None,
             notification: None,
+            last_send: None,
         }
     }
     pub fn reset(&mut self) {
@@ -227,6 +231,7 @@ impl GameData {
         self.overlay_blowup = None;
         self.buy_selected = None;
         self.notification = None;
+        self.last_send = None;
     }
 }
 #[derive( Debug, Clone,PartialEq)]

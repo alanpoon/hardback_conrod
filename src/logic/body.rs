@@ -12,6 +12,7 @@ use cardgame_widgets::custom_widget::shuffle::Shuffle;
 use cardgame_widgets::custom_widget::promptview::{PromptView, PromptSendable};
 use cardgame_widgets::custom_widget::instructionset::InstructionSet;
 use cardgame_widgets::custom_widget::player_info; //player_info::list::List,//::item::IconStruct
+use cardgame_widgets::sprite::spriteable_rect;
 use backend::codec_lib::codec::*;
 use backend::OwnedMessage;
 use backend::SupportIdType;
@@ -21,6 +22,7 @@ use std::collections::HashMap;
 use futures::sync::mpsc;
 use futures::{Future, Sink};
 use std;
+use std::time::Instant;
 use app::{self, GameData, Ids, GuiState};
 use logic::in_game;
 use logic;
@@ -46,6 +48,7 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref mut personal,
                    ref mut buy_selected,
                    ref mut overlay2,
+                   ref mut last_send,
                    .. } = *gamedata;
     if let &mut Some(ref mut boardcodec) = boardcodec {
         if let (Some(ref mut _player), ref offer_row) =
@@ -81,6 +84,7 @@ pub fn render(ui: &mut conrod::UiCell,
                           &cardmeta,
                           personal,
                           overlay_blowup,
+                          last_send,
                           appdata,
                           result_map,
                           _action_tx.clone());
@@ -91,10 +95,19 @@ pub fn render(ui: &mut conrod::UiCell,
                           &cardmeta,
                           personal,
                           overlay_blowup,
+                          last_send,
                           appdata,
                           result_map,
                           _action_tx.clone());
-                    turn_to_submit_but(ui, ids, &appdata, _action_tx.clone());
+                    if let Some(&SupportIdType::ImageId(spinner_image)) =
+                        result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)) {
+                        turn_to_submit_but(ui,
+                                           ids,
+                                           &appdata,
+                                           last_send.clone(),
+                                           spinner_image,
+                                           _action_tx.clone());
+                    }
                 }
                 &mut app::GuiState::Game(GameState::Buy) => {
                     buy(ui,
@@ -102,6 +115,7 @@ pub fn render(ui: &mut conrod::UiCell,
                         &cardmeta,
                         offer_row,
                         buy_selected,
+                        overlay_blowup,
                         appdata,
                         result_map);
                 }
@@ -140,21 +154,40 @@ pub fn render(ui: &mut conrod::UiCell,
 fn turn_to_submit_but(ui: &mut conrod::UiCell,
                       ids: &Ids,
                       appdata: &AppData,
+                      last_send: Option<Instant>,
+                      spinner_image: image::Id,
                       _action_tx: mpsc::Sender<OwnedMessage>) {
+    let spinner_rect = graphics_match::spinner_sprite();
     let promptsender = PromptSender(_action_tx);
-    if let Some(_) = widget::Button::new()
-           .label(&appdata.texts.submit)
-           .mid_bottom_of(ids.body)
-           .wh(appdata.convert_dim([100.0, 80.0]))
-           .set(ids.submit_but, ui)
-           .next() {
-        println!("submit word");
-        let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
-        let mut g = GameCommand::new();
-        g.submit_word = Some(true);
-        h.set_gamecommand(g);
-        promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
+    if let Some(_last_send) = last_send {
+        let ratio = _last_send.elapsed()
+            .checked_div(30_000_000)
+            .unwrap()
+            .subsec_nanos();
+        println!("ratio {:?}",ratio);
+        let spinner_index = ratio * 60;
+        let _rect = spriteable_rect(spinner_rect, spinner_index as f64);
+        widget::Image::new(spinner_image)
+            .source_rectangle(Rect::from_corners(_rect.0, _rect.1))
+            .wh(appdata.convert_dim([80.0, 80.0]))
+            .mid_bottom_of(ids.body)
+            .set(ids.loading_gif, ui);
+    } else {
+        if let Some(_) = widget::Button::new()
+               .label(&appdata.texts.submit)
+               .mid_bottom_of(ids.body)
+               .wh(appdata.convert_dim([100.0, 80.0]))
+               .set(ids.submit_but, ui)
+               .next() {
+            println!("submit word");
+            let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
+            let mut g = GameCommand::new();
+            g.submit_word = Some(true);
+            h.set_gamecommand(g);
+            promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
+        }
     }
+
 }
 fn show_draft(ui: &mut conrod::UiCell,
               ids: &Ids,
@@ -316,6 +349,7 @@ fn spell(ui: &mut conrod::UiCell,
          cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
          personal: &mut Option<Personal>,
          overlay_blowup: &mut Option<usize>,
+         last_send: &mut Option<Instant>,
          appdata: &AppData,
          result_map: &HashMap<ResourceEnum, SupportIdType>,
          _action_tx: mpsc::Sender<OwnedMessage>) {
@@ -423,6 +457,8 @@ fn spell(ui: &mut conrod::UiCell,
                 .collect::<Vec<(usize, bool, Option<String>, bool)>>();
 
             if (*_personal).clone() != temp {
+                let now = Instant::now();
+                *last_send = Some(now);
                 let promptsender = PromptSender(_action_tx);
                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                 let mut g = GameCommand::new();
@@ -439,6 +475,7 @@ fn buy(ui: &mut conrod::UiCell,
        cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
        offer_row: &Vec<usize>,
        buyselected: &mut Option<usize>,
+       overlay_blowup: &mut Option<usize>,
        appdata: &AppData,
        result_map: &HashMap<ResourceEnum, SupportIdType>) {
 
@@ -471,10 +508,14 @@ fn buy(ui: &mut conrod::UiCell,
     }
     if let (Some(&SupportIdType::ImageId(cloudy)),
             Some(&SupportIdType::ImageId(coin_info)),
-            Some(&SupportIdType::ImageId(coin_info270))) =
+            Some(&SupportIdType::ImageId(coin_info270)),
+            Some(&SupportIdType::ImageId(arrows_image))) =
         (result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
-         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270))) {
+         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::ARROWS))) {
+        let mut buy_selected_id: Option<widget::Id> = None;
+        let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
         while let Some(event) = events.next(ui, |i| {
             let mut y = false;
             if let &mut Some(_x) = buyselected {
@@ -506,6 +547,7 @@ fn buy(ui: &mut conrod::UiCell,
                             .color(_color);
                     if let &mut Some(_s) = buyselected {
                         if _s == item.i {
+                            buy_selected_id = Some(item.widget_id);
                             j = j.bordered();
                         }
                     }
@@ -514,6 +556,7 @@ fn buy(ui: &mut conrod::UiCell,
                 Event::Selection(selected_id) => {
                     if let &mut Some(_s) = buyselected {
                         if _s == selected_id {
+                            buy_selected_id = None;
                             *buyselected = None;
                         } else {
                             *buyselected = Some(selected_id);
@@ -524,6 +567,17 @@ fn buy(ui: &mut conrod::UiCell,
                 }
                 _ => {}
             }
+        }
+        if let (Some(_buy_selected_id), &mut Some(_buy_selected)) = (buy_selected_id, buyselected) {
+            let j = ImageHover::new(_c)
+                .w_h(item_h * 0.25, item_h * 0.25)
+                .mid_right_with_margin_on(_buy_selected_id, -2.0)
+                .set(ids.corner_arrow, ui);
+            for _c in j {
+                let j = offer_row.get(_buy_selected).unwrap().clone();
+                *overlay_blowup = Some(j);
+            }
+
         }
     }
 }

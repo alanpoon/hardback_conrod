@@ -50,21 +50,34 @@ pub fn get_tile_image_withcost<'a>(card_index: usize,
     };
     (timeless.clone(), letter, color, _font.unwrap(), source_rect)
 }
-pub fn get_tile_image_withcostwords<'a>
-    (card_index: usize,
-     cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
-     appdata: &AppData,
-     result_map: &HashMap<ResourceEnum, SupportIdType>)
-     -> (bool, &'a str, Color, text::font::Id, Rect, Option<String>, Option<String>) {
+pub fn get_tile_image_withcostwords<'a>(card_index: usize,
+                                        cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
+                                        appdata: &AppData,
+                                        result_map: &HashMap<ResourceEnum, SupportIdType>)
+                                        -> (bool,
+                                            &'a str,
+                                            Color,
+                                            text::font::Id,
+                                            Rect,
+                                            Giveable,
+                                            Giveable,
+                                            Giveable,
+                                            Giveable,
+                                            Option<String>,
+                                            Option<String>) {
 
     let &meta::cards::BlowupCard { ref genre_string, ref non_genre_string, .. } =
         appdata.blowupcards.get(&card_index).unwrap();
     let codec_lib::cards::ListCard::<BoardStruct>{
      ref cost,
      ref letter,
+     ref purchase_giveables,
+     ref giveables,
+     ref genre_giveables,
+     ref trash,
      ref genre,
      ref timeless,..
-     //ref id,ref cost,ref purchase_giveables,ref giveables,ref genre_giveables,ref trash,ref timeless,..
+     //ref id,ref cost,
  } = cardmeta[card_index.clone()];
     let color = match genre {
         &Genre::MYSTERY => color::LIGHT_BLUE,
@@ -96,6 +109,10 @@ pub fn get_tile_image_withcostwords<'a>
      color,
      _font.unwrap(),
      source_rect,
+     purchase_giveables.clone(),
+     giveables.clone(),
+     genre_giveables.clone(),
+     trash.clone(),
      genre_string.clone(),
      non_genre_string.clone())
 }

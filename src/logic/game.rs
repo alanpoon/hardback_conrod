@@ -50,6 +50,12 @@ impl<'a, T> GameProcess<'a, T>
                                       Option<text::Font>)>,
                action_tx: mpsc::Sender<OwnedMessage>) {
         let ids = &self.ids;
+        // remove last_send if elasped 2 second
+        if let Some(_last_send) = gamedata.last_send {
+            if _last_send.elapsed() > std::time::Duration::new(3, 0) {
+                gamedata.last_send = None;
+            }
+        }
         match &gamedata.guistate {
             &GuiState::Game(_) => {
                 if result_map.len() < 20 {

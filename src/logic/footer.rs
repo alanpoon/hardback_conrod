@@ -11,6 +11,7 @@ use cardgame_widgets::custom_widget::player_info::list::List;
 use cardgame_widgets::custom_widget::player_info::item::IconStruct;
 use backend::codec_lib::codec::*;
 use std::collections::HashMap;
+use std::time::Instant;
 use futures::sync::mpsc;
 use futures::{Future, Sink};
 use app::{self, GameData, Ids};
@@ -42,6 +43,7 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref mut overlay_chat,
                    ref mut overlay_exit,
                    ref mut buy_selected,
+                   ref mut last_send,
                    .. } = *gamedata;
     if let &mut Some(ref mut boardcodec) = boardcodec {
         if let Some(ref mut _player) = boardcodec.players.get_mut(*page_index) {
@@ -60,6 +62,7 @@ pub fn render(ui: &mut conrod::UiCell,
                           overlay,
                           overlay_chat,
                           overlay_exit,
+                          last_send,
                           result_map,
                           _action_tx);
                 }
@@ -74,6 +77,7 @@ pub fn render(ui: &mut conrod::UiCell,
                           overlay,
                           overlay_chat,
                           overlay_exit,
+                          last_send,
                           result_map,
                           _action_tx);
                 }
@@ -124,6 +128,7 @@ fn spell(ui: &mut conrod::UiCell,
          overlay: &mut bool,
          overlay_chat: &mut bool,
          overlay_exit: &mut bool,
+         last_send: &mut Option<Instant>,
          result_map: &HashMap<ResourceEnum, SupportIdType>,
          _action_tx: mpsc::Sender<OwnedMessage>) {
     if let &mut Some(ref mut _personal) = personal {
@@ -201,7 +206,8 @@ fn spell(ui: &mut conrod::UiCell,
             _personal.hand =
                 handvec.iter().map(|&(x_index, _, _, _, _, _)| x_index).collect::<Vec<usize>>();
             if (*_personal).clone() != temp {
-                println!("arranging");
+                let now = Instant::now();
+                *last_send = Some(now);
                 let promptsender = PromptSender(_action_tx);
                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                 let mut g = GameCommand::new();

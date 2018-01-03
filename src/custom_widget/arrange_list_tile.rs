@@ -238,12 +238,17 @@ impl<'a, S> Widget for ItemWidget<'a, S>
 
         let fontsize = get_font_size_hn(h, 2.0);
         let alphabet_font_id = self.style.alphabet_font_id(&ui.theme).or(ui.fonts.ids().next());
+        let fontsize1 = if (self.alphabet == "m") | (self.alphabet == "w") {
+            (fontsize as f64 * 0.7) as u32
+        } else {
+            fontsize
+        };
         let j = self.alphabet.to_uppercase();
 
         widget::Text::new(&j)
-            .mid_right_with_margin_on(id, 0.2*w)
+            .mid_right_with_margin_on(id, 0.2 * w)
             .parent(id)
-            .font_size(fontsize)
+            .font_size(fontsize1)
             .and_then(alphabet_font_id, widget::Text::font_id)
             .graphics_for(id)
             .set(state.ids.alphabet, ui);

@@ -77,11 +77,10 @@ fn render_closure()
                   mpsc::Sender<OwnedMessage>,
                   &mut conrod::UiCell)>>
 {
-    vec![
-             Box::new(|w_id, ids, mut gamedata, _appdata, result_map, action_tx, ui| {
-            //Chat
-            draw_game_chat(w_id, ids, &mut gamedata, result_map, action_tx, ui);
-        })]
+    vec![Box::new(|w_id, ids, mut gamedata, _appdata, result_map, action_tx, ui| {
+                      //Chat
+                      draw_game_chat(w_id, ids, &mut gamedata, result_map, action_tx, ui);
+                  })]
 }
 #[cfg(not(target_os="linux"))]
 fn draw_game_chat(w_id: tabview::Item,

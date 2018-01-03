@@ -4,7 +4,7 @@ use conrod::widget::primitive::image::Image;
 use cardgame_widgets::custom_widget::image_hover::Hoverable;
 use cardgame_widgets::custom_widget::player_info::item::IconStruct;
 use conrod::widget::envelope_editor::EnvelopePoint;
-
+#[derive(Clone)]
 pub struct ImageHoverable(pub Image, pub Option<Image>, pub Option<Image>);
 impl Hoverable for ImageHoverable {
     fn idle(&self) -> Image {

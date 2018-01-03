@@ -241,7 +241,7 @@ impl<'a, S> Widget for ItemWidget<'a, S>
         let j = self.alphabet.to_uppercase();
 
         widget::Text::new(&j)
-            .middle_of(id)
+            .mid_right_with_margin_on(id, 0.2*w)
             .parent(id)
             .font_size(fontsize)
             .and_then(alphabet_font_id, widget::Text::font_id)

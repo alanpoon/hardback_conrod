@@ -21,6 +21,9 @@ widget_ids! {
          footer_overlay_but,
          footer_overlay_but2, //chat
          footer_overlay_but3, //exit
+         //menu
+         menu_title_list1,
+         menu_title_list2,
          menubut_multiplayer,
         //lobby
         middle_tabview,
@@ -82,7 +85,18 @@ widget_ids! {
          overlayerbody_prompt,
          overlaypromptview_prompt,
          //loading
-         progress_bar
+         progress_bar,
+         //blow_up
+         blow_up_card,
+         blow_up_word,
+         blow_up_non_genre_rect,
+         blow_up_non_genre_cloudy,
+         blow_up_non_genre_text,
+         blow_up_genre_rect1,
+         blow_up_genre_cloudy1,
+         blow_up_genre_rect2,
+         blow_up_genre_cloudy2,
+         blow_up_genre_text,
     }
 }
 
@@ -141,10 +155,9 @@ pub struct GameData {
     pub overlay_timeless_selected: Vec<HashSet<usize, RandomState>>,
     pub overlay2: bool,
     pub overlay_prompt: Option<(f64, String, Vec<(String, Box<Fn(PromptSender)>)>)>,
+    pub overlay_blowup: Option<usize>,
     pub buy_selected: Option<usize>,
     pub notification: Option<(String, Instant)>,
-    pub arrange_selected: Option<usize>,
-    pub hand_selected: Option<usize>,
 }
 impl GameData {
     pub fn new() -> GameData {
@@ -185,10 +198,9 @@ impl GameData {
                                             HashSet::new()],
             overlay2: false,
             overlay_prompt: None,
+            overlay_blowup: None,
             buy_selected: None,
             notification: None,
-            arrange_selected: None,
-            hand_selected: None,
         }
     }
     pub fn reset(&mut self) {
@@ -212,10 +224,9 @@ impl GameData {
             vec![HashSet::new(), HashSet::new(), HashSet::new(), HashSet::new()];
         self.overlay2 = false;
         self.overlay_prompt = None;
+        self.overlay_blowup = None;
         self.buy_selected = None;
         self.notification = None;
-        self.arrange_selected = None;
-        self.hand_selected = None;
     }
 }
 #[derive( Debug, Clone,PartialEq)]
@@ -256,8 +267,6 @@ impl Board for BoardStruct {
                        _player_id: usize,
                        _card_id: usize,
                        _wait_for_input: &mut [WaitForInputType; 4]) {
-
-
     }
     fn trash_other(&mut self,
                    _player_id: usize,

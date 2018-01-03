@@ -36,7 +36,7 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref mut boardcodec,
                    ref mut print_instruction_set,
                    ref mut personal,
-                   ref mut hand_selected,
+                   ref mut overlay_blowup,
                    ref mut overlay,
                    ref mut overlay2,
                    ref mut overlay_chat,
@@ -56,7 +56,7 @@ pub fn render(ui: &mut conrod::UiCell,
                           &appdata,
                           &cardmeta,
                           personal,
-                          hand_selected,
+                          overlay_blowup,
                           overlay,
                           overlay_chat,
                           overlay_exit,
@@ -70,7 +70,7 @@ pub fn render(ui: &mut conrod::UiCell,
                           &appdata,
                           &cardmeta,
                           personal,
-                          hand_selected,
+                          overlay_blowup,
                           overlay,
                           overlay_chat,
                           overlay_exit,
@@ -120,7 +120,7 @@ fn spell(ui: &mut conrod::UiCell,
          appdata: &AppData,
          cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
          personal: &mut Option<Personal>,
-         hand_selected: &mut Option<usize>,
+         overlay_blowup: &mut Option<usize>,
          overlay: &mut bool,
          overlay_chat: &mut bool,
          overlay_exit: &mut bool,
@@ -155,7 +155,7 @@ fn spell(ui: &mut conrod::UiCell,
             let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
             let footer_list_w = ui.w_of(ids.footer).unwrap() - 300.0;
             let (exitid, exitby, scrollbar) = ArrangeList::new(&mut handvec,
-                                                               hand_selected,
+                                                               overlay_blowup,
                                                                Box::new(move |(_v_index,
                                                                                _timelessbool,
                                                                                _string,
@@ -172,6 +172,14 @@ fn spell(ui: &mut conrod::UiCell,
                     .alphabet_font_id(_font)
                     .color(_color)
             }),
+                                                               Box::new(|(_v_index,
+                                                                          _timelessbool,
+                                                                          _string,
+                                                                          _color,
+                                                                          _font,
+                                                                          _rect)| {
+                                                                            _v_index.clone()
+                                                                        }),
                                                                footer_list_w / 7.0)
                     .padded_h_of(ids.footer, 10.0)
                     .padded_w_of(ids.footer, 150.0)
@@ -193,6 +201,7 @@ fn spell(ui: &mut conrod::UiCell,
             _personal.hand =
                 handvec.iter().map(|&(x_index, _, _, _, _, _)| x_index).collect::<Vec<usize>>();
             if (*_personal).clone() != temp {
+                println!("arranging");
                 let promptsender = PromptSender(_action_tx);
                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                 let mut g = GameCommand::new();
@@ -345,8 +354,8 @@ fn buy(ui: &mut conrod::UiCell,
         if let (Some(_s), Some(_si), Some(xy)) = slist {
             let _dim = [300.0, 100.0];
             animated_canvas::Canvas::new()
-                .x(xy[0])
-                .y(-200.0)
+                .x(xy[0] + _dim[0] * 0.5)
+                .y(-150.0)
                 .parent(ids.master)
                 .color(default_color)
                 .wh(_dim)

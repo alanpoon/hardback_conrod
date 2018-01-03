@@ -1,5 +1,5 @@
 use hardback_meta::app::{AppData, ResourceEnum};
-use conrod::{self, color, widget, Colorable, Widget, text};
+use conrod::{self, color, widget, Colorable, Widget, text, Borderable};
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use backend::codec_lib::cards::*;
@@ -52,7 +52,7 @@ impl<'a, T> GameProcess<'a, T>
         let ids = &self.ids;
         match &gamedata.guistate {
             &GuiState::Game(_) => {
-                if result_map.len() < 8 {
+                if result_map.len() < 20 {
                     gamedata.guistate = GuiState::Loading;
                     std::thread::spawn(move || {
                         let mut map: HashMap<ResourceEnum, Vala> = HashMap::new();
@@ -79,8 +79,8 @@ impl<'a, T> GameProcess<'a, T>
                                     &ids,
                                     &mut gamedata,
                                     &self.appdata,
-                                    result_map,
-                                    action_tx);
+                                    &cardmeta,
+                                    result_map);
             }
             &GuiState::Lobby => {
                 logic::lobby::render(&mut ui.set_widgets(),
@@ -118,6 +118,7 @@ impl<'a, T> GameProcess<'a, T>
                               .color(color::DARK_GREEN)
                               .length(appdata.convert_h(210.0)))])
             .frame_rate(30)
+            .border(0.0)
             .set(ids.master, ui);
         logic::body::render(ui,
                             ids,
@@ -134,6 +135,7 @@ impl<'a, T> GameProcess<'a, T>
                               &cardmeta,
                               result_map,
                               action_tx.clone());
+        logic::overlay_blowup::render(ui, ids, &cardmeta, &mut gamedata, &appdata, result_map);
         logic::overlay::render(ui,
                                ids,
                                &cardmeta,

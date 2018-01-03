@@ -40,7 +40,7 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref mut print_instruction_set,
                    ref mut guistate,
                    ref mut initial_draft,
-                   ref mut arrange_selected,
+                   ref mut overlay_blowup,
                    ref player_index,
                    ref notification,
                    ref mut personal,
@@ -80,7 +80,7 @@ pub fn render(ui: &mut conrod::UiCell,
                           ids,
                           &cardmeta,
                           personal,
-                          arrange_selected,
+                          overlay_blowup,
                           appdata,
                           result_map,
                           _action_tx.clone());
@@ -90,7 +90,7 @@ pub fn render(ui: &mut conrod::UiCell,
                           ids,
                           &cardmeta,
                           personal,
-                          arrange_selected,
+                          overlay_blowup,
                           appdata,
                           result_map,
                           _action_tx.clone());
@@ -148,7 +148,7 @@ fn turn_to_submit_but(ui: &mut conrod::UiCell,
            .wh(appdata.convert_dim([100.0, 80.0]))
            .set(ids.submit_but, ui)
            .next() {
-
+        println!("submit word");
         let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
         let mut g = GameCommand::new();
         g.submit_word = Some(true);
@@ -166,7 +166,7 @@ fn show_draft(ui: &mut conrod::UiCell,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
               action_tx: mpsc::Sender<OwnedMessage>) {
     let body_w = ui.w_of(ids.body).unwrap();
-    let item_h = body_w / 7.0;
+    let item_h = body_w / 10.0;
     *initial_draft = player.draft.clone();
     let mut dealt_iter = player.draft.iter();
     if let (Some(&SupportIdType::ImageId(cloudy)),
@@ -288,9 +288,9 @@ fn shuffle(ui: &mut conrod::UiCell,
                          Image::new(back_logo).source_rectangle(graphics_match::backcard()))
                     .give_out(give_out_vec)
                     .bottom_left_of(ids.body)
-                    .h(appdata.convert_h(220.0))
+                    .h(appdata.convert_h(140.0))
                     .w_of(ids.body)
-                    .image_dim(appdata.convert_dim([190.0, 220.0]))
+                    .image_dim(appdata.convert_dim([110.0, 140.0]))
                     .close_frame_rate(25)
                     .set(ids.shuffleview, ui) {
             if _player_index == 0 {
@@ -315,7 +315,7 @@ fn spell(ui: &mut conrod::UiCell,
          ids: &Ids,
          cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
          personal: &mut Option<Personal>,
-         arrange_selected: &mut Option<usize>,
+         overlay_blowup: &mut Option<usize>,
          appdata: &AppData,
          result_map: &HashMap<ResourceEnum, SupportIdType>,
          _action_tx: mpsc::Sender<OwnedMessage>) {
@@ -360,7 +360,7 @@ fn spell(ui: &mut conrod::UiCell,
             let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
             let body_list_w = ui.w_of(ids.body).unwrap() - 40.0;
             let (exitid, exitby, scrollbar) = ArrangeList::new(&mut arrangedvec,
-                                                               arrange_selected,
+                                                               overlay_blowup,
                                                                Box::new(move |(_v_index,
                                                                                _timelessbool,
                                                                                _string,
@@ -379,6 +379,16 @@ fn spell(ui: &mut conrod::UiCell,
                     .alphabet_font_id(_font)
                     .color(_color)
             }),
+                                                               Box::new(|(_v_index,
+                                                                          _timelessbool,
+                                                                          _string,
+                                                                          _color,
+                                                                          _font,
+                                                                          _rect,
+                                                                          _inked,
+                                                                          _opstring)| {
+                                                                            _v_index.clone()
+                                                                        }),
                                                                body_list_w / 7.0)
                     .h(appdata.convert_h(260.0))
                     .padded_w_of(ids.body, 20.0)

@@ -1,4 +1,5 @@
 #![allow(unused_imports)]
+#![recursion_limit="128"]
 #[macro_use]
 extern crate serde_json;
 #[macro_use]

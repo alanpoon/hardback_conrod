@@ -43,6 +43,7 @@ impl<'b> Panelable for PanelInfo<'b> {
     fn list_selected<'a>(&'a self) -> &'a HashSet<usize, RandomState> {
         &self.list_selected
     }
+
     fn list_selected_mut<'a>(&'a mut self) -> &'a mut HashSet<usize, RandomState> {
         self.list_selected
     }
@@ -51,6 +52,13 @@ impl<'b> Panelable for PanelInfo<'b> {
                                    .get(i)
                                    .unwrap()
                                    .clone())
+    }
+    fn card_index(&self, i: usize) -> usize {
+        self.values
+            .get(i)
+            .unwrap()
+            .5
+            .clone()
     }
 }
 pub fn render(w_id: tabview::Item,
@@ -66,6 +74,7 @@ pub fn render(w_id: tabview::Item,
                    ref mut personal,
                    ref mut overlay_timeless_selected,
                    ref mut overlay_receivedimage,
+                   ref mut overlay_blowup,
                    .. } = *gamedata;
     widget::Text::new(&appdata.texts.use_timelessclassic)
         .color(color::WHITE)
@@ -82,11 +91,14 @@ pub fn render(w_id: tabview::Item,
     if let (Some(&SupportIdType::ImageId(cloudy)),
             Some(&SupportIdType::ImageId(coin_info)),
             Some(&SupportIdType::ImageId(coin_info270)),
+            Some(&SupportIdType::ImageId(arrows_image)),
             Some(&SupportIdType::ImageId(rust_logo))) =
         (result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::ARROWS)),
          result_map.get(&ResourceEnum::Sprite(Sprite::RUST))) {
+        let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
         if let (&mut Some(ref mut _boardcodec),
                 &Some(ref _player_index),
                 &mut Some(ref mut _personal)) = (boardcodec, player_index, personal) {
@@ -153,11 +165,12 @@ pub fn render(w_id: tabview::Item,
                         }
                     })
                     .collect::<Vec<PanelInfo>>();
-                ImagePanels::new(&mut vec_p)
+                ImagePanels::new(&mut vec_p, overlay_blowup)
                     .middle_of(w_id.parent_id)
                     .padded_w_of(w_id.parent_id, 20.0)
                     .y_item_height(100.0)
                     .x_item_list([100.0, 100.0, 22.0, 5.0])
+                    .corner_arrow(_c)
                     .set(ids.overlay_image_panels, ui);
                 match overlay_receivedimage[2] {
                     OverlayStatus::None => {
@@ -171,7 +184,6 @@ pub fn render(w_id: tabview::Item,
                                 for _selected in list_selected.iter() {
                                     if let Some(&(_timeless, _, _color, _font, _rect, _ci)) =
                                         values.get(_selected.clone()) {
-
                                         _personal.arranged.push((_ci.clone(), false, None, true));
                                     }
                                 }

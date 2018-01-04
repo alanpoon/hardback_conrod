@@ -89,16 +89,8 @@ widget_ids! {
          progress_bar,
          loading_gif,
          //blow_up
-         blow_up_card,
-         blow_up_word,
-         blow_up_non_genre_rect,
-         blow_up_non_genre_cloudy,
-         blow_up_non_genre_text,
-         blow_up_genre_rect1,
-         blow_up_genre_cloudy1,
-         blow_up_genre_rect2,
-         blow_up_genre_cloudy2,
-         blow_up_genre_text,
+         blowup_card,
+         blowup_list,
     }
 }
 

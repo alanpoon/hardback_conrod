@@ -3,7 +3,9 @@ use cardgame_widgets::custom_widget::animated_canvas;
 use cardgame_widgets::sprite::spriteable_rect;
 use cardgame_widgets::text::get_font_size_hn;
 use custom_widget::show_draft_item;
+use custom_widget::blowup_detail;
 use backend::codec_lib::codec::*;
+use backend::codec_lib::cards::*;
 use backend::codec_lib;
 use std::collections::HashMap;
 use app::{self, GameData, Ids, BoardStruct};
@@ -72,55 +74,32 @@ pub fn render(ui: &mut conrod::UiCell,
                 .w(wh[0] * 0.3)
                 .h(wh[0] * 0.3 * 1.2)
                 .mid_left_with_margin_on(ids.overlay, wh[0] * 0.05)
-                .set(ids.blow_up_card, ui);
-            let small_card_wh = [wh[0] * 0.05, wh[0] * 0.05 * 1.2];
-            let font_size = get_font_size_hn(wh[1] * 0.3, 3.0);
-            widget::Rectangle::fill_with(small_card_wh, _color)
-                .top_right_with_margins_on(ids.overlay, wh[1] * 0.1, wh[0] * 0.57)
-                .set(ids.blow_up_non_genre_rect, ui);
-            widget::Image::new(cloudy)
-                .wh_of(ids.blow_up_non_genre_rect)
-                .middle_of(ids.blow_up_non_genre_rect)
-                .set(ids.blow_up_non_genre_cloudy, ui);
-            if let Some(_ng_str) = _non_genre_str {
-                widget::Text::new(&_ng_str)
-                    .color(color::PURPLE.plain_contrast())
-                    .font_size(font_size)
-                    .top_left_with_margins_on(ids.overlay, wh[1] * 0.1, wh[0] * 0.45)
-                    .w(wh[0] * 0.45)
-                    .h(wh[1] * 0.3)
-                    .set(ids.blow_up_non_genre_text, ui);
+                .set(ids.blowup_card, ui);
+            let giveable_vec = vec![("Purchase".to_owned(),_purchase,None),
+            ("One of a kind".to_owned(),_giveable,_non_genre_str),
+            ("Two of a kind".to_owned(),_genre_giveable,_genre_str),
+            ("Trash".to_owned(),_trash,None)];
+            let reduce = giveable_vec.iter()
+                .filter(|&&(ref _i, ref _g, ref _s)| if (_g != &GIVEABLE::NONE) | (_s.is_some()) {
+                            true
+                        } else {
+                            false
+                        })
+                .collect::<Vec<&(String, GIVEABLE, Option<String>)>>();
+
+            let (mut items, _) = widget::List::flow_down(reduce.len())
+                .item_size(wh[0] / (reduce.len() as f64))
+                .w(wh[0] * 0.6)
+                .h(wh[1])
+                .set(ids.blowup_list, ui);
+            let mut reduce_iter = reduce.iter();
+            while let (Some(item), Some(_g)) = (items.next(ui), reduce_iter.next()) {
+                let &&(ref _is, ref _g, ref _s) = _g;
+                let j =
+                    blowup_detail::ItemWidget::new(&_is, _g.clone(), _s.clone(), game_icon.clone());
+                item.set(j, ui);
             }
 
-            widget::Rectangle::fill_with(small_card_wh, _color)
-                .top_right_with_margins_on(ids.overlay, wh[1] * 0.5, wh[0] * 0.57)
-                .set(ids.blow_up_genre_rect1, ui);
-            widget::Image::new(cloudy)
-                .wh_of(ids.blow_up_genre_rect1)
-                .middle_of(ids.blow_up_genre_rect1)
-                .set(ids.blow_up_genre_cloudy1, ui);
-            widget::Rectangle::fill_with(small_card_wh, _color)
-                .top_right_with_margins_on(ids.overlay, wh[1] * 0.5, wh[0] * 0.53)
-                .set(ids.blow_up_genre_rect2, ui);
-            widget::Image::new(cloudy)
-                .wh_of(ids.blow_up_genre_rect2)
-                .middle_of(ids.blow_up_genre_rect2)
-                .set(ids.blow_up_genre_cloudy2, ui);
-            if let Some(_g_str) = _genre_str {
-                widget::Text::new(&_g_str)
-                    .color(color::PURPLE.plain_contrast())
-                    .font_size(font_size)
-                    .top_left_with_margins_on(ids.overlay, wh[1] * 0.5, wh[0] * 0.45)
-                    .w(wh[0] * 0.45)
-                    .h(wh[1] * 0.3)
-                    .set(ids.blow_up_genre_text, ui);
-            }
         }
     }
-}
-fn render_giveable_icon(purchase: Giveable,
-                        giveable: Giveable,
-                        genre_giveable: Giveable,
-                        trash: Giveable) {
-
 }

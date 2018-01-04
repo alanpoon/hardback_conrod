@@ -39,8 +39,8 @@ path = "src/bin/main.rs"
 [package.metadata.android]
 package_name = "com.github.apoon1.hardback"
 label = "hardback"
-android_version = 19
-build_targets = ["arm-linux-androideabi"]
+android_version = 21
+build_targets = ["x86_64-linux-android"]
 assets = "assets"
 
 [package.metadata.android.activity_attributes]
@@ -54,4 +54,3 @@ conrod_chat = {path ="../conrod_chat", features=["web_socket","backend_glium_win
 [target.'cfg(target_os="android")'.dependencies]
 android_glue = "0.2.3"
 rusttype = "*"
-conrod_keypad ={path ="../conrod_keypad"}

@@ -46,7 +46,7 @@ pub fn textedit(k: &mut String,
                 ui: &mut conrod::UiCell) {
     use conrod_chat::chat::{english, sprite};
     use backend::meta::app::{AppData, ResourceEnum, Sprite};
-    use conrod_keypad::custom_widget::text_edit::TextEdit;
+    use conrod_chat::backend::custom_widget::text_edit::TextEdit;
     if let Some(&SupportIdType::ImageId(key_pad)) =
         result_map.get(&ResourceEnum::Sprite(Sprite::KEYPAD)) {
         let english_tuple = english::populate(key_pad, sprite::get_spriteinfo());

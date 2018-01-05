@@ -105,6 +105,7 @@ impl<'a, T> GameProcess<'a, T>
             }
             _ => {}
         }
+        //  logic::notification::render(&mut ui.set_widgets(), &ids, gamedata.notification.clone());
     }
     fn set_game_ui(&self,
                    ui: &mut conrod::UiCell,

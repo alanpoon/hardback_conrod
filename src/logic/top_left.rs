@@ -50,6 +50,7 @@ pub fn draw_lobby_chat(w_id: tabview::Item,
                        mut ui: &mut conrod::UiCell) {
     if let Some(&SupportIdType::ImageId(rust_img)) =
         result_map.get(&ResourceEnum::Sprite(Sprite::RUST)) {
+        println!("lobby history{:?}",gamedata.lobby_history.clone());
         let k = chatview_futures::ChatView::new(&mut gamedata.lobby_history,
                                                 &mut gamedata.lobby_textedit,
                                                 Some(rust_img),

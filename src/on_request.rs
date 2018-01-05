@@ -27,7 +27,24 @@ pub fn update(s: ClientReceivedMsg,
                             notification,
                             log,
                             hand,
+                            connection_status,
                             .. } = s;
+    if let Some(Some(_status)) = connection_status.clone() {
+        gamedata.connection_status = _status.clone();
+        match _status {
+            ConnectionStatus::Ok => {}
+            ConnectionStatus::Error(ConnectionError::NotConnectedToInternet) => {
+                gamedata.notification = Some(("NotConnectedToInternet".to_owned(), Instant::now()));
+            }
+            ConnectionStatus::Error(ConnectionError::CannotFindServer) => {
+                gamedata.notification = Some(("Cannot Find Server".to_owned(), Instant::now()));
+            }
+            ConnectionStatus::Error(ConnectionError::InvalidDestination) => {
+                gamedata.notification = Some(("Invalid Destination".to_owned(), Instant::now()));
+            }
+            _ => {}
+        }
+    }
     if let (Some(Some(_type_name)),
             Some(Some(_location)),
             Some(Some(_sender)),

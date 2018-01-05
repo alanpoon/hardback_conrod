@@ -80,12 +80,10 @@ impl GameApp {
         let cardmeta: [codec_lib::cards::ListCard<BoardStruct>; 180] =
             cards::populate::<BoardStruct>();
         let (load_asset_tx, load_asset_rx) = std::sync::mpsc::channel();
-
         std::thread::spawn(move || {
             let mut connected = false;
             let mut last_update = std::time::Instant::now();
             let mut c = 0;
-
             while !connected {
                 let sixteen_ms = std::time::Duration::from_millis(500);
                 let now = std::time::Instant::now();
@@ -93,6 +91,7 @@ impl GameApp {
                 if (duration_since_last_update < sixteen_ms) & (c > 0) {
                     std::thread::sleep(sixteen_ms - duration_since_last_update);
                 }
+                println!("reconnecting{:?}", c);
                 match toa_ping::run("www.google.com") {
                     Ok(_) => {
                         println!("internet connection");
@@ -102,11 +101,9 @@ impl GameApp {
                         drop(ss_tx);
                         match client::run_owned_message(CONNECTION, proxy_tx.clone(), rx) {
                             Ok(_) => {
-                                println!("connected");
                                 connected = true;
                             }
                             Err(_err) => {
-                                println!("reconnecting");
                                 connected = false;
                             }
                         }
@@ -114,7 +111,7 @@ impl GameApp {
                     }
                     _ => {
                         /*for test*/
-                        let (tx, rx) = mpsc::channel(3);
+                        /*   let (tx, rx) = mpsc::channel(3);
                         let mut ss_tx = ss_tx.lock().unwrap();
                         *ss_tx = tx;
                         drop(ss_tx);
@@ -128,7 +125,8 @@ impl GameApp {
                                 connected = false;
                             }
                         }
-                        //connected = false;
+                        */
+                        connected = false;
                     }
                 }
                 last_update = std::time::Instant::now();

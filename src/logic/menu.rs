@@ -8,7 +8,9 @@ use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use logic::in_game;
+use logic;
 use backend::codec_lib;
+use backend::codec_lib::codec::{ConnectionStatus, ConnectionError};
 #[allow(unused_mut)]
 pub fn render(ui: &mut conrod::UiCell,
               ids: &Ids,
@@ -24,7 +26,7 @@ pub fn render(ui: &mut conrod::UiCell,
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270))) {
         let w = ui.w_of(ids.master).unwrap();
-        let word_arr = vec![22,48,86,143];
+        let word_arr = vec![22, 48, 86, 143];
         let (mut items, _scrollbar) = widget::List::flow_right(word_arr.len())
             .item_size(w / 10.0)
             .w(w)
@@ -45,7 +47,7 @@ pub fn render(ui: &mut conrod::UiCell,
             item.set(j, ui);
         }
 
-        let blackjack_arr = vec![127,32,140,2,99,43,0,142,118];
+        let blackjack_arr = vec![127, 32, 140, 2, 99, 43, 0, 142, 118];
         let mut blackjack_iter = blackjack_arr.iter();
         let (mut items2, _scrollbar2) = widget::List::flow_right(blackjack_arr.len())
             .item_size(w / 10.0)
@@ -66,14 +68,21 @@ pub fn render(ui: &mut conrod::UiCell,
         }
 
     }
-    if widget::Button::new()
-           .wh(appdata.convert_dim([400.0, 100.0]))
-           .bottom_left_with_margin_on(ids.master, appdata.convert_h(20.0))
-           .rgb(0.4, 0.75, 0.6)
-           .label("Multiplayer")
-           .set(ids.menubut_multiplayer, ui)
-           .was_clicked() {
-        gamedata.guistate = GuiState::Lobby;
+    match gamedata.connection_status {
+        ConnectionStatus::Ok => {
+            if widget::Button::new()
+                   .wh(appdata.convert_dim([400.0, 100.0]))
+                   .bottom_left_with_margin_on(ids.master, appdata.convert_h(20.0))
+                   .rgb(0.4, 0.75, 0.6)
+                   .label("Multiplayer")
+                   .set(ids.menubut_multiplayer, ui)
+                   .was_clicked() {
+                gamedata.guistate = GuiState::Lobby;
+            }
+        }
+        _ => {
+            logic::notification::render(ui, ids, ids.master, gamedata.notification.clone());
+        }
     }
 
 }

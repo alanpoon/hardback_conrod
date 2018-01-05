@@ -42,7 +42,8 @@ pub fn get_tile_image_withcost<'a>(card_index: usize,
         _font = Some(__font.clone());
     }
     let source_rect = if *timeless {
-        let rect_dim = spriteable_rect(graphics_match::get_cost_info_sprite(), cost.clone() as f64);
+        let rect_dim = spriteable_rect(graphics_match::get_cost_info270_sprite(),
+                                       cost.clone() as f64);
         Rect::from_corners(rect_dim.0, rect_dim.1)
     } else {
         let rect_dim = spriteable_rect(graphics_match::get_cost_info_sprite(), cost.clone() as f64);

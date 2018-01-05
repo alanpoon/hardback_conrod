@@ -146,7 +146,7 @@ pub fn render(ui: &mut conrod::UiCell,
             }
             _ => {}
         }
-        logic::notification::render(ui, ids, notification.clone());
+        logic::notification::render(ui, ids, ids.body, notification.clone());
     }
 
     //  draw_hand(ui, ids, gamedata, appdata, result_map);
@@ -163,20 +163,20 @@ fn turn_to_submit_but(ui: &mut conrod::UiCell,
         let ratio = _last_send.elapsed()
             .checked_div(30_000_000)
             .unwrap()
-            .subsec_nanos();
-        println!("ratio {:?}",ratio);
-        let spinner_index = ratio * 60;
+            .subsec_nanos() as f64;
+        println!("ratio {:?}", ratio);
+        let spinner_index = ((ratio / 10.0).floor() as f64) / 10.0 * 60.0;
         let _rect = spriteable_rect(spinner_rect, spinner_index as f64);
         widget::Image::new(spinner_image)
             .source_rectangle(Rect::from_corners(_rect.0, _rect.1))
-            .wh(appdata.convert_dim([80.0, 80.0]))
+            .wh(appdata.convert_dim([50.0, 50.0]))
             .mid_bottom_of(ids.body)
             .set(ids.loading_gif, ui);
     } else {
         if let Some(_) = widget::Button::new()
                .label(&appdata.texts.submit)
                .mid_bottom_of(ids.body)
-               .wh(appdata.convert_dim([100.0, 80.0]))
+               .wh(appdata.convert_dim([100.0, 50.0]))
                .set(ids.submit_but, ui)
                .next() {
             println!("submit word");
@@ -238,13 +238,13 @@ fn show_draft(ui: &mut conrod::UiCell,
 
             let promptsender = PromptSender(action_tx);
             let instructions: Vec<(String, Box<Fn(PromptSender)>)> = vec![("Continue".to_owned(),
-                                                                       Box::new(move |ps| {
-            let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
-            let mut g = GameCommand::new();
-            g.go_to_shuffle = Some(true);
-            h.set_gamecommand(g);
-            ps.send(ServerReceivedMsg::serialize_send(h).unwrap());
-        }))];
+                                                                           Box::new(move |ps| {
+                let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
+                let mut g = GameCommand::new();
+                g.go_to_shuffle = Some(true);
+                h.set_gamecommand(g);
+                ps.send(ServerReceivedMsg::serialize_send(h).unwrap());
+            }))];
 
             let mut prompt =
                 Some((0.5f64, "Lets' start to Shuffle the cards".to_owned(), instructions));
@@ -424,9 +424,9 @@ fn spell(ui: &mut conrod::UiCell,
                                                                             _v_index.clone()
                                                                         }),
                                                                body_list_w / 7.0)
-                    .h(appdata.convert_h(260.0))
+                    .h(appdata.convert_h(210.0))
                     .padded_w_of(ids.body, 20.0)
-                    .mid_bottom_with_margin_on(ids.body, 80.0)
+                    .mid_bottom_with_margin_on(ids.body, appdata.convert_h(50.0))
                     .left_arrow(_l)
                     .right_arrow(_r)
                     .bottom_arrow(_b)

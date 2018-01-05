@@ -1,7 +1,6 @@
 use cardgame_widgets::custom_widget::image_hover::TimesClicked;
 use conrod::{widget, Color, Colorable, Borderable, Positionable, UiCell, Widget, event, input,
-             image, Theme, Sizeable, text, FontSize};
-
+             image, Theme, Sizeable, text, FontSize, color};
 use conrod::position::{Rect, Scalar, Dimensions, Point};
 use cardgame_widgets::text::get_font_size_hn;
 use conrod::widget::Rectangle;
@@ -100,31 +99,28 @@ impl<'a> Widget for ItemWidget<'a> {
         //
 
         let (_, _, w, h) = rect.x_y_w_h();
-        rectangle_fill(id,
+        /* rectangle_fill(id,
                        state.ids.background,
                        rect,
                        self.style.color(&ui.theme),
                        ui);
-
+                       */
         let fontsize = get_font_size_hn(h * 0.3, 1.0);
-        let j = self.key;
-
-        let text_dim = [w * 0.4, h * 0.3];
+        let text_dim = [w * 0.2, h * 0.3];
         let icon_dim = [w * 0.2, h * 0.3];
         widget::Text::new(self.key)
-            .mid_right_with_margin_on(id, 0.2 * w)
-            .parent(id)
+            .color(color::BLACK)
             .font_size(fontsize)
             .graphics_for(id)
-            .wh(text_dim)
+            .w(190.0)
             .mid_left_of(id)
             .set(state.ids.key, ui);
         match self.giveable {
             GIVEABLE::NONE => {}
             GIVEABLE::VP(_j) => {
                 widget::Text::new(&_j.to_string())
-                    .wh(text_dim)
-                    .mid_left_of(id)
+                    .w(50.0)
+                    .right_from(state.ids.keys, 5.0)
                     .set(state.ids.giveable_text, ui);
                 let j_rect = gameicons_rect(5.0);
                 widget::Image::new(self.icon_image)
@@ -135,8 +131,8 @@ impl<'a> Widget for ItemWidget<'a> {
             }
             GIVEABLE::COIN(_j) => {
                 widget::Text::new(&_j.to_string())
-                    .wh(text_dim)
-                    .mid_left_of(id)
+                    .w(50.0)
+                    .right_from(state.ids.keys, 5.0)
                     .set(state.ids.giveable_text, ui);
                 let j_rect = gameicons_rect(3.0);
                 widget::Image::new(self.icon_image)
@@ -147,9 +143,11 @@ impl<'a> Widget for ItemWidget<'a> {
             }
             GIVEABLE::VPCOIN(_v, _c) => {
                 let mut v_str = _v.to_string();
-                v_str.push_str("+");
-                widget::Text::new(&v_str).wh(text_dim).mid_left_of(id).set(state.ids.giveable_text,
-                                                                           ui);
+                v_str.push_str(" + ");
+                widget::Text::new(&v_str)
+                    .w(50.0)
+                    .right_from(state.ids.keys, 5.0)
+                    .set(state.ids.giveable_text, ui);
                 let v_rect = gameicons_rect(5.0);
                 widget::Image::new(self.icon_image)
                     .right_from(state.ids.giveable_text, 0.0)
@@ -158,8 +156,7 @@ impl<'a> Widget for ItemWidget<'a> {
                     .set(state.ids.giveable_icon, ui);
                 widget::Text::new(&_c.to_string())
                     .right_from(state.ids.giveable_icon, 0.0)
-                    .wh(text_dim)
-                    .mid_left_of(id)
+                    .w(50.0)
                     .set(state.ids.giveable_text2, ui);
                 let c_rect = gameicons_rect(3.0);
                 widget::Image::new(self.icon_image)
@@ -170,9 +167,11 @@ impl<'a> Widget for ItemWidget<'a> {
             }
             GIVEABLE::COININK(_v) => {
                 let mut v_str = _v.to_string();
-                v_str.push_str("+");
-                widget::Text::new(&v_str).wh(text_dim).mid_left_of(id).set(state.ids.giveable_text,
-                                                                           ui);
+                v_str.push_str(" + ");
+                widget::Text::new(&v_str)
+                    .wh(text_dim)
+                    .right_from(state.ids.keys, 5.0)
+                    .set(state.ids.giveable_text, ui);
                 let v_rect = gameicons_rect(3.0);
                 widget::Image::new(self.icon_image)
                     .right_from(state.ids.giveable_text, 0.0)
@@ -181,8 +180,8 @@ impl<'a> Widget for ItemWidget<'a> {
                     .set(state.ids.giveable_icon, ui);
                 widget::Text::new(&_v.to_string())
                     .right_from(state.ids.giveable_icon, 0.0)
-                    .wh(text_dim)
-                    .mid_left_of(id)
+                    .w(50.0)
+                    .right_from(state.ids.keys, 5.0)
                     .set(state.ids.giveable_text2, ui);
                 let c_rect = gameicons_rect(1.0);
                 widget::Image::new(self.icon_image)
@@ -193,9 +192,11 @@ impl<'a> Widget for ItemWidget<'a> {
             }
             GIVEABLE::VPINK(_v) => {
                 let mut v_str = _v.to_string();
-                v_str.push_str("+");
-                widget::Text::new(&v_str).wh(text_dim).mid_left_of(id).set(state.ids.giveable_text,
-                                                                           ui);
+                v_str.push_str(" + ");
+                widget::Text::new(&v_str)
+                    .wh(text_dim)
+                    .right_from(state.ids.keys, 5.0)
+                    .set(state.ids.giveable_text, ui);
                 let v_rect = gameicons_rect(5.0);
                 widget::Image::new(self.icon_image)
                     .right_from(state.ids.giveable_text, 0.0)
@@ -204,8 +205,7 @@ impl<'a> Widget for ItemWidget<'a> {
                     .set(state.ids.giveable_icon, ui);
                 widget::Text::new(&_v.to_string())
                     .right_from(state.ids.giveable_icon, 0.0)
-                    .wh(text_dim)
-                    .mid_left_of(id)
+                    .w(50.0)
                     .set(state.ids.giveable_text2, ui);
                 let c_rect = gameicons_rect(1.0);
                 widget::Image::new(self.icon_image)
@@ -216,7 +216,7 @@ impl<'a> Widget for ItemWidget<'a> {
             }
             GIVEABLE::VPORCOIN(_v) => {
                 let mut v_str = _v.to_string();
-                v_str.push_str("/");
+                v_str.push_str(" / ");
                 widget::Text::new(&v_str).wh(text_dim).mid_left_of(id).set(state.ids.giveable_text,
                                                                            ui);
                 let v_rect = gameicons_rect(5.0);
@@ -227,31 +227,7 @@ impl<'a> Widget for ItemWidget<'a> {
                     .set(state.ids.giveable_icon, ui);
                 widget::Text::new(&_v.to_string())
                     .right_from(state.ids.giveable_icon, 0.0)
-                    .wh(text_dim)
-                    .mid_left_of(id)
-                    .set(state.ids.giveable_text2, ui);
-                let c_rect = gameicons_rect(3.0);
-                widget::Image::new(self.icon_image)
-                    .source_rectangle(c_rect)
-                    .wh(icon_dim)
-                    .right_from(state.ids.giveable_text2, 0.0)
-                    .set(state.ids.giveable_icon2, ui);
-            }
-            GIVEABLE::VPORCOIN(_v) => {
-                let mut v_str = _v.to_string();
-                v_str.push_str("/");
-                widget::Text::new(&v_str).wh(text_dim).mid_left_of(id).set(state.ids.giveable_text,
-                                                                           ui);
-                let v_rect = gameicons_rect(5.0);
-                widget::Image::new(self.icon_image)
-                    .right_from(state.ids.giveable_text, 0.0)
-                    .source_rectangle(v_rect)
-                    .wh(icon_dim)
-                    .set(state.ids.giveable_icon, ui);
-                widget::Text::new(&_v.to_string())
-                    .right_from(state.ids.giveable_icon, 0.0)
-                    .wh(text_dim)
-                    .mid_left_of(id)
+                    .w(50.0)
                     .set(state.ids.giveable_text2, ui);
                 let c_rect = gameicons_rect(3.0);
                 widget::Image::new(self.icon_image)
@@ -262,7 +238,7 @@ impl<'a> Widget for ItemWidget<'a> {
             }
             GIVEABLE::VPORCOININK(_v) => {
                 let mut v_str = _v.to_string();
-                v_str.push_str("/");
+                v_str.push_str(" / ");
                 widget::Text::new(&v_str).wh(text_dim).mid_left_of(id).set(state.ids.giveable_text,
                                                                            ui);
                 let v_rect = gameicons_rect(5.0);
@@ -273,8 +249,7 @@ impl<'a> Widget for ItemWidget<'a> {
                     .set(state.ids.giveable_icon, ui);
                 widget::Text::new(&_v.to_string())
                     .right_from(state.ids.giveable_icon, 0.0)
-                    .wh(text_dim)
-                    .mid_left_of(id)
+                    .w(50.0)
                     .set(state.ids.giveable_text2, ui);
                 let c_rect = gameicons_rect(3.0);
                 widget::Image::new(self.icon_image)
@@ -286,7 +261,6 @@ impl<'a> Widget for ItemWidget<'a> {
                 widget::Image::new(self.icon_image)
                     .source_rectangle(rect3)
                     .wh(text_dim)
-                    .mid_left_of(id)
                     .right_from(state.ids.giveable_icon2, 0.0)
                     .set(state.ids.giveable_icon3, ui);
             }
@@ -305,7 +279,7 @@ impl<'a> Widget for ItemWidget<'a> {
             widget::Text::new(&_detail)
                 .down_from(state.ids.giveable_text, 0.0)
                 .h(h * 0.6)
-                .w(w)
+                .w(w * 0.4)
                 .set(state.ids.details, ui);
         }
     }
@@ -318,7 +292,11 @@ fn rectangle_fill(button_id: widget::Id,
                   ui: &mut UiCell) {
     // BorderedRectangle widget.
     let dim = rect.dim();
-    widget::Rectangle::fill_with(dim, color)
+
+    widget::BorderedRectangle::new(dim)
+        //.with_style(_style)
+        .border_color(color::BLACK)
+            .border(2.0)
         .middle_of(button_id)
         .graphics_for(button_id)
         .set(rectangle_id, ui);

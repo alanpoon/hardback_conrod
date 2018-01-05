@@ -34,8 +34,8 @@ pub fn render(ui: &mut conrod::UiCell,
 
             let close_rect = spriteable_rect(graphics_match::keypad_sprite(), 2.0);
             if animated_canvas::Canvas::new()
-                   .mid_top_with_margin_on(ids.master, appdata.convert_h(80.0))
-                   .h(appdata.convert_h(80.0))
+                   .mid_top_with_margin_on(ids.master, appdata.convert_h(50.0))
+                   .h(appdata.convert_h(140.0))
                    .padded_w_of(ids.master, appdata.convert_h(180.0))
                    .color(color::LIGHT_BLUE)
                    .parent(ids.master)
@@ -71,8 +71,8 @@ pub fn render(ui: &mut conrod::UiCell,
                 .coin_info270(coin_info270)
                 .alphabet_font_id(_font)
                 .color(_color)
-                .w(wh[0] * 0.3)
-                .h(wh[0] * 0.3 * 1.2)
+                .w(wh[1] * 0.9)
+                .h(wh[1] * 0.9)
                 .mid_left_with_margin_on(ids.overlay, wh[0] * 0.05)
                 .set(ids.blowup_card, ui);
             let giveable_vec = vec![("Purchase".to_owned(),_purchase,None),
@@ -86,17 +86,19 @@ pub fn render(ui: &mut conrod::UiCell,
                             false
                         })
                 .collect::<Vec<&(String, GIVEABLE, Option<String>)>>();
-
             let (mut items, _) = widget::List::flow_down(reduce.len())
-                .item_size(wh[0] / (reduce.len() as f64))
-                .w(wh[0] * 0.6)
-                .h(wh[1])
+                .right_from(ids.blowup_card, wh[0] * 0.1)
+               // .item_size(wh[0]*0.9 / (reduce.len() as f64))
+                .w(wh[0] * 0.65)
+                .h(wh[1] * 0.9)
                 .set(ids.blowup_list, ui);
             let mut reduce_iter = reduce.iter();
             while let (Some(item), Some(_g)) = (items.next(ui), reduce_iter.next()) {
                 let &&(ref _is, ref _g, ref _s) = _g;
                 let j =
-                    blowup_detail::ItemWidget::new(&_is, _g.clone(), _s.clone(), game_icon.clone());
+                    blowup_detail::ItemWidget::new(&_is, _g.clone(), _s.clone(), game_icon.clone())
+                        .color(color::RED);
+                //  let t=widget::Text::new("asdsad");
                 item.set(j, ui);
             }
 

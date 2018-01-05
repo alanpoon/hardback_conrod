@@ -173,12 +173,12 @@ impl<'a> Widget for ItemWidget<'a> {
         let alphabet_font_id = self.style.alphabet_font_id(&ui.theme).or(ui.fonts.ids().next());
         let j = self.alphabet.to_uppercase();
         let fontsize1 = if (self.alphabet == "m") | (self.alphabet == "w") {
-            (fontsize as f64 * 0.7) as u32
+            (fontsize as f64 * 0.6) as u32
         } else {
             fontsize
         };
         widget::Text::new(&j)
-            .mid_right_with_margin_on(id, 0.2 * w)
+            .mid_right_with_margin_on(id, 0.3 * w)
             .parent(id)
             .font_size(fontsize1)
             .and_then(alphabet_font_id, widget::Text::font_id)

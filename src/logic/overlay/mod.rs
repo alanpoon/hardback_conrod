@@ -140,7 +140,7 @@ fn render_closure()
                   mpsc::Sender<OwnedMessage>,
                   &mut conrod::UiCell)>>
 {
-    vec![Box::new(|w_id, ids, cardmeta,mut gamedata, appdata, result_map, action_tx, ui| {
+    vec![Box::new(|w_id, ids, cardmeta, mut gamedata, appdata, result_map, action_tx, ui| {
         //draw use ink
         overlay::use_ink::render(w_id,
                                  ids,
@@ -151,7 +151,7 @@ fn render_closure()
                                  action_tx,
                                  ui);
     }),
-         Box::new(|w_id, ids, cardmeta,mut gamedata, _appdata, result_map, action_tx, ui| {
+         Box::new(|w_id, ids, cardmeta, mut gamedata, _appdata, result_map, action_tx, ui| {
         //draw use remover
         overlay::use_remover::render(w_id,
                                      ids,
@@ -162,7 +162,7 @@ fn render_closure()
                                      action_tx,
                                      ui);
     }),
-         Box::new(|w_id, ids, cardmeta,mut gamedata, _appdata, result_map, action_tx, ui| {
+         Box::new(|w_id, ids, cardmeta, mut gamedata, _appdata, result_map, action_tx, ui| {
         //draw use timeless classics
         overlay::use_timelessclassic::render(w_id,
                                              ids,

@@ -28,7 +28,6 @@ pub fn load_resources_iter(map: &mut HashMap<ResourceEnum, Vala>) {
     (ResourceEnum::Texture(Texture::PAGE2F),"texture","images/characters/player2.jpg"),
     (ResourceEnum::Texture(Texture::PAGE3F),"texture","images/characters/player3.jpg"),
     (ResourceEnum::Texture(Texture::PAGE4F),"texture","images/characters/player4.jpg"),
-    (ResourceEnum::Sprite(Sprite::RUST),"image","images/rust.png"),
     (ResourceEnum::Sprite(Sprite::KEYPAD),"image","images/keypad.png"),   
     (ResourceEnum::Sprite(Sprite::DOWNLOAD),"image","images/download.png"), //10
     (ResourceEnum::Sprite(Sprite::BACKCARD),"image","images/cards/backside.jpg"),
@@ -46,6 +45,7 @@ pub fn init_load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, 
                                          display: &glium::Display,
                                          ui: &mut conrod::Ui) {
     CGM_image_map!{
+    (ResourceEnum::Sprite(Sprite::RUST),"image","images/rust.png"),        
     (ResourceEnum::Sprite(Sprite::CLOUDY),"image","images/cards/cloudy.png"),
     (ResourceEnum::Sprite(Sprite::COININFO),"image","images/allcoin_info.png"),
     (ResourceEnum::Sprite(Sprite::COININFO270),"image270","images/allcoin_info.png"),

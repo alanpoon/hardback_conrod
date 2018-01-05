@@ -132,12 +132,12 @@ pub struct GameData {
     pub name_text_edit: String,
     pub tables: Vec<TableInfo>,
     pub tablenumber: Option<usize>,
-    pub connected: bool,
     pub error_str: Option<String>,
     pub boardcodec: Option<BoardCodec>,
     pub personal: Option<Personal>,
     pub player_index: Option<usize>,
     pub print_instruction_set: Vec<bool>,
+    pub print_instruction_cache: usize,
     pub initial_draft: Vec<usize>,
     pub keypad_on: bool,
     pub overlay: bool,
@@ -153,6 +153,7 @@ pub struct GameData {
     pub buy_selected: Option<usize>,
     pub notification: Option<(String, Instant)>,
     pub last_send: Option<Instant>,
+    pub connection_status: ConnectionStatus,
 }
 impl GameData {
     pub fn new() -> GameData {
@@ -173,12 +174,12 @@ impl GameData {
             name_text_edit: "".to_owned(),
             tables: vec![],
             tablenumber: None,
-            connected: false,
             error_str: None,
             boardcodec: None,
             personal: None,
             player_index: None,
             print_instruction_set: vec![true],
+            print_instruction_cache: 0,
             initial_draft: vec![],
             keypad_on: false,
             overlay: false,
@@ -197,6 +198,7 @@ impl GameData {
             buy_selected: None,
             notification: None,
             last_send: None,
+            connection_status: ConnectionStatus::None,
         }
     }
     pub fn reset(&mut self) {
@@ -207,6 +209,7 @@ impl GameData {
         self.personal = None;
         self.player_index = None;
         self.print_instruction_set = vec![true];
+        self.print_instruction_cache = 0;
         self.initial_draft = vec![];
         self.keypad_on = false;
         self.overlay = false;

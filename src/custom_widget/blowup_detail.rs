@@ -43,6 +43,7 @@ widget_ids! {
         giveable_text2,
         giveable_icon2,
         giveable_icon3,
+        operator,
         details,
     }
 }
@@ -99,177 +100,196 @@ impl<'a> Widget for ItemWidget<'a> {
         //
 
         let (_, _, w, h) = rect.x_y_w_h();
-        /* rectangle_fill(id,
-                       state.ids.background,
-                       rect,
-                       self.style.color(&ui.theme),
-                       ui);
-                       */
         let fontsize = get_font_size_hn(h * 0.3, 1.0);
         let text_dim = [w * 0.2, h * 0.3];
-        let icon_dim = [w * 0.2, h * 0.3];
+        let icon_dim = [h * 0.3, h * 0.3];
+        let second_text_w = 90.0;
+        let first_text_w=25.0;
         widget::Text::new(self.key)
             .color(color::BLACK)
             .font_size(fontsize)
             .graphics_for(id)
-            .w(190.0)
+            .w(130.0)
             .mid_left_of(id)
             .set(state.ids.key, ui);
+            let mut j ="+".to_string();
         match self.giveable {
             GIVEABLE::NONE => {}
             GIVEABLE::VP(_j) => {
-                widget::Text::new(&_j.to_string())
-                    .w(50.0)
-                    .right_from(state.ids.keys, 5.0)
+                j.push_str(&_j.to_string());
+                widget::Text::new(&j)
+                    .w(first_text_w)
+                    .font_size(fontsize)
+                    .right_from(state.ids.key,20.0)
                     .set(state.ids.giveable_text, ui);
                 let j_rect = gameicons_rect(5.0);
                 widget::Image::new(self.icon_image)
                     .wh(icon_dim)
-                    .right_from(state.ids.giveable_text, 0.0)
+                    .right_from(state.ids.giveable_text, 8.0)
                     .source_rectangle(j_rect)
                     .set(state.ids.giveable_icon, ui);
             }
             GIVEABLE::COIN(_j) => {
-                widget::Text::new(&_j.to_string())
-                    .w(50.0)
-                    .right_from(state.ids.keys, 5.0)
+                j.push_str(&_j.to_string());
+                widget::Text::new(&j)
+                    .w(first_text_w)
+                    .font_size(fontsize)
+                    .right_from(state.ids.key,20.0)
                     .set(state.ids.giveable_text, ui);
                 let j_rect = gameicons_rect(3.0);
                 widget::Image::new(self.icon_image)
-                    .right_from(state.ids.giveable_text, 0.0)
+                    .right_from(state.ids.giveable_text, 8.0)
                     .wh(icon_dim)
                     .source_rectangle(j_rect)
                     .set(state.ids.giveable_icon, ui);
             }
             GIVEABLE::VPCOIN(_v, _c) => {
-                let mut v_str = _v.to_string();
-                v_str.push_str(" + ");
-                widget::Text::new(&v_str)
-                    .w(50.0)
-                    .right_from(state.ids.keys, 5.0)
+                j.push_str(&_v.to_string());
+                widget::Text::new(&j)
+                    .w(first_text_w)
+                    .font_size(fontsize)
+                    .right_from(state.ids.key,20.0)
                     .set(state.ids.giveable_text, ui);
                 let v_rect = gameicons_rect(5.0);
                 widget::Image::new(self.icon_image)
-                    .right_from(state.ids.giveable_text, 0.0)
+                    .right_from(state.ids.giveable_text, 8.0)
                     .source_rectangle(v_rect)
                     .wh(icon_dim)
                     .set(state.ids.giveable_icon, ui);
-                widget::Text::new(&_c.to_string())
-                    .right_from(state.ids.giveable_icon, 0.0)
-                    .w(50.0)
+                let mut k =" and + ".to_string();
+                k.push_str(&_c.to_string());
+                widget::Text::new(&k)
+                    .right_from(state.ids.giveable_icon, 8.0)
+                    .w(second_text_w)
+                    .font_size(fontsize)
                     .set(state.ids.giveable_text2, ui);
                 let c_rect = gameicons_rect(3.0);
                 widget::Image::new(self.icon_image)
                     .source_rectangle(c_rect)
                     .wh(icon_dim)
-                    .right_from(state.ids.giveable_text2, 0.0)
+                    .right_from(state.ids.giveable_text2, 8.0)
                     .set(state.ids.giveable_icon2, ui);
             }
             GIVEABLE::COININK(_v) => {
-                let mut v_str = _v.to_string();
-                v_str.push_str(" + ");
-                widget::Text::new(&v_str)
-                    .wh(text_dim)
-                    .right_from(state.ids.keys, 5.0)
+                j.push_str(&_v.to_string());
+                widget::Text::new(&j)
+                    .w(first_text_w)
+                    .font_size(fontsize)
+                    .right_from(state.ids.key,20.0)
                     .set(state.ids.giveable_text, ui);
                 let v_rect = gameicons_rect(3.0);
                 widget::Image::new(self.icon_image)
-                    .right_from(state.ids.giveable_text, 0.0)
+                    .right_from(state.ids.giveable_text, 8.0)
                     .wh(icon_dim)
                     .source_rectangle(v_rect)
                     .set(state.ids.giveable_icon, ui);
-                widget::Text::new(&_v.to_string())
-                    .right_from(state.ids.giveable_icon, 0.0)
-                    .w(50.0)
-                    .right_from(state.ids.keys, 5.0)
+                let mut k = " and + ".to_owned();
+                k.push_str(&_v.to_string());
+                widget::Text::new(&k)
+                    .right_from(state.ids.giveable_icon, 8.0)
+                    .w(second_text_w)
+                    .font_size(fontsize)
+                    .right_from(state.ids.key,20.0)
                     .set(state.ids.giveable_text2, ui);
                 let c_rect = gameicons_rect(1.0);
                 widget::Image::new(self.icon_image)
                     .source_rectangle(c_rect)
                     .wh(icon_dim)
-                    .right_from(state.ids.giveable_text2, 0.0)
+                    .right_from(state.ids.giveable_text2, 8.0)
                     .set(state.ids.giveable_icon2, ui);
             }
             GIVEABLE::VPINK(_v) => {
-                let mut v_str = _v.to_string();
-                v_str.push_str(" + ");
-                widget::Text::new(&v_str)
-                    .wh(text_dim)
-                    .right_from(state.ids.keys, 5.0)
+                widget::Text::new(&_v.to_string())
+                    .w(first_text_w)
+                    .font_size(fontsize)
+                    .right_from(state.ids.key,20.0)
                     .set(state.ids.giveable_text, ui);
                 let v_rect = gameicons_rect(5.0);
                 widget::Image::new(self.icon_image)
-                    .right_from(state.ids.giveable_text, 0.0)
+                    .right_from(state.ids.giveable_text, 8.0)
                     .wh(icon_dim)
                     .source_rectangle(v_rect)
                     .set(state.ids.giveable_icon, ui);
-                widget::Text::new(&_v.to_string())
-                    .right_from(state.ids.giveable_icon, 0.0)
-                    .w(50.0)
+                let mut k = " and + ".to_owned();
+                k.push_str(&_v.to_string());
+                widget::Text::new(&k)
+                    .right_from(state.ids.giveable_icon, 8.0)
+                    .w(second_text_w)
+                    .font_size(fontsize)
                     .set(state.ids.giveable_text2, ui);
                 let c_rect = gameicons_rect(1.0);
                 widget::Image::new(self.icon_image)
                     .source_rectangle(c_rect)
                     .wh(icon_dim)
-                    .right_from(state.ids.giveable_text2, 0.0)
+                    .right_from(state.ids.giveable_text2, 8.0)
                     .set(state.ids.giveable_icon2, ui);
             }
-            GIVEABLE::VPORCOIN(_v) => {
-                let mut v_str = _v.to_string();
-                v_str.push_str(" / ");
-                widget::Text::new(&v_str).wh(text_dim).mid_left_of(id).set(state.ids.giveable_text,
+            GIVEABLE::VPORCOIN(_v) => {                
+                widget::Text::new(&_v.to_string())
+                    .font_size(fontsize)
+                    .w(first_text_w).right_from(state.ids.key,20.0).set(state.ids.giveable_text,
                                                                            ui);
                 let v_rect = gameicons_rect(5.0);
                 widget::Image::new(self.icon_image)
-                    .right_from(state.ids.giveable_text, 0.0)
+                    .right_from(state.ids.giveable_text, 8.0)
                     .wh(icon_dim)
                     .source_rectangle(v_rect)
                     .set(state.ids.giveable_icon, ui);
-                widget::Text::new(&_v.to_string())
-                    .right_from(state.ids.giveable_icon, 0.0)
-                    .w(50.0)
+                let mut k =" or + ".to_owned();
+                k.push_str(&_v.to_string());
+                widget::Text::new(&k)
+                    .font_size(fontsize)
+                    .right_from(state.ids.giveable_icon, 8.0)
+                    .w(second_text_w)
                     .set(state.ids.giveable_text2, ui);
                 let c_rect = gameicons_rect(3.0);
                 widget::Image::new(self.icon_image)
                     .source_rectangle(c_rect)
                     .wh(icon_dim)
-                    .right_from(state.ids.giveable_text2, 0.0)
+                    .right_from(state.ids.giveable_text2, 8.0)
                     .set(state.ids.giveable_icon2, ui);
             }
             GIVEABLE::VPORCOININK(_v) => {
-                let mut v_str = _v.to_string();
-                v_str.push_str(" / ");
-                widget::Text::new(&v_str).wh(text_dim).mid_left_of(id).set(state.ids.giveable_text,
+                j.push_str(&_v.to_string());
+                widget::Text::new(&j)
+                    .font_size(fontsize)
+                    .w(first_text_w).right_from(state.ids.key,20.0).set(state.ids.giveable_text,
                                                                            ui);
                 let v_rect = gameicons_rect(5.0);
                 widget::Image::new(self.icon_image)
-                    .right_from(state.ids.giveable_text, 0.0)
+                    .right_from(state.ids.giveable_text, 8.0)
                     .wh(icon_dim)
                     .source_rectangle(v_rect)
                     .set(state.ids.giveable_icon, ui);
-                widget::Text::new(&_v.to_string())
-                    .right_from(state.ids.giveable_icon, 0.0)
-                    .w(50.0)
+                let mut k = " or + ".to_owned();
+                k.push_str(&_v.to_string()); 
+                widget::Text::new(&k)
+                    .font_size(fontsize)
+                    .right_from(state.ids.giveable_icon, 8.0)
+                    .w(second_text_w)
                     .set(state.ids.giveable_text2, ui);
                 let c_rect = gameicons_rect(3.0);
                 widget::Image::new(self.icon_image)
                     .source_rectangle(c_rect)
                     .wh(icon_dim)
-                    .right_from(state.ids.giveable_text2, 0.0)
+                    .right_from(state.ids.giveable_text2, 8.0)
                     .set(state.ids.giveable_icon2, ui);
                 let rect3 = gameicons_rect(1.0);
                 widget::Image::new(self.icon_image)
                     .source_rectangle(rect3)
                     .wh(text_dim)
-                    .right_from(state.ids.giveable_icon2, 0.0)
+                    .right_from(state.ids.giveable_icon2, 8.0)
                     .set(state.ids.giveable_icon3, ui);
             }
             GIVEABLE::INK => {
-                widget::Text::new("1").wh(text_dim).mid_left_of(id).set(state.ids.giveable_text,
-                                                                        ui);
+                widget::Text::new("+ 1")
+                .w(first_text_w)
+                .font_size(fontsize)
+                .right_from(state.ids.key,20.0)
+                .set(state.ids.giveable_text,ui);
                 let v_rect = gameicons_rect(1.0);
                 widget::Image::new(self.icon_image)
-                    .right_from(state.ids.giveable_text, 0.0)
+                    .right_from(state.ids.giveable_text, 8.0)
                     .wh(icon_dim)
                     .source_rectangle(v_rect)
                     .set(state.ids.giveable_icon, ui);
@@ -277,31 +297,14 @@ impl<'a> Widget for ItemWidget<'a> {
         }
         if let Some(_detail) = self.details {
             widget::Text::new(&_detail)
-                .down_from(state.ids.giveable_text, 0.0)
+                .font_size(fontsize)
+                .down_from(state.ids.giveable_text, 8.0)
                 .h(h * 0.6)
                 .w(w * 0.4)
                 .set(state.ids.details, ui);
         }
     }
 }
-
-fn rectangle_fill(button_id: widget::Id,
-                  rectangle_id: widget::Id,
-                  rect: Rect,
-                  color: Color,
-                  ui: &mut UiCell) {
-    // BorderedRectangle widget.
-    let dim = rect.dim();
-
-    widget::BorderedRectangle::new(dim)
-        //.with_style(_style)
-        .border_color(color::BLACK)
-            .border(2.0)
-        .middle_of(button_id)
-        .graphics_for(button_id)
-        .set(rectangle_id, ui);
-}
-
 
 impl<'a> Colorable for ItemWidget<'a> {
     builder_method!(color { style.color = Some(Color) });

@@ -131,10 +131,10 @@ pub fn get_cost_info_sprite() -> SpriteInfo {
 }
 pub fn get_cost_info270_sprite() -> SpriteInfo {
     SpriteInfo {
-        first: (0.0, 400.0), //left corner of first
+        first: (5.0, 410.0), //left corner of first
         num_in_row: 1,
         num_in_col: 10,
-        w_h: (400.0, 41.0),
+        w_h: (395.0, 41.0),
         pad: (0.0, 0.0, 0.0, 0.0),
     }
 }

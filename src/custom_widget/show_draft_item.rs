@@ -155,7 +155,7 @@ impl<'a> Widget for ItemWidget<'a> {
                 let timeless_font_id =
                     self.style.timeless_font_id(&ui.theme).or(ui.fonts.ids().next());
                 widget::Text::new(self.timelesstext)
-                    .middle_of(state.ids.coin_info)
+                    .mid_left_with_margin_on(state.ids.coin_info,2.0)
                     .font_size(fontsize)
                     .and_then(timeless_font_id, widget::Text::font_id)
                     .set(state.ids.coin_info_timeless, ui);

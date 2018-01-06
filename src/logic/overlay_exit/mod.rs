@@ -32,6 +32,7 @@ pub fn render(ui: &mut conrod::UiCell,
                                  animated_canvas::Canvas::new().color(default_color))])
                    .color(color::TRANSPARENT)
                    .parent(ids.master)
+                   .close_icon_color(color::YELLOW)
                    .close_icon_dim([30.0, 30.0])
                    .close_icon(keypad_image)
                    .close_icon_src_rect(Rect::from_corners(close_rect.0, close_rect.1))
@@ -41,8 +42,9 @@ pub fn render(ui: &mut conrod::UiCell,
                 gamedata.overlay_exit = false;
             }
             widget::Text::new(&appdata.texts.are_you_sure_exit)
+                .font_size(30.0)
                 .mid_top_of(ids.overlaybody_exit)
-                .color(default_color.plain_contrast())
+                .color(color::WHITE)
                 .set(ids.overlaytext_exit, ui);
             let button_color = color::LIGHT_ORANGE;
             for _i in widget::Button::new()

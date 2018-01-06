@@ -164,7 +164,6 @@ fn turn_to_submit_but(ui: &mut conrod::UiCell,
             .checked_div(30_000_000)
             .unwrap()
             .subsec_nanos() as f64;
-        println!("ratio {:?}", ratio);
         let spinner_index = ((ratio / 10.0).floor() as f64) / 10.0 * 60.0;
         let _rect = spriteable_rect(spinner_rect, spinner_index as f64);
         widget::Image::new(spinner_image)
@@ -573,6 +572,12 @@ fn buy(ui: &mut conrod::UiCell,
                 .w_h(item_h * 0.25, item_h * 0.25)
                 .mid_right_with_margin_on(_buy_selected_id, -2.0)
                 .set(ids.corner_arrow, ui);
+            if let &mut Some(mut _overlay_blowup) = overlay_blowup{
+                let j = offer_row.get(_buy_selected).unwrap().clone();
+                if j!=_overlay_blowup{
+                    _overlay_blowup=j;
+                }
+            }
             for _c in j {
                 let j = offer_row.get(_buy_selected).unwrap().clone();
                 *overlay_blowup = Some(j);

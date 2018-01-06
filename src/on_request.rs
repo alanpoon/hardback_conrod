@@ -60,6 +60,14 @@ pub fn update(s: ClientReceivedMsg,
                                                     text: _message,
                                                 });
                 }
+            }else if _location=="game"{
+                  if let Some(&SupportIdType::ImageId(rust_logo)) =
+                    result_map.get(&ResourceEnum::Sprite(Sprite::RUST)) {
+                    gamedata.game_history.push(chat::message::Message {
+                                                    image_id: Some(rust_logo),
+                                                    name: _sender,
+                                                    text: _message,
+                                                });
             }
             if _location == "table" {}
         }

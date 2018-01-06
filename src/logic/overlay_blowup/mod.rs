@@ -98,7 +98,6 @@ pub fn render(ui: &mut conrod::UiCell,
                 let j =
                     blowup_detail::ItemWidget::new(&_is, _g.clone(), _s.clone(), game_icon.clone())
                         .color(color::RED);
-                //  let t=widget::Text::new("asdsad");
                 item.set(j, ui);
             }
 

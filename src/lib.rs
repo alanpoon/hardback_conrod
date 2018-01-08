@@ -16,6 +16,7 @@ pub extern crate hardback_meta;
 pub extern crate hardback_codec;
 extern crate futures;
 extern crate image;
+extern crate sdl2;
 #[cfg(target_os="android")]
 extern crate rusttype;
 #[cfg(target_os="android")]

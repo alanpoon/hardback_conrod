@@ -42,7 +42,7 @@ pub fn render(ui: &mut conrod::UiCell,
                 gamedata.overlay_exit = false;
             }
             widget::Text::new(&appdata.texts.are_you_sure_exit)
-                .font_size(30.0)
+                .font_size(30)
                 .mid_top_of(ids.overlaybody_exit)
                 .color(color::WHITE)
                 .set(ids.overlaytext_exit, ui);

@@ -21,6 +21,7 @@ pub struct ItemWidget<'a> {
     pub cloudy_image: Option<image::Id>,
     pub coin_info: Option<image::Id>,
     pub coin_info270: Option<image::Id>,
+    pub game_icon: Option<image::Id>,
     pub bordered: bool,
     /// See the Style struct below.
     style: Style,
@@ -56,6 +57,7 @@ widget_ids! {
         textedit_background,
         textedit_blinkline,
         textedit_at_toggle,
+        top_lefticon
     }
 }
 
@@ -66,7 +68,12 @@ pub struct State {
 
 impl<'a> ItemWidget<'a> {
     /// Create a button context to be built upon.
-    pub fn new(timeless: bool, alphabet: &'a str, cost_rect: Rect, timelesstext: &'a str) -> Self {
+    pub fn new(timeless: bool,
+               alphabet: &'a str,
+               cost_rect: Rect,
+               top_left_rect: Rect,
+               timelesstext: &'a str)
+               -> Self {
         ItemWidget {
             common: widget::CommonBuilder::default(),
             bordered: false,
@@ -75,6 +82,7 @@ impl<'a> ItemWidget<'a> {
             timeless: timeless,
             timelesstext: timelesstext,
             cost_rect: cost_rect,
+            top_left_rect: top_left_rect,
             cloudy_image: None,
             coin_info: None,
             coin_info270: None,
@@ -93,7 +101,10 @@ impl<'a> ItemWidget<'a> {
         self.coin_info270 = Some(coin_info270);
         self
     }
-
+    pub fn game_icon(mut self, game_icon: image::Id) -> Self {
+        self.game_icon = Some(game_icon);
+        self
+    }
     pub fn alphabet_font_id(mut self, font_id: text::font::Id) -> Self {
         self.style.alphabet_font_id = Some(Some(font_id));
         self
@@ -156,8 +167,8 @@ impl<'a> Widget for ItemWidget<'a> {
                                                                                    ui);
         }
 
-        if let (Some(_cloudy), Some(_coin_info), Some(_coin_info270)) =
-            (self.cloudy_image, self.coin_info, self.coin_info270) {
+        if let (Some(_cloudy), Some(_coin_info), Some(_coin_info270), Some(_game_icon)) =
+            (self.cloudy_image, self.coin_info, self.coin_info270, self.game_icon) {
             widget::Image::new(_cloudy)
                 .w_h(w - border, h - border)
                 .middle_of(id)
@@ -171,11 +182,16 @@ impl<'a> Widget for ItemWidget<'a> {
                     .mid_bottom_of(id)
                     .parent(id)
                     .set(state.ids.coin_info, ui);
-                let fontsize = get_font_size_hn(h * 0.2, 1.0);
+                widget::Image::new(_game_icon)
+                    .source_rectangle(self.left_left_rect)
+                    .wh([15.0, 15.0])
+                    .mid_left_of(state.ids.coin_info)
+                    .set(state.ids.top_lefticon, ui);
+                let fontsize = get_font_size_hn(h * 0.15, 1.0);
                 let timeless_font_id =
                     self.style.timeless_font_id(&ui.theme).or(ui.fonts.ids().next());
                 widget::Text::new(self.timelesstext)
-                    .mid_left_with_margin_on(state.ids.coin_info,2.0)
+                    .mid_left_with_margin_on(state.ids.coin_info, 2.0)
                     .font_size(fontsize)
                     .and_then(timeless_font_id, widget::Text::font_id)
                     .set(state.ids.coin_info_timeless, ui);
@@ -186,6 +202,11 @@ impl<'a> Widget for ItemWidget<'a> {
                     .mid_left_of(id)
                     .parent(id)
                     .set(state.ids.coin_info, ui);
+                widget::Image::new(_game_icon)
+                    .source_rectangle(self.top_left_rect)
+                    .wh([15.0, 15.0])
+                    .mid_top_of(state.ids.coin_info)
+                    .set(state.ids.top_lefticon, ui);
             }
         }
 

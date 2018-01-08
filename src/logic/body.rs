@@ -49,6 +49,7 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref mut buy_selected,
                    ref mut overlay2,
                    ref mut last_send,
+                   ref mut spell_which_arrangelist,
                    .. } = *gamedata;
     if let &mut Some(ref mut boardcodec) = boardcodec {
         if let (Some(ref mut _player), ref offer_row) =
@@ -83,6 +84,7 @@ pub fn render(ui: &mut conrod::UiCell,
                           ids,
                           &cardmeta,
                           personal,
+                          spell_which_arrangelist,
                           overlay_blowup,
                           last_send,
                           appdata,
@@ -94,6 +96,7 @@ pub fn render(ui: &mut conrod::UiCell,
                           ids,
                           &cardmeta,
                           personal,
+                          spell_which_arrangelist,
                           overlay_blowup,
                           last_send,
                           appdata,
@@ -203,10 +206,12 @@ fn show_draft(ui: &mut conrod::UiCell,
     let mut dealt_iter = player.draft.iter();
     if let (Some(&SupportIdType::ImageId(cloudy)),
             Some(&SupportIdType::ImageId(coin_info)),
-            Some(&SupportIdType::ImageId(coin_info270))) =
+            Some(&SupportIdType::ImageId(coin_info270)),
+            Some(&SupportIdType::ImageId(game_icon))) =
         (result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
-         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270))) {
+         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICON))) {
         if let Some(&mut true) = print_instruction_set.get_mut(0) {
             let (mut items, scrollbar) = widget::List::flow_right(player.draft.len())
                 .item_size(item_h)
@@ -220,17 +225,22 @@ fn show_draft(ui: &mut conrod::UiCell,
                 s.set(ui)
             }
             while let (Some(item), Some(card_index)) = (items.next(ui), dealt_iter.next()) {
-                let (_timeless, _string, _color, _font, _rect) =
+                let (_timeless, _string, _color, _font, _rect, _top_lefticon_rect) =
                     in_game::get_tile_image_withcost(card_index.clone(),
                                                      cardmeta,
                                                      appdata,
                                                      result_map);
-                let j = show_draft_item::ItemWidget::new(_timeless, _string, _rect, "timeless")
-                    .cloudy_image(cloudy)
-                    .coin_info(coin_info)
-                    .coin_info270(coin_info270)
-                    .alphabet_font_id(_font)
-                    .color(_color);
+                let j = show_draft_item::ItemWidget::new(_timeless,
+                                                         _string,
+                                                         _rect,
+                                                         _top_lefticon_rect,
+                                                         "timeless")
+                        .cloudy_image(cloudy)
+                        .coin_info(coin_info)
+                        .coin_info270(coin_info270)
+                        .game_icon(game_icon)
+                        .alphabet_font_id(_font)
+                        .color(_color);
                 item.set(j, ui);
             }
         } else {
@@ -270,20 +280,23 @@ fn shuffle(ui: &mut conrod::UiCell,
             Some(&SupportIdType::ImageId(coin_info)),
             Some(&SupportIdType::ImageId(coin_info270)),
             Some(&SupportIdType::ImageId(spinner_image)),
+            Some(&SupportIdType::ImageId(game_icon)),
             &Some(_player_index)) =
         (result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)),
          result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
          result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICON)),
          player_index) {
-        let card_vec = initial_draft.iter()
-            .map(|x| {
-                     let (_timeless, _string, _color, _app_font, _rect) =
-                    in_game::get_tile_image_withcost(x.clone(), cardmeta, appdata, result_map);
-                     (x.clone(), _timeless, _string, _color, _app_font, _rect)
-                 })
-            .collect::<Vec<(usize, bool, &str, Color, text::font::Id, Rect)>>();
+        let card_vec =
+            initial_draft.iter()
+                .map(|x| {
+                    let (_timeless, _string, _color, _app_font, _rect, _top_lefticon_rect) =
+                        in_game::get_tile_image_withcost(x.clone(), cardmeta, appdata, result_map);
+                    (x.clone(), _timeless, _string, _color, _app_font, _rect, _top_lefticon_rect)
+                })
+                .collect::<Vec<(usize, bool, &str, Color, text::font::Id, Rect, Rect)>>();
         let give_out_vec = player.hand
             .iter()
             .enumerate()
@@ -305,17 +318,24 @@ fn shuffle(ui: &mut conrod::UiCell,
                                          _string,
                                          _color,
                                          _font,
-                                         _rect)| {
+                                         _rect,
+                                         _top_lefticon_rect)| {
             let spinner_rect = graphics_match::spinner_sprite();
-            ItemWidget::new(back_logo, _timelessbool, _string, _rect, "timeless")
-                .cloudy_image(cloudy)
-                .coin_info(coin_info)
-                .coin_info270(coin_info270)
-                .spinner_image(spinner_image, spinner_rect)
-                .border_color(color::YELLOW)
-                .border(15.0)
-                .alphabet_font_id(_font)
-                .color(_color)
+            ItemWidget::new(back_logo,
+                            _timelessbool,
+                            _string,
+                            _rect,
+                            _top_lefticon_rect,
+                            "timeless")
+                    .cloudy_image(cloudy)
+                    .game_icon(game_icon)
+                    .coin_info(coin_info)
+                    .coin_info270(coin_info270)
+                    .spinner_image(spinner_image, spinner_rect)
+                    .border_color(color::YELLOW)
+                    .border(15.0)
+                    .alphabet_font_id(_font)
+                    .color(_color)
         }),
                          Image::new(back_logo).source_rectangle(graphics_match::backcard()))
                     .give_out(give_out_vec)
@@ -347,6 +367,7 @@ fn spell(ui: &mut conrod::UiCell,
          ids: &Ids,
          cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
          personal: &mut Option<Personal>,
+         spell_which_arrangelist: &mut Option<widget::Id>,
          overlay_blowup: &mut Option<usize>,
          last_send: &mut Option<Instant>,
          appdata: &AppData,
@@ -382,55 +403,65 @@ fn spell(ui: &mut conrod::UiCell,
                 Some(&SupportIdType::ImageId(arrows_image)),
                 Some(&SupportIdType::ImageId(cloudy)),
                 Some(&SupportIdType::ImageId(coin_info)),
-                Some(&SupportIdType::ImageId(coin_info270))) =
+                Some(&SupportIdType::ImageId(coin_info270)),
+                Some(&SupportIdType::ImageId(game_icon))) =
             (result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)),
              result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)),
              result_map.get(&ResourceEnum::Sprite(Sprite::ARROWS)),
              result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
              result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
-             result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270))) {
+             result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
+             result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
             let spinner_rect = graphics_match::spinner_sprite();
             let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
             let body_list_w = ui.w_of(ids.body).unwrap() - 40.0;
-            let (exitid, exitby, scrollbar) = ArrangeList::new(&mut arrangedvec,
-                                                               overlay_blowup,
-                                                               Box::new(move |(_v_index,
-                                                                               _timelessbool,
-                                                                               _string,
-                                                                               _color,
-                                                                               _font,
-                                                                               _rect,
-                                                                               _inked,
-                                                                               _opstring)| {
-                ItemWidget::new(back_image, _timelessbool, _string, _rect, "timeless")
-                    .cloudy_image(cloudy)
-                    .coin_info(coin_info)
-                    .coin_info270(coin_info270)
-                    .spinner_image(spinner_image, spinner_rect)
-                    .border_color(color::YELLOW)
-                    .border(15.0)
-                    .alphabet_font_id(_font)
-                    .color(_color)
-            }),
-                                                               Box::new(|(_v_index,
-                                                                          _timelessbool,
-                                                                          _string,
-                                                                          _color,
-                                                                          _font,
-                                                                          _rect,
-                                                                          _inked,
-                                                                          _opstring)| {
-                                                                            _v_index.clone()
-                                                                        }),
-                                                               body_list_w / 7.0)
-                    .h(appdata.convert_h(210.0))
-                    .padded_w_of(ids.body, 20.0)
-                    .mid_bottom_with_margin_on(ids.body, appdata.convert_h(50.0))
-                    .left_arrow(_l)
-                    .right_arrow(_r)
-                    .bottom_arrow(_b)
-                    .corner_arrow(_c)
-                    .set(ids.bodydragdroplistview, ui);
+            let (exitid, exitby, scrollbar) =
+                ArrangeList::new(&mut arrangedvec,
+                                 spell_which_arrangelist,
+                                 overlay_blowup,
+                                 Box::new(move |(_v_index,
+                                                 _timelessbool,
+                                                 _string,
+                                                 _color,
+                                                 _font,
+                                                 _rect,
+                                                 _top_lefticon_rect,
+                                                 _inked,
+                                                 _opstring)| {
+                    ItemWidget::new(back_image,
+                                    _timelessbool,
+                                    _string,
+                                    _rect,
+                                    _top_lefticon_rect,
+                                    "timeless")
+                            .cloudy_image(cloudy)
+                            .coin_info(coin_info)
+                            .coin_info270(coin_info270)
+                            .spinner_image(spinner_image, spinner_rect)
+                            .border_color(color::YELLOW)
+                            .border(15.0)
+                            .alphabet_font_id(_font)
+                            .color(_color)
+                }),
+                                 Box::new(|(_v_index,
+                                            _timelessbool,
+                                            _string,
+                                            _color,
+                                            _font,
+                                            _rect,
+                                            _inked,
+                                            _opstring)| {
+                                              _v_index.clone()
+                                          }),
+                                 body_list_w / 7.0)
+                        .h(appdata.convert_h(210.0))
+                        .padded_w_of(ids.body, 20.0)
+                        .mid_bottom_with_margin_on(ids.body, appdata.convert_h(50.0))
+                        .left_arrow(_l)
+                        .right_arrow(_r)
+                        .bottom_arrow(_b)
+                        .corner_arrow(_c)
+                        .set(ids.bodydragdroplistview, ui);
 
             match (exitid, exitby) {                
                 (Some(_x), ExitBy::Bottom) => {
@@ -529,14 +560,17 @@ fn buy(ui: &mut conrod::UiCell,
                 // For the `Item` events we instantiate the `List`'s items.
                 Event::Item(item) => {
                     let card_index = offer_row.get(item.i).unwrap();
-                    let (_timeless, _string, _color, _app_font, _rect) =
+                    let (_timeless, _string, _color, _app_font, _rect, _top_lefticon_rect) =
                         in_game::get_tile_image_withcost(card_index.clone(),
                                                          cardmeta,
                                                          appdata,
                                                          result_map);
 
-                    let mut j =
-                        buy_list_item::ItemWidget::new(_timeless, _string, _rect, "timeless")
+                    let mut j = buy_list_item::ItemWidget::new(_timeless,
+                                                               _string,
+                                                               _rect,
+                                                               _top_lefticon_rect,
+                                                               "timeless")
                             .cloudy_image(cloudy)
                             .coin_info(coin_info)
                             .coin_info270(coin_info270)
@@ -572,10 +606,10 @@ fn buy(ui: &mut conrod::UiCell,
                 .w_h(item_h * 0.25, item_h * 0.25)
                 .mid_right_with_margin_on(_buy_selected_id, -2.0)
                 .set(ids.corner_arrow, ui);
-            if let &mut Some(mut _overlay_blowup) = overlay_blowup{
+            if let &mut Some(mut _overlay_blowup) = overlay_blowup {
                 let j = offer_row.get(_buy_selected).unwrap().clone();
-                if j!=_overlay_blowup{
-                    _overlay_blowup=j;
+                if j != _overlay_blowup {
+                    _overlay_blowup = j;
                 }
             }
             for _c in j {
@@ -658,20 +692,25 @@ fn trash_other(ui: &mut conrod::UiCell,
                 Event::Item(item) => {
                     let card_index = hand.get(item.i).unwrap();
                     let spinner_rect = graphics_match::spinner_sprite();
-                    let (_timeless, _string, _color, _app_font, _rect) =
+                    let (_timeless, _string, _color, _app_font, _rect, _top_lefticon_rect) =
                         in_game::get_tile_image_withcost(card_index.clone(),
                                                          cardmeta,
                                                          appdata,
                                                          result_map);
-                    let j = ItemWidget::new(back_logo, _timeless, _string, _rect, "timeless")
-                        .cloudy_image(cloudy)
-                        .coin_info(coin_info)
-                        .coin_info270(coin_info270)
-                        .spinner_image(spinner_image, spinner_rect)
-                        .border_color(color::YELLOW)
-                        .border(15.0)
-                        .alphabet_font_id(_app_font)
-                        .color(_color);
+                    let j = ItemWidget::new(back_logo,
+                                            _timeless,
+                                            _string,
+                                            _rect,
+                                            _top_lefticon_rect,
+                                            "timeless")
+                            .cloudy_image(cloudy)
+                            .coin_info(coin_info)
+                            .coin_info270(coin_info270)
+                            .spinner_image(spinner_image, spinner_rect)
+                            .border_color(color::YELLOW)
+                            .border(15.0)
+                            .alphabet_font_id(_app_font)
+                            .color(_color);
                     /*   let mut j = buy_list_item::ItemWidget::new(i_h_struct)
                     .border_color(color::YELLOW)
                     .border(15.0);

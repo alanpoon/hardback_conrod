@@ -75,10 +75,10 @@ pub fn render(ui: &mut conrod::UiCell,
                 .h(wh[1] * 0.9)
                 .mid_left_with_margin_on(ids.overlay, wh[0] * 0.05)
                 .set(ids.blowup_card, ui);
-            let giveable_vec = vec![("Purchase".to_owned(),_purchase,None),
-            ("One of a kind".to_owned(),_giveable,_non_genre_str),
-            ("Two of a kind".to_owned(),_genre_giveable,_genre_str),
-            ("Trash".to_owned(),_trash,None)];
+            let giveable_vec = vec![("Purchase".to_owned(), _purchase, None),
+                                    ("One of a kind".to_owned(), _giveable, _non_genre_str),
+                                    ("Two of a kind".to_owned(), _genre_giveable, _genre_str),
+                                    ("Trash".to_owned(), _trash, None)];
             let reduce = giveable_vec.iter()
                 .filter(|&&(ref _i, ref _g, ref _s)| if (_g != &GIVEABLE::NONE) | (_s.is_some()) {
                             true

@@ -21,10 +21,12 @@ widget_ids! {
          footer_overlay_but,
          footer_overlay_but2, //chat
          footer_overlay_but3, //exit
+         footer_overlay_but4,
          //menu
          menu_title_list1,
          menu_title_list2,
          menubut_multiplayer,
+         menu_progessbar,
         //lobby
         middle_tabview,
         new_table_but,
@@ -85,12 +87,16 @@ widget_ids! {
          overlay_prompt,
          overlayerbody_prompt,
          overlaypromptview_prompt,
+         //overlay human
+         overlay_human,
+         overlay_human_list,
          //loading
          progress_bar,
          loading_gif,
          //blow_up
          blowup_card,
          blowup_list,
+         
     }
 }
 
@@ -123,6 +129,7 @@ pub struct GameData {
     pub footer: Footer,
     pub page_vec: Vec<(Page, Texture)>,
     pub page_index: usize,
+    pub go_to_page_index: Option<usize>,
     pub player_size: usize,
     pub lobby_history: Vec<Message>,
     pub lobby_textedit: String,
@@ -135,6 +142,7 @@ pub struct GameData {
     pub error_str: Option<String>,
     pub boardcodec: Option<BoardCodec>,
     pub personal: Option<Personal>,
+    pub spell_which_arrangelist: Option<widget::Id>,
     pub player_index: Option<usize>,
     pub print_instruction_set: Vec<bool>,
     pub print_instruction_cache: usize,
@@ -143,6 +151,7 @@ pub struct GameData {
     pub overlay: bool,
     pub overlay_chat: bool,
     pub overlay_exit: bool,
+    pub overlay_human: bool,
     pub overlay_receivedimage: [OverlayStatus; 3],
     pub overlay_index: Option<usize>,
     pub overlay_remover_selected: HashSet<usize, RandomState>,
@@ -152,7 +161,7 @@ pub struct GameData {
     pub overlay_blowup: Option<usize>,
     pub buy_selected: Option<usize>,
     pub notification: Option<(String, Instant)>,
-    pub last_send: Option<Instant>,
+    pub last_send: Option<Instant>, //used in arranging cards before submit
     pub connection_status: ConnectionStatus,
 }
 impl GameData {
@@ -165,6 +174,7 @@ impl GameData {
                            (Page::new(), Texture::PAGE3F),
                            (Page::new(), Texture::PAGE4F)],
             page_index: 0,
+            go_to_page_index: None,
             player_size: 4,
             lobby_history: vec![],
             lobby_textedit: "".to_owned(),
@@ -177,6 +187,7 @@ impl GameData {
             error_str: None,
             boardcodec: None,
             personal: None,
+            spell_which_arrangelist: None,
             player_index: None,
             print_instruction_set: vec![true],
             print_instruction_cache: 0,
@@ -185,6 +196,7 @@ impl GameData {
             overlay: false,
             overlay_chat: false,
             overlay_exit: false,
+            overlay_human: false,
             overlay_receivedimage: [OverlayStatus::None, OverlayStatus::None, OverlayStatus::None],
             overlay_index: None,
             overlay_remover_selected: HashSet::new(),
@@ -201,12 +213,16 @@ impl GameData {
             connection_status: ConnectionStatus::None,
         }
     }
+    pub fn resize_player_len(&mut self, player_len: usize) {
+        self.player_size = player_len;
+    }
     pub fn reset(&mut self) {
         self.footer = Footer::ShowHand;
         self.game_history = vec![];
         self.game_textedit = "".to_owned();
         self.boardcodec = None;
         self.personal = None;
+        self.spell_which_arrangelist = None;
         self.player_index = None;
         self.print_instruction_set = vec![true];
         self.print_instruction_cache = 0;
@@ -215,6 +231,7 @@ impl GameData {
         self.overlay = false;
         self.overlay_chat = false;
         self.overlay_exit = false;
+        self.overlay_human = false;
         self.overlay_receivedimage =
             [OverlayStatus::None, OverlayStatus::None, OverlayStatus::None];
         self.overlay_index = None;
@@ -286,3 +303,4 @@ impl Board for BoardStruct {
                                 _wait_for_input: &mut [WaitForInputType; 4]) {
     }
 }
+pub const ResultMapLen: usize = 23;

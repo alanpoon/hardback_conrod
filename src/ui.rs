@@ -1,9 +1,10 @@
 use conrod;
 use conrod::backend::glium::glium::{self, Surface};
 use backend::SupportIdType;
-use backend::meta::app::{self, Font, ResourceEnum, Sprite, Texture};
+use backend::meta::app::{self, Font, ResourceEnum, Sprite, Texture, ChunkEnum, MusicEnum};
 use support;
 use image;
+use sdl2;
 use std::collections::HashMap;
 #[derive(Clone)]
 pub struct Vala {
@@ -32,10 +33,8 @@ pub fn load_resources_iter(map: &mut HashMap<ResourceEnum, Vala>) {
     (ResourceEnum::Sprite(Sprite::DOWNLOAD),"image","images/download.png"), //10
     (ResourceEnum::Sprite(Sprite::BACKCARD),"image","images/cards/backside.jpg"),
     (ResourceEnum::Sprite(Sprite::GAMEICONS),"image","images/gameicon.png"),
-    (ResourceEnum::Sprite(Sprite::ARROWS),"image","images/arrows_but.png"),
-    (ResourceEnum::Font(Font::BOLD),"font","fonts/NotoSans/NotoSans-Bold.ttf"),
-    (ResourceEnum::Font(Font::BOLDITALIC),"font","fonts/NotoSans/NotoSans-BoldItalic.ttf"),
-    (ResourceEnum::Font(Font::ITALIC),"font","fonts/NotoSans/NotoSans-Italic.ttf"),
+    (ResourceEnum::Sprite(Sprite::ARROWS),"image","images/arrows_but.png")
+    
   }
     iter_resource_enum_vala_new(map)
 }
@@ -53,10 +52,13 @@ pub fn init_load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, 
     (ResourceEnum::Font(Font::BOLD),"font","fonts/NotoSans/NotoSans-Bold.ttf"),
     (ResourceEnum::Font(Font::BOLDITALIC),"font","fonts/NotoSans/NotoSans-BoldItalic.ttf"),
     (ResourceEnum::Font(Font::ITALIC),"font","fonts/NotoSans/NotoSans-Italic.ttf"),
-     (ResourceEnum::Font(Font::MYSTERY),"font","fonts/MysteryQuest-Regular.ttf"),
+    (ResourceEnum::Font(Font::MYSTERY),"font","fonts/MysteryQuest-Regular.ttf"),
     (ResourceEnum::Font(Font::HORROR),"font","fonts/Mortified.ttf"),
     (ResourceEnum::Font(Font::ADVENTURE),"font","fonts/TradeWinds-Regular.ttf"),
     (ResourceEnum::Font(Font::ROMANCE),"font","fonts/Babylove.ttf"),
+    (ResourceEnum::Music(MusicEnum::BACKGROUND),"music","audio/doki1.ogg"),
+    (ResourceEnum::Chunk(ChunkEnum::PAGEFLIP),"chunk","audio/Page_urn_sound_effect.ogg")
+    
   }
     let g = ImageIds::new();
     g.pump(result_map, display, ui, image_map);

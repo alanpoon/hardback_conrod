@@ -68,8 +68,8 @@ pub fn render(ui: &mut conrod::UiCell,
         }
 
     }
-    match gamedata.connection_status {
-        ConnectionStatus::Ok => {
+    match &gamedata.connection_status {
+        &ConnectionStatus::Ok => {
             if widget::Button::new()
                    .wh(appdata.convert_dim([400.0, 100.0]))
                    .bottom_left_with_margin_on(ids.master, appdata.convert_h(20.0))

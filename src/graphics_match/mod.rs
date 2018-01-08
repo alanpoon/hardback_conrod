@@ -38,13 +38,14 @@ pub fn spinner_sprite() -> SpriteInfo {
 }
 pub fn gameicon_sprite() -> SpriteInfo {
     SpriteInfo {
-        first: (0.0, 1600.0),
+        first: (0.0, 2000.0),
         num_in_row: 3,
-        num_in_col: 4,
+        num_in_col: 5,
         w_h: (400.0, 400.0),
         pad: (0.0, 0.0, 0.0, 0.0),
     }
 }
+
 pub fn gameicons_rect(i: f64) -> Rect {
     let icon_rect = spriteable_rect(gameicon_sprite(), i);
     Rect::from_corners(icon_rect.0, icon_rect.1)

@@ -43,8 +43,10 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref mut overlay2,
                    ref mut overlay_chat,
                    ref mut overlay_exit,
+                   ref mut overlay_human,
                    ref mut buy_selected,
                    ref mut last_send,
+                   ref mut spell_which_arrangelist,
                    .. } = *gamedata;
     if let &mut Some(ref mut boardcodec) = boardcodec {
         if let Some(ref mut _player) = boardcodec.players.get_mut(*page_index) {
@@ -63,10 +65,12 @@ pub fn render(ui: &mut conrod::UiCell,
                           &appdata,
                           &cardmeta,
                           personal,
+                          spell_which_arrangelist,
                           overlay_blowup,
                           overlay,
                           overlay_chat,
                           overlay_exit,
+                          overlay_human,
                           last_send,
                           result_map,
                           _action_tx);
@@ -78,10 +82,12 @@ pub fn render(ui: &mut conrod::UiCell,
                           &appdata,
                           &cardmeta,
                           personal,
+                          spell_which_arrangelist,
                           overlay_blowup,
                           overlay,
                           overlay_chat,
                           overlay_exit,
+                          overlay_human,
                           last_send,
                           result_map,
                           _action_tx);
@@ -129,24 +135,27 @@ fn spell(ui: &mut conrod::UiCell,
          appdata: &AppData,
          cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
          personal: &mut Option<Personal>,
+         spell_which_arrangelist: &mut Option<widget::Id>,
          overlay_blowup: &mut Option<usize>,
          overlay: &mut bool,
          overlay_chat: &mut bool,
          overlay_exit: &mut bool,
+         overlay_human: &mut bool,
          last_send: &mut Option<Instant>,
          result_map: &HashMap<ResourceEnum, SupportIdType>,
          _action_tx: mpsc::Sender<OwnedMessage>) {
     if let &mut Some(ref mut _personal) = personal {
         let temp = (*_personal).clone();
-        let mut handvec = _personal.hand
-            .clone()
-            .iter()
-            .map(|ref x| {
-                     let (_timeless, _string, _color, _app_font, _rect) =
-                    in_game::get_tile_image_withcost(*x.clone(), cardmeta, appdata, result_map);
-                     (*x.clone(), _timeless, _string, _color, _app_font, _rect)
-                 })
-            .collect::<Vec<(usize, bool, &str, Color, text::font::Id, Rect)>>();
+        let mut handvec =
+            _personal.hand
+                .clone()
+                .iter()
+                .map(|ref x| {
+                         let (_timeless, _string, _color, _app_font, _rect, _top_left_rect) =
+                        in_game::get_tile_image_withcost(*x.clone(), cardmeta, appdata, result_map);
+                         (*x.clone(), _timeless, _string, _color, _app_font, _rect, _top_left_rect)
+                     })
+                .collect::<Vec<(usize, bool, &str, Color, text::font::Id, Rect, Rect)>>();
         if let (Some(&SupportIdType::ImageId(spinner_image)),
                 Some(&SupportIdType::ImageId(back_image)),
                 Some(&SupportIdType::ImageId(arrows_image)),
@@ -164,41 +173,51 @@ fn spell(ui: &mut conrod::UiCell,
             let spinner_rect = graphics_match::spinner_sprite();
             let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
             let footer_list_w = ui.w_of(ids.footer).unwrap() - 300.0;
-            let (exitid, exitby, scrollbar) = ArrangeList::new(&mut handvec,
-                                                               overlay_blowup,
-                                                               Box::new(move |(_v_index,
-                                                                               _timelessbool,
-                                                                               _string,
-                                                                               _color,
-                                                                               _font,
-                                                                               _rect)| {
-                ItemWidget::new(back_image, _timelessbool, &_string, _rect, "timeless")
-                    .cloudy_image(cloudy)
-                    .coin_info(coin_info)
-                    .coin_info270(coin_info270)
-                    .spinner_image(spinner_image, spinner_rect)
-                    .border_color(color::YELLOW)
-                    .border(15.0)
-                    .alphabet_font_id(_font)
-                    .color(_color)
-            }),
-                                                               Box::new(|(_v_index,
-                                                                          _timelessbool,
-                                                                          _string,
-                                                                          _color,
-                                                                          _font,
-                                                                          _rect)| {
-                                                                            _v_index.clone()
-                                                                        }),
-                                                               footer_list_w / 7.0)
-                    .padded_h_of(ids.footer, 10.0)
-                    .padded_w_of(ids.footer, 150.0)
-                    .top_left_with_margin_on(ids.footer, 10.0)
-                    .left_arrow(_l)
-                    .right_arrow(_r)
-                    .top_arrow(_t)
-                    .corner_arrow(_c)
-                    .set(ids.footerdragdroplistview, ui);
+            let (exitid, exitby, scrollbar) =
+                ArrangeList::new(&mut handvec,
+                                 spell_which_arrangelist,
+                                 overlay_blowup,
+                                 Box::new(move |(_v_index,
+                                                 _timelessbool,
+                                                 _string,
+                                                 _color,
+                                                 _font,
+                                                 _rect,
+                                                 _top_left_rect)| {
+                    ItemWidget::new(back_image,
+                                    _timelessbool,
+                                    &_string,
+                                    _rect,
+                                    _top_left_rect,
+                                    "timeless")
+                            .cloudy_image(cloudy)
+                            .game_icon(icon_image)
+                            .coin_info(coin_info)
+                            .coin_info270(coin_info270)
+                            .spinner_image(spinner_image, spinner_rect)
+                            .border_color(color::YELLOW)
+                            .border(15.0)
+                            .alphabet_font_id(_font)
+                            .color(_color)
+                }),
+                                 Box::new(|(_v_index,
+                                            _timelessbool,
+                                            _string,
+                                            _color,
+                                            _font,
+                                            _rect,
+                                            _top_left_rect)| {
+                                              _v_index.clone()
+                                          }),
+                                 footer_list_w / 7.0)
+                        .padded_h_of(ids.footer, 10.0)
+                        .padded_w_of(ids.footer, 150.0)
+                        .top_left_with_margin_on(ids.footer, 10.0)
+                        .left_arrow(_l)
+                        .right_arrow(_r)
+                        .top_arrow(_t)
+                        .corner_arrow(_c)
+                        .set(ids.footerdragdroplistview, ui);
             match (exitid, exitby) {                
                 (Some(_x), ExitBy::Top) => {
                     _personal.arranged.push((_x.0, false, None, false));
@@ -244,6 +263,14 @@ fn spell(ui: &mut conrod::UiCell,
                     .set(ids.footer_overlay_but3, ui) {
                 *overlay_exit = true;
             }
+            //human button
+            for _ in widget::Button::image(icon_image)
+                    .source_rectangle(graphics_match::gameicons_rect(12.0))
+                    .w_h(80.0, 80.0)
+                    .down_from(ids.footer_overlay_but, 0.0)
+                    .set(ids.footer_overlay_but4, ui) {
+                *overlay_human = true;
+            }
         }
     }
 
@@ -276,46 +303,6 @@ fn show_draft(ui: &mut conrod::UiCell,
 
 }
 
-
-#[allow(dead_code)]
-fn page_next(gamedata: &mut GameData) {
-    if gamedata.page_index + 1 >= gamedata.player_size {
-        gamedata.page_index = 0;
-        for i in (0usize..gamedata.page_vec.len()).rev() {
-            if let Some(&mut (ref mut _page, _)) = gamedata.page_vec.get_mut(i) {
-                if i < gamedata.player_size {
-                    _page.reverse_flip();
-                }
-            }
-        }
-
-    } else {
-        if let Some(&mut (ref mut x, _)) = gamedata.page_vec.get_mut(gamedata.page_index) {
-            x.flip();
-        }
-        gamedata.page_index += 1;
-
-    }
-}
-#[allow(dead_code)]
-fn page_previous(gamedata: &mut GameData) {
-    if gamedata.page_index as f32 - 1.0 < 0.0 {
-        gamedata.page_index = gamedata.player_size - 1;
-        for i in 0..gamedata.page_vec.len() {
-            if let Some(&mut (ref mut _page, _)) = gamedata.page_vec.get_mut(i) {
-                if i < gamedata.player_size - 1 {
-                    _page.flip();
-                }
-            }
-        }
-    } else {
-        gamedata.page_index -= 1;
-        if let Some(&mut (ref mut x, _)) = gamedata.page_vec.get_mut(gamedata.page_index) {
-            x.reverse_flip();
-        }
-
-    }
-}
 fn buy(ui: &mut conrod::UiCell,
        ids: &Ids,
        _player: &mut Player,
@@ -385,7 +372,6 @@ fn buy(ui: &mut conrod::UiCell,
                     .h(_dim[1])
                     .set(ids.overlay2_text, ui);
             }
-
         }
     }
 

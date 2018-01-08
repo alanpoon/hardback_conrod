@@ -1,7 +1,7 @@
 use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, Labelable};
 use std::collections::HashMap;
 use futures::sync::mpsc;
-use app::{GameData, Ids, GuiState};
+use app::{GameData, Ids, GuiState, ResultMapLen};
 use cardgame_widgets::custom_widget::animated_canvas;
 use cardgame_widgets::custom_widget::progress_bar;
 use backend::OwnedMessage;
@@ -16,13 +16,12 @@ pub fn render(ui: &mut conrod::UiCell,
               result_map: &HashMap<ResourceEnum, SupportIdType>) {
     animated_canvas::Canvas::new().color(color::TRANSPARENT).frame_rate(30).set(ids.master, ui);
     let result_map_len = result_map.len();
-    println!("result_map_len {:?}",result_map_len);
-    progress_bar::ProgressBar::new(result_map_len, 21)
+    progress_bar::ProgressBar::new(result_map_len, ResultMapLen)
         .middle_of(ids.master)
         .wh(appdata.convert_dim([300.0, 200.0]))
         .label("Loading")
         .set(ids.progress_bar, ui);
-    if result_map_len >= 21 {
+    if result_map_len >= ResultMapLen {
         gamedata.guistate = GuiState::Game(GameState::ShowDraft);
     }
 }

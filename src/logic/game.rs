@@ -5,7 +5,7 @@ use futures::sync::mpsc;
 use backend::codec_lib::cards::*;
 use backend::codec_lib::cards;
 use logic;
-use app::{GameData, Ids, GuiState, BoardStruct};
+use app::{GameData, Ids, GuiState, BoardStruct, ResultMapLen};
 use ui::{Vala, load_resources_iter, iter_resource_enum_vala_next};
 use backend::OwnedMessage;
 use backend::SupportIdType;
@@ -58,16 +58,16 @@ impl<'a, T> GameProcess<'a, T>
         }
         match &gamedata.guistate {
             &GuiState::Game(_) => {
-                if result_map.len() < 20 {
+                if result_map.len() < ResultMapLen {
                     gamedata.guistate = GuiState::Loading;
                     std::thread::spawn(move || {
                         let mut map: HashMap<ResourceEnum, Vala> = HashMap::new();
                         load_resources_iter(&mut map);
                         let mut _iter_resource_enum_vala = map.iter();
                         while let Some((k, v)) = _iter_resource_enum_vala.next() {
-                            let _send_this = iter_resource_enum_vala_next((*k).clone(),
-                                                                          (*v).clone());
-                            load_asset_tx.send(_send_this).unwrap();
+                            let (_resource_enum, _image_buffer, _font, _music, _chunk) =
+                                iter_resource_enum_vala_next((*k).clone(), (*v).clone());
+                            load_asset_tx.send((_resource_enum, _image_buffer, _font)).unwrap();
                         }
                     });
                 } else {

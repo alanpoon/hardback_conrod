@@ -60,14 +60,15 @@ pub fn update(s: ClientReceivedMsg,
                                                     text: _message,
                                                 });
                 }
-            }else if _location=="game"{
-                  if let Some(&SupportIdType::ImageId(rust_logo)) =
+            } else if _location == "game" {
+                if let Some(&SupportIdType::ImageId(rust_logo)) =
                     result_map.get(&ResourceEnum::Sprite(Sprite::RUST)) {
                     gamedata.game_history.push(chat::message::Message {
-                                                    image_id: Some(rust_logo),
-                                                    name: _sender,
-                                                    text: _message,
-                                                });
+                                                   image_id: Some(rust_logo),
+                                                   name: _sender,
+                                                   text: _message,
+                                               });
+                }
             }
             if _location == "table" {}
         }
@@ -82,7 +83,12 @@ pub fn update(s: ClientReceivedMsg,
                                                .get(_player_index)
                                                .unwrap()
                                                .clone());
+        let player_len = _boardcodec.players.len();
         gamedata.boardcodec = Some(_boardcodec);
+
+        if gamedata.player_size != player_len {
+            gamedata.player_size = player_len;
+        }
 
     }
     if let (&Some(Some(ref _request)), Some(ref _overlay_index)) =

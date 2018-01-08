@@ -104,7 +104,7 @@ impl<'a> Widget for ItemWidget<'a> {
         let text_dim = [w * 0.2, h * 0.3];
         let icon_dim = [h * 0.3, h * 0.3];
         let second_text_w = 90.0;
-        let first_text_w=25.0;
+        let first_text_w = 25.0;
         widget::Text::new(self.key)
             .color(color::BLACK)
             .font_size(fontsize)
@@ -112,7 +112,7 @@ impl<'a> Widget for ItemWidget<'a> {
             .w(130.0)
             .mid_left_of(id)
             .set(state.ids.key, ui);
-            let mut j ="+".to_string();
+        let mut j = "+".to_string();
         match self.giveable {
             GIVEABLE::NONE => {}
             GIVEABLE::VP(_j) => {
@@ -120,7 +120,7 @@ impl<'a> Widget for ItemWidget<'a> {
                 widget::Text::new(&j)
                     .w(first_text_w)
                     .font_size(fontsize)
-                    .right_from(state.ids.key,20.0)
+                    .right_from(state.ids.key, 20.0)
                     .set(state.ids.giveable_text, ui);
                 let j_rect = gameicons_rect(5.0);
                 widget::Image::new(self.icon_image)
@@ -134,7 +134,7 @@ impl<'a> Widget for ItemWidget<'a> {
                 widget::Text::new(&j)
                     .w(first_text_w)
                     .font_size(fontsize)
-                    .right_from(state.ids.key,20.0)
+                    .right_from(state.ids.key, 20.0)
                     .set(state.ids.giveable_text, ui);
                 let j_rect = gameicons_rect(3.0);
                 widget::Image::new(self.icon_image)
@@ -148,7 +148,7 @@ impl<'a> Widget for ItemWidget<'a> {
                 widget::Text::new(&j)
                     .w(first_text_w)
                     .font_size(fontsize)
-                    .right_from(state.ids.key,20.0)
+                    .right_from(state.ids.key, 20.0)
                     .set(state.ids.giveable_text, ui);
                 let v_rect = gameicons_rect(5.0);
                 widget::Image::new(self.icon_image)
@@ -156,7 +156,7 @@ impl<'a> Widget for ItemWidget<'a> {
                     .source_rectangle(v_rect)
                     .wh(icon_dim)
                     .set(state.ids.giveable_icon, ui);
-                let mut k =" and + ".to_string();
+                let mut k = " and + ".to_string();
                 k.push_str(&_c.to_string());
                 widget::Text::new(&k)
                     .right_from(state.ids.giveable_icon, 8.0)
@@ -175,7 +175,7 @@ impl<'a> Widget for ItemWidget<'a> {
                 widget::Text::new(&j)
                     .w(first_text_w)
                     .font_size(fontsize)
-                    .right_from(state.ids.key,20.0)
+                    .right_from(state.ids.key, 20.0)
                     .set(state.ids.giveable_text, ui);
                 let v_rect = gameicons_rect(3.0);
                 widget::Image::new(self.icon_image)
@@ -189,7 +189,7 @@ impl<'a> Widget for ItemWidget<'a> {
                     .right_from(state.ids.giveable_icon, 8.0)
                     .w(second_text_w)
                     .font_size(fontsize)
-                    .right_from(state.ids.key,20.0)
+                    .right_from(state.ids.key, 20.0)
                     .set(state.ids.giveable_text2, ui);
                 let c_rect = gameicons_rect(1.0);
                 widget::Image::new(self.icon_image)
@@ -202,7 +202,7 @@ impl<'a> Widget for ItemWidget<'a> {
                 widget::Text::new(&_v.to_string())
                     .w(first_text_w)
                     .font_size(fontsize)
-                    .right_from(state.ids.key,20.0)
+                    .right_from(state.ids.key, 20.0)
                     .set(state.ids.giveable_text, ui);
                 let v_rect = gameicons_rect(5.0);
                 widget::Image::new(self.icon_image)
@@ -224,18 +224,19 @@ impl<'a> Widget for ItemWidget<'a> {
                     .right_from(state.ids.giveable_text2, 8.0)
                     .set(state.ids.giveable_icon2, ui);
             }
-            GIVEABLE::VPORCOIN(_v) => {                
+            GIVEABLE::VPORCOIN(_v) => {
                 widget::Text::new(&_v.to_string())
                     .font_size(fontsize)
-                    .w(first_text_w).right_from(state.ids.key,20.0).set(state.ids.giveable_text,
-                                                                           ui);
+                    .w(first_text_w)
+                    .right_from(state.ids.key, 20.0)
+                    .set(state.ids.giveable_text, ui);
                 let v_rect = gameicons_rect(5.0);
                 widget::Image::new(self.icon_image)
                     .right_from(state.ids.giveable_text, 8.0)
                     .wh(icon_dim)
                     .source_rectangle(v_rect)
                     .set(state.ids.giveable_icon, ui);
-                let mut k =" or + ".to_owned();
+                let mut k = " or + ".to_owned();
                 k.push_str(&_v.to_string());
                 widget::Text::new(&k)
                     .font_size(fontsize)
@@ -253,8 +254,9 @@ impl<'a> Widget for ItemWidget<'a> {
                 j.push_str(&_v.to_string());
                 widget::Text::new(&j)
                     .font_size(fontsize)
-                    .w(first_text_w).right_from(state.ids.key,20.0).set(state.ids.giveable_text,
-                                                                           ui);
+                    .w(first_text_w)
+                    .right_from(state.ids.key, 20.0)
+                    .set(state.ids.giveable_text, ui);
                 let v_rect = gameicons_rect(5.0);
                 widget::Image::new(self.icon_image)
                     .right_from(state.ids.giveable_text, 8.0)
@@ -262,7 +264,7 @@ impl<'a> Widget for ItemWidget<'a> {
                     .source_rectangle(v_rect)
                     .set(state.ids.giveable_icon, ui);
                 let mut k = " or + ".to_owned();
-                k.push_str(&_v.to_string()); 
+                k.push_str(&_v.to_string());
                 widget::Text::new(&k)
                     .font_size(fontsize)
                     .right_from(state.ids.giveable_icon, 8.0)
@@ -283,10 +285,10 @@ impl<'a> Widget for ItemWidget<'a> {
             }
             GIVEABLE::INK => {
                 widget::Text::new("+ 1")
-                .w(first_text_w)
-                .font_size(fontsize)
-                .right_from(state.ids.key,20.0)
-                .set(state.ids.giveable_text,ui);
+                    .w(first_text_w)
+                    .font_size(fontsize)
+                    .right_from(state.ids.key, 20.0)
+                    .set(state.ids.giveable_text, ui);
                 let v_rect = gameicons_rect(1.0);
                 widget::Image::new(self.icon_image)
                     .right_from(state.ids.giveable_text, 8.0)

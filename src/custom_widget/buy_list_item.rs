@@ -16,6 +16,7 @@ pub struct ItemWidget<'a> {
     common: widget::CommonBuilder,
     pub timeless: bool,
     pub cost_rect: Rect,
+    pub top_left_rect: Rect,
     pub alphabet: &'a str,
     pub timelesstext: &'a str,
     pub cloudy_image: Option<image::Id>,
@@ -86,6 +87,7 @@ impl<'a> ItemWidget<'a> {
             cloudy_image: None,
             coin_info: None,
             coin_info270: None,
+            game_icon: None,
         }
     }
 
@@ -183,7 +185,7 @@ impl<'a> Widget for ItemWidget<'a> {
                     .parent(id)
                     .set(state.ids.coin_info, ui);
                 widget::Image::new(_game_icon)
-                    .source_rectangle(self.left_left_rect)
+                    .source_rectangle(self.top_left_rect)
                     .wh([15.0, 15.0])
                     .mid_left_of(state.ids.coin_info)
                     .set(state.ids.top_lefticon, ui);

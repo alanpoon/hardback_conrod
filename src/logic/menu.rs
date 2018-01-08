@@ -36,14 +36,15 @@ pub fn render(ui: &mut conrod::UiCell,
 
         let mut word_iter = word_arr.iter();
         while let (Some(item), Some(&card_index)) = (items.next(ui), word_iter.next()) {
-            let (_timeless, _str, _color, _font, _rect) =
+            let (_timeless, _str, _color, _font, _rect, _top_lefticon) =
                 in_game::get_tile_image_withcost(card_index, cardmeta, appdata, result_map);
-            let j = show_draft_item::ItemWidget::new(_timeless, _str, _rect, "timeless")
-                .cloudy_image(cloudy)
-                .coin_info(coin_info)
-                .coin_info270(coin_info270)
-                .alphabet_font_id(_font)
-                .color(_color);
+            let j =
+                show_draft_item::ItemWidget::new(_timeless, _str, _rect, _top_lefticon, "timeless")
+                    .cloudy_image(cloudy)
+                    .coin_info(coin_info)
+                    .coin_info270(coin_info270)
+                    .alphabet_font_id(_font)
+                    .color(_color);
             item.set(j, ui);
         }
 
@@ -56,14 +57,16 @@ pub fn render(ui: &mut conrod::UiCell,
             .mid_left_of(ids.master)
             .set(ids.menu_title_list2, ui);
         while let (Some(item), Some(&card_index)) = (items2.next(ui), blackjack_iter.next()) {
-            let (_timeless, _str, _color, _font, _rect) =
+            let (_timeless, _str, _color, _font, _rect, _top_lefticon) =
                 in_game::get_tile_image_withcost(card_index, cardmeta, appdata, result_map);
-            let j = show_draft_item::ItemWidget::new(_timeless, _str, _rect, "timeless")
-                .cloudy_image(cloudy)
-                .coin_info(coin_info)
-                .coin_info270(coin_info270)
-                .alphabet_font_id(_font)
-                .color(_color);
+            let j =
+                show_draft_item::ItemWidget::new(_timeless, _str, _rect, _top_lefticon, "timeless")
+                    .game_icon(_game_icon)
+                    .cloudy_image(cloudy)
+                    .coin_info(coin_info)
+                    .coin_info270(coin_info270)
+                    .alphabet_font_id(_font)
+                    .color(_color);
             item.set(j, ui);
         }
 

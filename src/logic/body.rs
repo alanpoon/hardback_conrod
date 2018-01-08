@@ -211,7 +211,7 @@ fn show_draft(ui: &mut conrod::UiCell,
         (result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
-         result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICON))) {
+         result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
         if let Some(&mut true) = print_instruction_set.get_mut(0) {
             let (mut items, scrollbar) = widget::List::flow_right(player.draft.len())
                 .item_size(item_h)
@@ -287,7 +287,7 @@ fn shuffle(ui: &mut conrod::UiCell,
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
          result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)),
-         result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICON)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS)),
          player_index) {
         let card_vec =
             initial_draft.iter()
@@ -379,7 +379,7 @@ fn spell(ui: &mut conrod::UiCell,
             .clone()
             .iter()
             .map(|&(ref x, ref ink, ref op_string, ref _timeless)| {
-                let (_timeless, _string, _color, _font, _rect) =
+                let (_timeless, _string, _color, _font, _rect, _top_lefticon_rect) =
                     in_game::get_tile_image_withcost(x.clone(), cardmeta, appdata, result_map);
                 (x.clone(),
                  _timeless,
@@ -387,6 +387,7 @@ fn spell(ui: &mut conrod::UiCell,
                  _color,
                  _font,
                  _rect,
+                 _top_lefticon_rect,
                  ink.clone(),
                  op_string.clone())
             })
@@ -396,6 +397,7 @@ fn spell(ui: &mut conrod::UiCell,
                  conrod::Color,
                  text::font::Id,
                  conrod::Rect,
+                 conrod::Rect,
                  bool,
                  Option<String>)>>();
         if let (Some(&SupportIdType::ImageId(spinner_image)),
@@ -404,7 +406,7 @@ fn spell(ui: &mut conrod::UiCell,
                 Some(&SupportIdType::ImageId(cloudy)),
                 Some(&SupportIdType::ImageId(coin_info)),
                 Some(&SupportIdType::ImageId(coin_info270)),
-                Some(&SupportIdType::ImageId(game_icon))) =
+                Some(&SupportIdType::ImageId(_game_icon))) =
             (result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)),
              result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)),
              result_map.get(&ResourceEnum::Sprite(Sprite::ARROWS)),
@@ -425,14 +427,14 @@ fn spell(ui: &mut conrod::UiCell,
                                                  _color,
                                                  _font,
                                                  _rect,
-                                                 _top_lefticon_rect,
+                                                 _top_left_rect,
                                                  _inked,
                                                  _opstring)| {
                     ItemWidget::new(back_image,
                                     _timelessbool,
                                     _string,
                                     _rect,
-                                    _top_lefticon_rect,
+                                    _top_left_rect,
                                     "timeless")
                             .cloudy_image(cloudy)
                             .coin_info(coin_info)
@@ -449,6 +451,7 @@ fn spell(ui: &mut conrod::UiCell,
                                             _color,
                                             _font,
                                             _rect,
+                                            _top_left_rect,
                                             _inked,
                                             _opstring)| {
                                               _v_index.clone()
@@ -480,6 +483,7 @@ fn spell(ui: &mut conrod::UiCell,
                         _,
                         ref _font,
                         ref _rect,
+                        ref _top_lefticon_rect,
                         ref _inked,
                         ref op_string)| {
                          (x_index.clone(), _inked.clone(), op_string.clone(), _timeless.clone())

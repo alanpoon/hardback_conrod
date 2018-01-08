@@ -54,6 +54,7 @@ pub fn render(ui: &mut conrod::UiCell,
                  _color,
                  _font,
                  _rect,
+                 _top_left_rect,
                  _purchase,
                  _giveable,
                  _genre_giveable,
@@ -65,7 +66,7 @@ pub fn render(ui: &mut conrod::UiCell,
                                                                          result_map);
             let wh = ui.wh_of(ids.overlay).unwrap();
 
-            show_draft_item::ItemWidget::new(_timeless, _string, _rect, "timeless")
+            show_draft_item::ItemWidget::new(_timeless, _string, _rect, _top_left_rect, "timeless")
                 .cloudy_image(cloudy)
                 .coin_info(coin_info)
                 .coin_info270(coin_info270)

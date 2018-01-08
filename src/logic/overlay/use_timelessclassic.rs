@@ -24,9 +24,9 @@ use instruction::Instruction;
 pub struct PanelInfo<'a> {
     text: Option<String>,
     display_pic: Option<ImageRectType>,
-    values: &'a Vec<(bool, &'a str, Color, text::font::Id, Rect, usize)>,
+    values: &'a Vec<(bool, &'a str, Color, text::font::Id, Rect, Rect, usize)>,
     list_selected: &'a mut HashSet<usize, RandomState>,
-    widget_closure: Box<Fn((bool, &'a str, Color, text::font::Id, Rect, usize))
+    widget_closure: Box<Fn((bool, &'a str, Color, text::font::Id, Rect, Rect, usize))
                            -> buy_list_item::ItemWidget<'a>>,
 }
 impl<'b> Panelable for PanelInfo<'b> {
@@ -57,7 +57,7 @@ impl<'b> Panelable for PanelInfo<'b> {
         self.values
             .get(i)
             .unwrap()
-            .5
+            .6
             .clone()
     }
 }
@@ -86,7 +86,7 @@ pub fn render(w_id: tabview::Item,
     //normal_stuff don't need mut borrow
     let mut normal_stuff: Vec<(Option<String>,
                                Option<ImageRectType>,
-                               Vec<(bool, &str, Color, text::font::Id, Rect, usize)>)> = vec![];
+                               Vec<(bool, &str, Color, text::font::Id, Rect, Rect, usize)>)> = vec![];
     // let card_images = in_game::card_images(result_map);
     if let (Some(&SupportIdType::ImageId(cloudy)),
             Some(&SupportIdType::ImageId(coin_info)),
@@ -123,16 +123,22 @@ pub fn render(w_id: tabview::Item,
                         })
                         .filter(|x| if let &Some(_) = x { true } else { false })
                         .map(|x| {
-                            let (_timeless, _str, _color, _font, _rect) =
+                            let (_timeless, _str, _color, _font, _rect, _top_left_rect) =
                                 in_game::get_tile_image_withcost(x.unwrap().clone(),
                                                                  cardmeta,
                                                                  appdata,
                                                                  result_map);
                             // let mut k="".to_owned();
                             // k.push_str(_str);
-                            (_timeless, _str, _color, _font, _rect, x.unwrap().clone())
+                            (_timeless,
+                             _str,
+                             _color,
+                             _font,
+                             _rect,
+                             _top_left_rect,
+                             x.unwrap().clone())
                         })
-                        .collect::<Vec<(bool, &str, Color, text::font::Id, Rect, usize)>>();
+                        .collect::<Vec<(bool, &str, Color, text::font::Id, Rect, Rect, usize)>>();
 
                 normal_stuff.push((Some(_p.name), Some((rust_logo, None, 0)), vec_cards));
             }
@@ -150,11 +156,13 @@ pub fn render(w_id: tabview::Item,
                                                             _color,
                                                             _font,
                                                             _rect,
+                                                            _top_left_rect,
                                                             _)| {
 
                                 buy_list_item::ItemWidget::new(_timeless,
                                                                &_string,
                                                                _rect,
+                                                               _top_left_rect,
                                                                "timeless")
                                         .cloudy_image(cloudy)
                                         .coin_info(coin_info)
@@ -182,8 +190,13 @@ pub fn render(w_id: tabview::Item,
                             for &PanelInfo { ref values, ref list_selected, .. } in vec_p.iter() {
                                 //list_image ->Vec<ImageRectType>
                                 for _selected in list_selected.iter() {
-                                    if let Some(&(_timeless, _, _color, _font, _rect, _ci)) =
-                                        values.get(_selected.clone()) {
+                                    if let Some(&(_timeless,
+                                                  _,
+                                                  _color,
+                                                  _font,
+                                                  _rect,
+                                                  _top_left_rect,
+                                                  _ci)) = values.get(_selected.clone()) {
                                         _personal.arranged.push((_ci.clone(), false, None, true));
                                     }
                                 }

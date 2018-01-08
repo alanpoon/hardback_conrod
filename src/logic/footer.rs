@@ -228,7 +228,7 @@ fn spell(ui: &mut conrod::UiCell,
                 s.set(ui);
             }
             _personal.hand =
-                handvec.iter().map(|&(x_index, _, _, _, _, _)| x_index).collect::<Vec<usize>>();
+                handvec.iter().map(|&(x_index, _, _, _, _, _, _)| x_index).collect::<Vec<usize>>();
             if (*_personal).clone() != temp {
                 let now = Instant::now();
                 *last_send = Some(now);

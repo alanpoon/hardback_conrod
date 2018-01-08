@@ -4,7 +4,7 @@ use backend::meta::cards;
 use conrod_chat::custom_widget::Message;
 use backend::codec_lib::codec::*;
 use backend::codec_lib::cards::{Board, WaitForInputType};
-use conrod::{image, Rect};
+use conrod::{image, Rect, widget};
 use std::collections::hash_map::RandomState;
 use std::collections::HashSet;
 use std::time::Instant;
@@ -303,4 +303,4 @@ impl Board for BoardStruct {
                                 _wait_for_input: &mut [WaitForInputType; 4]) {
     }
 }
-pub const ResultMapLen: usize = 23;
+pub const RESULTMAPLEN: usize = 23;

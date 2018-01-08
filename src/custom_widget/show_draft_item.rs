@@ -1,7 +1,6 @@
 use cardgame_widgets::custom_widget::image_hover::TimesClicked;
 use conrod::{widget, Color, Colorable, Borderable, Positionable, UiCell, Widget, event, input,
              image, Theme, Sizeable, text, FontSize};
-use logic::in_game::TopLeftIcon;
 use conrod::position::{Rect, Scalar, Dimensions, Point};
 use cardgame_widgets::text::get_font_size_hn;
 use conrod::widget::Rectangle;
@@ -85,7 +84,6 @@ impl<'a> ItemWidget<'a> {
             coin_info: None,
             coin_info270: None,
             game_icon: None,
-            top_lefticon: TopLeftIcon,
         }
     }
 
@@ -150,8 +148,8 @@ impl<'a> Widget for ItemWidget<'a> {
                        self.style.color(&ui.theme),
                        ui);
 
-        if let (Some(_cloudy), Some(_coin_info), Some(_coin_info270), Some(_game_icon)) =
-            (self.cloudy_image, self.coin_info, self.coin_info270, self.game_icon) {
+        if let (Some(_cloudy), Some(_coin_info), Some(_coin_info270)) =
+            (self.cloudy_image, self.coin_info, self.coin_info270) {
             widget::Image::new(_cloudy)
                 .w_h(w, h)
                 .middle_of(id)
@@ -165,11 +163,13 @@ impl<'a> Widget for ItemWidget<'a> {
                     .mid_bottom_of(id)
                     .parent(id)
                     .set(state.ids.coin_info, ui);
-                widget::Image::new(_game_icon)
-                    .source_rectangle(self.top_left_rect)
-                    .wh([15.0, 15.0])
-                    .mid_left_of(state.ids.coin_info)
-                    .set(state.ids.top_lefticon, ui);
+                if let Some(_game_icon) = self.game_icon {
+                    widget::Image::new(_game_icon)
+                        .source_rectangle(self.top_left_rect)
+                        .wh([15.0, 15.0])
+                        .mid_left_of(state.ids.coin_info)
+                        .set(state.ids.top_lefticon, ui);
+                }
                 let fontsize = get_font_size_hn(h * 0.2, 1.0);
                 let timeless_font_id =
                     self.style.timeless_font_id(&ui.theme).or(ui.fonts.ids().next());
@@ -185,11 +185,13 @@ impl<'a> Widget for ItemWidget<'a> {
                     .mid_left_of(id)
                     .parent(id)
                     .set(state.ids.coin_info, ui);
-                widget::Image::new(_game_icon)
-                    .source_rectangle(self.top_left_rect)
-                    .wh([15.0, 15.0])
-                    .mid_top_of(state.ids.coin_info)
-                    .set(state.ids.top_lefticon, ui);
+                if let Some(_game_icon) = self.game_icon {
+                    widget::Image::new(_game_icon)
+                        .source_rectangle(self.top_left_rect)
+                        .wh([15.0, 15.0])
+                        .mid_top_of(state.ids.coin_info)
+                        .set(state.ids.top_lefticon, ui);
+                }
             }
         }
 

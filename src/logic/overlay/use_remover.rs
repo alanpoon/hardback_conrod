@@ -60,11 +60,13 @@ pub fn render(w_id: tabview::Item,
             if let (Some(&SupportIdType::ImageId(cloudy)),
                     Some(&SupportIdType::ImageId(coin_info)),
                     Some(&SupportIdType::ImageId(coin_info270)),
-                    Some(&SupportIdType::ImageId(dwn_img))) =
+                    Some(&SupportIdType::ImageId(dwn_img)),
+                    Some(&SupportIdType::ImageId(_game_icon))) =
                 (result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
                  result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
                  result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
-                 result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD))) {
+                 result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)),
+                 result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
                 // Handle the `ListSelect`s events.
                 while let Some(event) = events.next(ui, |i| overlay_remover_selected.contains(&i)) {
                     use conrod::widget::list_select::Event;
@@ -73,7 +75,7 @@ pub fn render(w_id: tabview::Item,
                         Event::Item(item) => {
                             let card_index = inked.get(item.i).unwrap();
                             let selected = overlay_remover_selected.contains(&item.i);
-                            let (_timeless, _string, _color, _font, _rect) =
+                            let (_timeless, _string, _color, _font, _rect, _top_left_rect) =
                                 in_game::get_tile_image_withcost(card_index.clone(),
                                                                  cardmeta,
                                                                  appdata,
@@ -82,7 +84,9 @@ pub fn render(w_id: tabview::Item,
                             let mut j = buy_list_item::ItemWidget::new(_timeless,
                                                                        _string,
                                                                        _rect,
+                                                                       _top_left_rect,
                                                                        "timeless")
+                                    .game_icon(_game_icon)
                                     .wh(appdata.convert_dim([150.0, 190.0]))
                                     .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
                                     .cloudy_image(cloudy)
@@ -118,20 +122,24 @@ pub fn render(w_id: tabview::Item,
 
                 match overlay_receivedimage[1] {
                     OverlayStatus::Received(ref card_index) => {
-                        let (_timeless, _string, _color, _font, _rect) =
+                        let (_timeless, _string, _color, _font, _rect, _top_left_rect) =
                             in_game::get_tile_image_withcost(card_index.clone(),
                                                              cardmeta,
                                                              appdata,
                                                              result_map);
-                        show_draft_item::ItemWidget::new(_timeless, _string, _rect, "timeless")
-                            .wh(appdata.convert_dim([150.0, 190.0]))
-                            .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
-                            .cloudy_image(cloudy)
-                            .coin_info(coin_info)
-                            .coin_info270(coin_info270)
-                            .alphabet_font_id(_font)
-                            .color(_color)
-                            .set(ids.overlay_receivedimage, ui);
+                        show_draft_item::ItemWidget::new(_timeless,
+                                                         _string,
+                                                         _rect,
+                                                         _top_left_rect,
+                                                         "timeless")
+                                .wh(appdata.convert_dim([150.0, 190.0]))
+                                .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
+                                .cloudy_image(cloudy)
+                                .coin_info(coin_info)
+                                .coin_info270(coin_info270)
+                                .alphabet_font_id(_font)
+                                .color(_color)
+                                .set(ids.overlay_receivedimage, ui);
                     }
                     OverlayStatus::Loading => {
                         let spinner_sprite = graphics_match::spinner_sprite();

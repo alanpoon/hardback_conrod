@@ -247,7 +247,7 @@ impl GameApp {
                                   load_asset_tx.clone(),
                                   proxy_action_tx.clone());
 
-                    action_instant = Instant::now;
+                    action_instant = std::time::Instant::now();
                 }
                 Some(ConrodMessage::Thread(_t)) => {
                     // Set the widgets.

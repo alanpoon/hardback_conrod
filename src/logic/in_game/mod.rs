@@ -58,7 +58,7 @@ pub fn get_tile_image_withcost<'a>(card_index: usize,
         }
         TopLeftIcon::COINVP => {
             let rect_dim = spriteable_rect(graphics_match::gameicon_sprite(), 3.0);
-            Rect::from_corners(rect_dim.0, rect_dim.13)
+            Rect::from_corners(rect_dim.0, rect_dim.1)
         }
     };
     let mut _font = None;
@@ -129,7 +129,7 @@ pub fn get_tile_image_withcostwords<'a>(card_index: usize,
         &GIVEABLE::COININK(_) => TopLeftIcon::COIN,
         &GIVEABLE::VPINK(_) => TopLeftIcon::COINVP,
         &GIVEABLE::VPORCOININK(_) => TopLeftIcon::COINVP,
-        _ => TopLeftIcon::NONE,
+        _ => TopLeftIcon::COINVP,
     };
     let top_lefticon_src_rect = match top_lefticon {
         TopLeftIcon::VP => {
@@ -142,7 +142,7 @@ pub fn get_tile_image_withcostwords<'a>(card_index: usize,
         }
         TopLeftIcon::COINVP => {
             let rect_dim = spriteable_rect(graphics_match::gameicon_sprite(), 3.0);
-            Rect::from_corners(rect_dim.0, rect_dim.13)
+            Rect::from_corners(rect_dim.0, rect_dim.1)
         }
     };
     if let Some(&SupportIdType::FontId(__font)) = result_map.get(&ResourceEnum::Font(font)) {

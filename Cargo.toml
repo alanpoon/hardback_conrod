@@ -54,6 +54,7 @@ conrod_chat = {path ="../conrod_chat", features=["web_socket","backend_glium_win
 [target.'cfg(target_os="android")'.dependencies]
 android_glue = "0.2.3"
 rusttype = "*"
+conrod_chat = {path ="../conrod_chat", features=["keypad"]}
 
 [dependencies.sdl2]
 version = "0.29"

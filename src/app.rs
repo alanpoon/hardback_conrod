@@ -303,4 +303,4 @@ impl Board for BoardStruct {
                                 _wait_for_input: &mut [WaitForInputType; 4]) {
     }
 }
-pub const RESULTMAPLEN: usize = 23;
+pub const RESULTMAPLEN: usize = 22;

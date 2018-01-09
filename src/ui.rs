@@ -57,7 +57,7 @@ pub fn init_load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, 
     (ResourceEnum::Font(Font::ADVENTURE),"font","fonts/TradeWinds-Regular.ttf"),
     (ResourceEnum::Font(Font::ROMANCE),"font","fonts/Babylove.ttf"),
     (ResourceEnum::Music(MusicEnum::BACKGROUND),"music","audio/doki1.ogg"),
-    (ResourceEnum::Chunk(ChunkEnum::PAGEFLIP),"chunk","audio/Page_urn_sound_effect.ogg")
+    //(ResourceEnum::Chunk(ChunkEnum::PAGEFLIP),"chunk","audio/Page_urn_sound_effect.ogg")
     
   }
     let g = ImageIds::new();

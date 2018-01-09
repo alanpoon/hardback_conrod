@@ -21,10 +21,12 @@ pub fn render(ui: &mut conrod::UiCell,
     animated_canvas::Canvas::new().color(color::LIGHT_ORANGE).frame_rate(30).set(ids.master, ui);
     if let (Some(&SupportIdType::ImageId(cloudy)),
             Some(&SupportIdType::ImageId(coin_info)),
-            Some(&SupportIdType::ImageId(coin_info270))) =
+            Some(&SupportIdType::ImageId(coin_info270)),
+            Some(&SupportIdType::ImageId(_game_icon))) =
         (result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
-         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270))) {
+         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
         let w = ui.w_of(ids.master).unwrap();
         let word_arr = vec![22, 48, 86, 143];
         let (mut items, _scrollbar) = widget::List::flow_right(word_arr.len())

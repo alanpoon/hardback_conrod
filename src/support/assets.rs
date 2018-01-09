@@ -44,6 +44,7 @@ pub fn load_music(filename: &str) -> Music<'static> {
         Err(_) => panic!("Can't load music."),
     }
 }
+/*
 pub fn load_chunk(filename: &str) -> Chunk {
     let assets = find_folder::Search::ParentsThenKids(3, 3).for_folder("assets").unwrap();
     let path = assets.join(filename);
@@ -55,3 +56,4 @@ pub fn load_chunk(filename: &str) -> Chunk {
         }
     }
 }
+*/

@@ -28,18 +28,18 @@ pub fn load_270image(filename: &str) -> DynamicImage {
     }
 }
 pub fn load_music(filename: &str) -> Music<'static> {
-    let assets = find_folder::Search::ParentsThenKids(3, 3).for_folder("assets").unwrap();
-    let path = assets.join(filename);
-    match Music::from_file(&std::path::Path::new(&path)) {
-        Ok(data) => data,
+    match android_glue::load_asset(filename) {
+        Ok(data) =>  Music::from_static_bytes(data),
         Err(_) => panic!("Can't load music."),
     }
 }
+/*
 pub fn load_chunk(filename: &str) -> Chunk {
     let assets = find_folder::Search::ParentsThenKids(3, 3).for_folder("assets").unwrap();
     let path = assets.join(filename);
-    match Chunk::from_file(&std::path::Path::new(&path)) {
+    match android_glue::load_asset(filename)Chunk::from_file(&std::path::Path::new(&path)) {
         Ok(data) => data,
         Err(_) => panic!("Can't load chunk."),
     }
 }
+*/

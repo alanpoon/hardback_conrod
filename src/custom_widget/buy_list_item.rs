@@ -1,6 +1,6 @@
 use cardgame_widgets::custom_widget::image_hover::TimesClicked;
 use conrod::{widget, Color, Colorable, Borderable, Positionable, UiCell, Widget, event, input,
-             image, Theme, Sizeable, text, FontSize};
+             image, Theme, Sizeable, text, FontSize, color};
 
 use conrod::position::{Rect, Scalar, Dimensions, Point};
 use cardgame_widgets::text::get_font_size_hn;
@@ -186,14 +186,15 @@ impl<'a> Widget for ItemWidget<'a> {
                     .set(state.ids.coin_info, ui);
                 widget::Image::new(_game_icon)
                     .source_rectangle(self.top_left_rect)
-                    .wh([15.0, 15.0])
+                    .wh([20.0, 20.0])
                     .mid_left_of(state.ids.coin_info)
                     .set(state.ids.top_lefticon, ui);
-                let fontsize = get_font_size_hn(h * 0.15, 1.0);
+                let fontsize = get_font_size_hn(h * 0.18, 1.0);
                 let timeless_font_id =
                     self.style.timeless_font_id(&ui.theme).or(ui.fonts.ids().next());
                 widget::Text::new(self.timelesstext)
-                    .mid_left_with_margin_on(state.ids.coin_info, 2.0)
+                    .mid_left_with_margin_on(state.ids.coin_info, 20.0)
+                    .color(color::WHITE)
                     .font_size(fontsize)
                     .and_then(timeless_font_id, widget::Text::font_id)
                     .set(state.ids.coin_info_timeless, ui);
@@ -206,7 +207,7 @@ impl<'a> Widget for ItemWidget<'a> {
                     .set(state.ids.coin_info, ui);
                 widget::Image::new(_game_icon)
                     .source_rectangle(self.top_left_rect)
-                    .wh([15.0, 15.0])
+                    .wh([20.0, 20.0])
                     .mid_top_of(state.ids.coin_info)
                     .set(state.ids.top_lefticon, ui);
             }

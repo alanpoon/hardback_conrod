@@ -87,12 +87,16 @@ pub fn render(ui: &mut conrod::UiCell,
                             false
                         })
                 .collect::<Vec<&(String, GIVEABLE, Option<String>)>>();
-            let (mut items, _) = widget::List::flow_down(reduce.len())
+            let (mut items, scrollbar) = widget::List::flow_down(reduce.len())
                 .right_from(ids.blowup_card, wh[0] * 0.1)
-               // .item_size(wh[0]*0.9 / (reduce.len() as f64))
+                .item_size(wh[1] * 0.99 / 2.0)
+                .scrollbar_next_to()
                 .w(wh[0] * 0.65)
                 .h(wh[1] * 0.9)
                 .set(ids.blowup_list, ui);
+            if let Some(s) = scrollbar {
+                s.set(ui);
+            }
             let mut reduce_iter = reduce.iter();
             while let (Some(item), Some(_g)) = (items.next(ui), reduce_iter.next()) {
                 let &&(ref _is, ref _g, ref _s) = _g;

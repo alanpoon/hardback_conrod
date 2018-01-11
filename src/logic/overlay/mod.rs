@@ -78,9 +78,8 @@ pub fn render(ui: &mut conrod::UiCell,
                 if let (Some(_s), Some(_si), Some(xy)) = slist {
                     let _dim = appdata.convert_dim([300.0, 100.0]);
                     animated_canvas::Canvas::new()
-                        .x(appdata.convert_w(xy[0]))
-                        .y(appdata.convert_h(200.0))
-                        .graphics_for(ids.master)
+                        .x(appdata.convert_w(xy[0] + _dim[0] / 2.0))
+                        .y(appdata.convert_h(250.0))
                         .parent(ids.master)
                         .color(default_color)
                         .wh(_dim)

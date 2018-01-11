@@ -78,8 +78,8 @@ pub fn render(w_id: tabview::Item,
                    .. } = *gamedata;
     widget::Text::new(&appdata.texts.use_timelessclassic)
         .color(color::WHITE)
-        .font_size(60)
-        .h(100.0)
+        .font_size(30)
+        .h(40.0)
         .w_of(w_id.parent_id)
         .top_left_of(w_id.parent_id)
         .set(ids.overlay_subject, ui);
@@ -113,23 +113,21 @@ pub fn render(w_id: tabview::Item,
                     _p.timeless_classic
                         .iter()
                         .map(|x| {
-                            let mut r = None;
+                            let mut r = Some(x.clone());
                             for (_ci, _inkbool, _, _timeless) in _personal.arranged.clone() {
-                                if *x != _ci {
-                                    r = Some(x.clone());
+                                if *x == _ci {
+                                    r = None;
                                 }
                             }
                             r
                         })
-                        .filter(|x| if let &Some(_) = x { true } else { false })
+                        .filter(|x| x.is_some())
                         .map(|x| {
                             let (_timeless, _str, _color, _font, _rect, _top_left_rect) =
                                 in_game::get_tile_image_withcost(x.unwrap().clone(),
                                                                  cardmeta,
                                                                  appdata,
                                                                  result_map);
-                            // let mut k="".to_owned();
-                            // k.push_str(_str);
                             (_timeless,
                              _str,
                              _color,
@@ -179,11 +177,13 @@ pub fn render(w_id: tabview::Item,
                     .y_item_height(100.0)
                     .x_item_list([100.0, 100.0, 22.0, 5.0])
                     .corner_arrow(_c)
+                    .label_color(color::LIGHT_YELLOW)
                     .set(ids.overlay_image_panels, ui);
                 match overlay_receivedimage[2] {
                     OverlayStatus::None => {
                         for _c in widget::Button::new()
                                 .label(&appdata.texts.use_timelessclassic)
+                                .h(40.0)
                                 .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
                                 .set(ids.overlay_okbut, ui) {
                             overlay_receivedimage[2] = OverlayStatus::Loading;

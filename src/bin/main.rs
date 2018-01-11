@@ -3,7 +3,7 @@ extern crate conrod;
 extern crate conrod_chat;
 extern crate futures;
 extern crate toa_ping;
-extern crate sdl2;
+extern crate rodio;
 #[allow(non_snake_case)]
 use hardback_conrod as game_conrod;
 use game_conrod::backend::glium::{self, glutin, Surface};
@@ -24,6 +24,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use futures::sync::mpsc;
 use std::time::Instant;
+use rodio::{Source, Sink};
 
 #[cfg(target_os="android")]
 const CONNECTION: &'static str = "ws://13.229.94.195:8080";
@@ -51,7 +52,6 @@ impl GameApp {
                 .with_gl(glium::glutin::GlRequest::Specific(glium::glutin::Api::OpenGlEs, (3, 0)));
         let mut events_loop = glutin::EventsLoop::new();
         let display = glium::Display::new(window_z, context, &events_loop).unwrap();
-
         let mut renderer = conrod::backend::glium::Renderer::new(&display).unwrap();
         // construct our `Ui`.
         let (screen_w, screen_h) = display.get_framebuffer_dimensions();
@@ -59,9 +59,7 @@ impl GameApp {
         let mut ui = conrod::UiBuilder::new([screen_w as f64, screen_h as f64])
             .theme(support::theme(&appdata))
             .build();
-        let _mixer_context = sdl2::mixer::init(sdl2::mixer::INIT_OGG).unwrap();
-        sdl2::mixer::open_audio(44100, sdl2::mixer::AUDIO_S16LSB, 2, 1024).unwrap();
-        sdl2::mixer::allocate_channels(16);
+
         let mut result_map = HashMap::<ResourceEnum, SupportIdType>::new();
         let mut image_map = conrod::image::Map::new();
         game_conrod::ui::init_load_resources_to_result_map(&mut result_map,
@@ -74,10 +72,8 @@ impl GameApp {
             ui.theme.font_id = Some(regular);
         }
 
-        if let Some(&SupportIdType::MusicId(ref background_music)) =
-            result_map.get(&ResourceEnum::Music(MusicEnum::BACKGROUND)) {
-            background_music.play(-1).unwrap();
-        }
+        if let Some(SupportIdType::MusicId(background_music)) =
+            result_map.remove(&ResourceEnum::Music(MusicEnum::BACKGROUND)) {}
         let (proxy_tx, proxy_rx) = std::sync::mpsc::channel();
         let (proxy_action_tx, proxy_action_rx) = mpsc::channel(2);
         let s_tx = Arc::new(Mutex::new(proxy_action_tx));
@@ -169,7 +165,6 @@ impl GameApp {
                                                                     msg| {
                 if let OwnedMessage::Text(z) = OwnedMessage::from(msg) {
                     if let Ok(s) = codec::ClientReceivedMsg::deserialize_receive(&z) {
-                        println!("s {:?}", s);
                         on_request::update(s, gamedata, appdata, result_map);
                     } else {
                         println!("err");

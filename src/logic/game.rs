@@ -5,8 +5,8 @@ use futures::sync::mpsc;
 use backend::codec_lib::cards::*;
 use backend::codec_lib::cards;
 use logic;
-use app::{GameData, Ids, GuiState, BoardStruct, RESULTMAPLEN};
-use ui::{Vala, load_resources_iter, iter_resource_enum_vala_next};
+use app::{GameData, Ids, GuiState, BoardStruct};
+use ui::{Vala, load_resources_iter, iter_resource_enum_vala_next, RESULTMAPLEN};
 use backend::OwnedMessage;
 use backend::SupportIdType;
 use cardgame_widgets::custom_widget::animated_canvas;
@@ -65,7 +65,7 @@ impl<'a, T> GameProcess<'a, T>
                         load_resources_iter(&mut map);
                         let mut _iter_resource_enum_vala = map.iter();
                         while let Some((k, v)) = _iter_resource_enum_vala.next() {
-                            let (_resource_enum, _image_buffer, _font, _music, _chunk) =
+                            let (_resource_enum, _image_buffer, _font, _music) =
                                 iter_resource_enum_vala_next((*k).clone(), (*v).clone());
                             load_asset_tx.send((_resource_enum, _image_buffer, _font)).unwrap();
                         }
@@ -162,6 +162,7 @@ impl<'a, T> GameProcess<'a, T>
                                     &appdata,
                                     result_map,
                                     action_tx.clone());
+        logic::overlay_human::render(ui, ids, &mut gamedata, &appdata, result_map);
         logic::overlay_prompt::render(ui, ids, &mut gamedata, action_tx.clone());
     }
     #[allow(unused_mut)]

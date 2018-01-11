@@ -100,9 +100,9 @@ impl<'a> Widget for ItemWidget<'a> {
         //
 
         let (_, _, w, h) = rect.x_y_w_h();
-        let fontsize = get_font_size_hn(h * 0.3, 1.0);
-        let text_dim = [w * 0.2, h * 0.3];
-        let icon_dim = [h * 0.3, h * 0.3];
+        let fontsize = get_font_size_hn(h * 0.5, 1.0);
+        let text_dim = [w * 0.2, h * 0.5];
+        let icon_dim = [h * 0.5, h * 0.5];
         let second_text_w = 90.0;
         let first_text_w = 25.0;
         widget::Text::new(self.key)
@@ -300,9 +300,9 @@ impl<'a> Widget for ItemWidget<'a> {
         if let Some(_detail) = self.details {
             widget::Text::new(&_detail)
                 .font_size(fontsize)
-                .down_from(state.ids.giveable_text, 8.0)
+                .down_from(state.ids.giveable_text, 4.0)
                 .h(h * 0.6)
-                .w(w * 0.4)
+                .w(w * 0.7)
                 .set(state.ids.details, ui);
         }
     }

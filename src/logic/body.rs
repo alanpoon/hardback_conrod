@@ -107,6 +107,7 @@ pub fn render(ui: &mut conrod::UiCell,
                         turn_to_submit_but(ui,
                                            ids,
                                            &appdata,
+                                           overlay_blowup,
                                            last_send.clone(),
                                            spinner_image,
                                            _action_tx.clone());
@@ -157,6 +158,7 @@ pub fn render(ui: &mut conrod::UiCell,
 fn turn_to_submit_but(ui: &mut conrod::UiCell,
                       ids: &Ids,
                       appdata: &AppData,
+                      overlay_blowup: &mut Option<usize>,
                       last_send: Option<Instant>,
                       spinner_image: image::Id,
                       _action_tx: mpsc::Sender<OwnedMessage>) {
@@ -181,6 +183,7 @@ fn turn_to_submit_but(ui: &mut conrod::UiCell,
                .wh(appdata.convert_dim([100.0, 50.0]))
                .set(ids.submit_but, ui)
                .next() {
+            *overlay_blowup = None;
             println!("submit word");
             let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
             let mut g = GameCommand::new();
@@ -436,6 +439,7 @@ fn spell(ui: &mut conrod::UiCell,
                                     _rect,
                                     _top_left_rect,
                                     "timeless")
+                            .game_icon(_game_icon)
                             .cloudy_image(cloudy)
                             .coin_info(coin_info)
                             .coin_info270(coin_info270)
@@ -543,11 +547,13 @@ fn buy(ui: &mut conrod::UiCell,
     if let (Some(&SupportIdType::ImageId(cloudy)),
             Some(&SupportIdType::ImageId(coin_info)),
             Some(&SupportIdType::ImageId(coin_info270)),
-            Some(&SupportIdType::ImageId(arrows_image))) =
+            Some(&SupportIdType::ImageId(arrows_image)),
+            Some(&SupportIdType::ImageId(game_icon))) =
         (result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
-         result_map.get(&ResourceEnum::Sprite(Sprite::ARROWS))) {
+         result_map.get(&ResourceEnum::Sprite(Sprite::ARROWS)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
         let mut buy_selected_id: Option<widget::Id> = None;
         let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
         while let Some(event) = events.next(ui, |i| {
@@ -575,6 +581,7 @@ fn buy(ui: &mut conrod::UiCell,
                                                                _rect,
                                                                _top_lefticon_rect,
                                                                "timeless")
+                            .game_icon(game_icon)
                             .cloudy_image(cloudy)
                             .coin_info(coin_info)
                             .coin_info270(coin_info270)
@@ -605,6 +612,7 @@ fn buy(ui: &mut conrod::UiCell,
                 _ => {}
             }
         }
+
         if let (Some(_buy_selected_id), &mut Some(_buy_selected)) = (buy_selected_id, buyselected) {
             let j = ImageHover::new(_c)
                 .w_h(item_h * 0.25, item_h * 0.25)
@@ -675,12 +683,14 @@ fn trash_other(ui: &mut conrod::UiCell,
             Some(&SupportIdType::ImageId(cloudy)),
             Some(&SupportIdType::ImageId(coin_info)),
             Some(&SupportIdType::ImageId(coin_info270)),
-            Some(&SupportIdType::ImageId(spinner_image))) =
+            Some(&SupportIdType::ImageId(spinner_image)),
+            Some(&SupportIdType::ImageId(game_icon))) =
         (result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)),
          result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
-         result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD))) {
+         result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
         while let Some(event) = events.next(ui, |i| {
             let mut y = false;
             if let &mut Some(_x) = buyselected {
@@ -707,6 +717,7 @@ fn trash_other(ui: &mut conrod::UiCell,
                                             _rect,
                                             _top_lefticon_rect,
                                             "timeless")
+                            .game_icon(game_icon)
                             .cloudy_image(cloudy)
                             .coin_info(coin_info)
                             .coin_info270(coin_info270)

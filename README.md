@@ -11,3 +11,5 @@ adb install -r target/android-artifacts/app/build/outputs/apk/app-release-unsign
 
 need to add this line to android in cargo.toml
 conrod_chat = {path ="../conrod_chat", features=["keypad"]}
+
+need to fix tradein

@@ -24,7 +24,7 @@ widget_ids! {
          footer_overlay_but4,
          //menu
          menu_title_list1,
-         menu_title_list2,
+         unofficial_logo,
          menubut_multiplayer,
          menu_progessbar,
         //lobby
@@ -303,4 +303,3 @@ impl Board for BoardStruct {
                                 _wait_for_input: &mut [WaitForInputType; 4]) {
     }
 }
-pub const RESULTMAPLEN: usize = 22;

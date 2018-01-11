@@ -4,7 +4,7 @@ use backend::SupportIdType;
 use backend::meta::app::{self, Font, ResourceEnum, Sprite, Texture, ChunkEnum, MusicEnum};
 use support;
 use image;
-use sdl2;
+use rodio;
 use std::collections::HashMap;
 #[derive(Clone)]
 pub struct Vala {
@@ -44,7 +44,8 @@ pub fn init_load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, 
                                          display: &glium::Display,
                                          ui: &mut conrod::Ui) {
     CGM_image_map!{
-    (ResourceEnum::Sprite(Sprite::RUST),"image","images/rust.png"),        
+    (ResourceEnum::Sprite(Sprite::RUST),"image","images/rust.png"),
+    (ResourceEnum::Sprite(Sprite::UNOFFICIAL),"image","images/unofficial.png"),        
     (ResourceEnum::Sprite(Sprite::CLOUDY),"image","images/cards/cloudy.png"),
     (ResourceEnum::Sprite(Sprite::COININFO),"image","images/allcoin_info.png"),
     (ResourceEnum::Sprite(Sprite::COININFO270),"image270","images/allcoin_info.png"),
@@ -56,10 +57,12 @@ pub fn init_load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, 
     (ResourceEnum::Font(Font::HORROR),"font","fonts/Mortified.ttf"),
     (ResourceEnum::Font(Font::ADVENTURE),"font","fonts/TradeWinds-Regular.ttf"),
     (ResourceEnum::Font(Font::ROMANCE),"font","fonts/Babylove.ttf"),
-    (ResourceEnum::Music(MusicEnum::BACKGROUND),"music","audio/doki1.ogg"),
+   // (ResourceEnum::Music(MusicEnum::BACKGROUND),"music","audio/doki1.ogg"),
     //(ResourceEnum::Chunk(ChunkEnum::PAGEFLIP),"chunk","audio/Page_urn_sound_effect.ogg")
     
   }
     let g = ImageIds::new();
     g.pump(result_map, display, ui, image_map);
 }
+pub const RESULTMAPLEN: usize = 21;
+//don't count music

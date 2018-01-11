@@ -228,11 +228,11 @@ impl<'a, S> Widget for ItemWidget<'a, S>
                         .wh([15.0, 15.0])
                         .mid_left_of(state.ids.coin_info)
                         .set(state.ids.top_lefticon, ui);
-                    let fontsize = get_font_size_hn(h * 0.15, 1.0);
+                    let fontsize = get_font_size_hn(h * 0.18, 1.0);
                     let timeless_font_id =
                         self.style.timeless_font_id(&ui.theme).or(ui.fonts.ids().next());
                     widget::Text::new(self.timelesstext)
-                        .mid_left_with_margin_on(state.ids.coin_info, 15.0)
+                        .mid_left_with_margin_on(state.ids.coin_info, 20.0)
                         .font_size(fontsize)
                         .color(color::WHITE)
                         .and_then(timeless_font_id, widget::Text::font_id)

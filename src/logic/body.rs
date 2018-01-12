@@ -44,6 +44,7 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref mut initial_draft,
                    ref mut overlay_blowup,
                    ref player_index,
+                   ref page_index,
                    ref notification,
                    ref mut personal,
                    ref mut buy_selected,
@@ -79,17 +80,27 @@ pub fn render(ui: &mut conrod::UiCell,
                             result_map);
                 }
                 &mut app::GuiState::Game(GameState::Spell) => {
-
-                    spell(ui,
-                          ids,
-                          &cardmeta,
-                          personal,
-                          spell_which_arrangelist,
-                          overlay_blowup,
-                          last_send,
-                          appdata,
-                          result_map,
-                          _action_tx.clone());
+                    if player_index != page_index {
+                        view_others(ui,
+                                    ids,
+                                    &cardmeta,
+                                    _player.clone(),
+                                    spell_which_arrangelist,
+                                    overlay_blowup,
+                                    appdata,
+                                    result_map);
+                    } else {
+                        spell(ui,
+                              ids,
+                              &cardmeta,
+                              personal,
+                              spell_which_arrangelist,
+                              overlay_blowup,
+                              last_send,
+                              appdata,
+                              result_map,
+                              _action_tx.clone());
+                    }
                 }
                 &mut app::GuiState::Game(GameState::TurnToSubmit) => {
                     spell(ui,
@@ -468,6 +479,7 @@ fn spell(ui: &mut conrod::UiCell,
                         .right_arrow(_r)
                         .bottom_arrow(_b)
                         .corner_arrow(_c)
+                        .arrow_size(appdata.convert_h(50.0))
                         .set(ids.bodydragdroplistview, ui);
 
             match (exitid, exitby) {                
@@ -508,6 +520,115 @@ fn spell(ui: &mut conrod::UiCell,
     }
 
 }
+fn view_others(ui: &mut conrod::UiCell,
+               ids: &Ids,
+               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
+               player: Player,
+               spell_which_arrangelist: &mut Option<widget::Id>,
+               overlay_blowup: &mut Option<usize>,
+               appdata: &AppData,
+               result_map: &HashMap<ResourceEnum, SupportIdType>) {
+    let mut arrangedvec = player.arranged
+        .clone()
+        .iter()
+        .map(|&(ref x, ref ink, ref op_string, ref _timeless)| {
+            let (_timeless, _string, _color, _font, _rect, _top_lefticon_rect) =
+                in_game::get_tile_image_withcost(x.clone(), cardmeta, appdata, result_map);
+            (x.clone(),
+             _timeless,
+             _string,
+             _color,
+             _font,
+             _rect,
+             _top_lefticon_rect,
+             ink.clone(),
+             op_string.clone())
+        })
+        .collect::<Vec<(usize,
+             bool,
+             &str,
+             conrod::Color,
+             text::font::Id,
+             conrod::Rect,
+             conrod::Rect,
+             bool,
+             Option<String>)>>();
+    if let (Some(&SupportIdType::ImageId(spinner_image)),
+            Some(&SupportIdType::ImageId(back_image)),
+            Some(&SupportIdType::ImageId(arrows_image)),
+            Some(&SupportIdType::ImageId(cloudy)),
+            Some(&SupportIdType::ImageId(coin_info)),
+            Some(&SupportIdType::ImageId(coin_info270)),
+            Some(&SupportIdType::ImageId(_game_icon))) =
+        (result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::ARROWS)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
+         result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
+        let spinner_rect = graphics_match::spinner_sprite();
+        let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
+        let body_list_w = ui.w_of(ids.body).unwrap() - 40.0;
+        let (exitid, exitby, scrollbar) = ArrangeList::new(&mut arrangedvec,
+                                                           spell_which_arrangelist,
+                                                           overlay_blowup,
+                                                           Box::new(move |(_v_index,
+                                                                           _timelessbool,
+                                                                           _string,
+                                                                           _color,
+                                                                           _font,
+                                                                           _rect,
+                                                                           _top_left_rect,
+                                                                           _inked,
+                                                                           _opstring)| {
+            buy_list_item::ItemWidget::new(_timelessbool,
+                                           _string,
+                                           _rect,
+                                           _top_left_rect,
+                                           "timeless")
+                    .game_icon(_game_icon)
+                    .cloudy_image(cloudy)
+                    .coin_info(coin_info)
+                    .coin_info270(coin_info270)
+                    .spinner_image(spinner_image, spinner_rect)
+                    .border_color(color::YELLOW)
+                    .border(15.0)
+                    .alphabet_font_id(_font)
+                    .color(_color)
+        }),
+                                                           Box::new(|(_v_index,
+                                                                      _timelessbool,
+                                                                      _string,
+                                                                      _color,
+                                                                      _font,
+                                                                      _rect,
+                                                                      _top_left_rect,
+                                                                      _inked,
+                                                                      _opstring)| {
+                                                                        _v_index.clone()
+                                                                    }),
+                                                           body_list_w / 7.0)
+                .h(appdata.convert_h(210.0))
+                .padded_w_of(ids.body, 20.0)
+                .mid_bottom_with_margin_on(ids.body, appdata.convert_h(50.0))
+                .corner_arrow(_c)
+                .arrow_size(appdata.convert_h(50.0))
+                .set(ids.bodydragdroplistview, ui);
+
+        match (exitid, exitby) {                
+            (Some(_x), ExitBy::Bottom) => {
+                _personal.hand.push(_x.0);
+            }
+            _ => {}
+        }
+        if let Some(s) = scrollbar {
+            s.set(ui);
+        }
+
+    }
+
+}
 fn buy(ui: &mut conrod::UiCell,
        ids: &Ids,
        cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
@@ -539,7 +660,7 @@ fn buy(ui: &mut conrod::UiCell,
         .mid_bottom_of(ids.body)
         .h(item_h * 1.2)
         .padded_w_of(ids.body, 20.0)
-        .scrollbar_next_to()
+        .scrollbar_thickness(10.0)
         .set(ids.listselect_view, ui);
     if let Some(s) = scrollbar {
         s.set(ui)
@@ -674,7 +795,7 @@ fn trash_other(ui: &mut conrod::UiCell,
         .mid_bottom_of(ids.body)
         .h(item_h * 1.2)
         .padded_w_of(ids.body, 20.0)
-        .scrollbar_next_to()
+        .scrollbar_thickness(10.0)
         .set(ids.listselect_view, ui);
     if let Some(s) = scrollbar {
         s.set(ui)

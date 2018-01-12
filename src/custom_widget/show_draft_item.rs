@@ -166,7 +166,7 @@ impl<'a> Widget for ItemWidget<'a> {
                 if let Some(_game_icon) = self.game_icon {
                     widget::Image::new(_game_icon)
                         .source_rectangle(self.top_left_rect)
-                        .wh([15.0, 15.0])
+                        .wh([h * 0.2, h * 0.2])
                         .mid_left_of(state.ids.coin_info)
                         .set(state.ids.top_lefticon, ui);
                 }
@@ -189,7 +189,7 @@ impl<'a> Widget for ItemWidget<'a> {
                 if let Some(_game_icon) = self.game_icon {
                     widget::Image::new(_game_icon)
                         .source_rectangle(self.top_left_rect)
-                        .wh([15.0, 15.0])
+                        .wh([w * 0.2, w * 0.2])
                         .mid_top_of(state.ids.coin_info)
                         .set(state.ids.top_lefticon, ui);
                 }

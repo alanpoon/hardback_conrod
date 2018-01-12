@@ -25,8 +25,10 @@ widget_ids! {
          //menu
          menu_title_list1,
          unofficial_logo,
+         menu_waiting_connection,
          menubut_multiplayer,
          menu_progessbar,
+         menu_version_num,
         //lobby
         middle_tabview,
         new_table_but,
@@ -125,6 +127,7 @@ impl PromptSendable for PromptSender {
     }
 }
 pub struct GameData {
+    pub version: &'static str,
     pub guistate: GuiState,
     pub footer: Footer,
     pub page_vec: Vec<(Page, Texture)>,
@@ -167,6 +170,7 @@ pub struct GameData {
 impl GameData {
     pub fn new() -> GameData {
         GameData {
+            version: "v0.1.0",
             guistate: GuiState::Menu,
             footer: Footer::ShowHand,
             page_vec: vec![(Page::new(), Texture::PAGE1F),
@@ -177,10 +181,10 @@ impl GameData {
             go_to_page_index: None,
             player_size: 4,
             lobby_history: vec![],
-            lobby_textedit: "".to_owned(),
+            lobby_textedit: "Enter your chat message here".to_owned(),
             game_history: vec![],
-            game_textedit: "".to_owned(),
-            name: "".to_owned(),
+            game_textedit: "Enter your chat message here".to_owned(),
+            name: "Default Player".to_owned(),
             name_text_edit: "".to_owned(),
             tables: vec![],
             tablenumber: None,

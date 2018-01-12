@@ -225,7 +225,7 @@ impl<'a, S> Widget for ItemWidget<'a, S>
                         .set(state.ids.coin_info, ui);
                     widget::Image::new(_game_icon)
                         .source_rectangle(self.top_left_rect)
-                        .wh([15.0, 15.0])
+                        .wh([h * 0.2, h * 0.2])
                         .mid_left_of(state.ids.coin_info)
                         .set(state.ids.top_lefticon, ui);
                     let fontsize = get_font_size_hn(h * 0.18, 1.0);
@@ -246,7 +246,7 @@ impl<'a, S> Widget for ItemWidget<'a, S>
                         .set(state.ids.coin_info, ui);
                     widget::Image::new(_game_icon)
                         .source_rectangle(self.top_left_rect)
-                        .wh([15.0, 15.0])
+                        .wh([w * 0.2, w * 0.2])
                         .mid_top_of(state.ids.coin_info)
                         .set(state.ids.top_lefticon, ui);
                 }

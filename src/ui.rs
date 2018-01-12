@@ -32,7 +32,6 @@ pub fn load_resources_iter(map: &mut HashMap<ResourceEnum, Vala>) {
     (ResourceEnum::Sprite(Sprite::KEYPAD),"image","images/keypad.png"),   
     (ResourceEnum::Sprite(Sprite::DOWNLOAD),"image","images/download.png"), //10
     (ResourceEnum::Sprite(Sprite::BACKCARD),"image","images/cards/backside.jpg"),
-    (ResourceEnum::Sprite(Sprite::GAMEICONS),"image","images/gameicon.png"),
     (ResourceEnum::Sprite(Sprite::ARROWS),"image","images/arrows_but.png")
     
   }
@@ -49,6 +48,7 @@ pub fn init_load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, 
     (ResourceEnum::Sprite(Sprite::CLOUDY),"image","images/cards/cloudy.png"),
     (ResourceEnum::Sprite(Sprite::COININFO),"image","images/allcoin_info.png"),
     (ResourceEnum::Sprite(Sprite::COININFO270),"image270","images/allcoin_info.png"),
+    (ResourceEnum::Sprite(Sprite::GAMEICONS),"image","images/gameicon.png"),
     (ResourceEnum::Font(Font::REGULAR),"font","fonts/NotoSans/NotoSans-Regular.ttf"),
     (ResourceEnum::Font(Font::BOLD),"font","fonts/NotoSans/NotoSans-Bold.ttf"),
     (ResourceEnum::Font(Font::BOLDITALIC),"font","fonts/NotoSans/NotoSans-BoldItalic.ttf"),

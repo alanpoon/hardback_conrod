@@ -22,7 +22,7 @@ pub fn keypad_sprite() -> SpriteInfo {
     SpriteInfo {
         first: (0.0, 400.0),
         num_in_row: 3,
-        num_in_col: 2,
+        num_in_col: 3,
         w_h: (200.0, 200.0),
         pad: (0.0, 0.0, 0.0, 0.0),
     }

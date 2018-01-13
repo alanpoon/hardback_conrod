@@ -12,6 +12,7 @@ use futures::sync::mpsc;
 use futures::{Future, Sink};
 use cardgame_widgets::custom_widget::promptview::PromptSendable;
 use backend::OwnedMessage;
+//
 widget_ids! {
     pub struct Ids {
          master,

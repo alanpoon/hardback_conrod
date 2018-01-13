@@ -1,0 +1,47 @@
+language: rust
+
+env:
+    - zipname="hardback-$TRAVIS_OS_NAME.tar.gz"
+
+cache: cargo
+
+rust:
+    - nightly
+    - beta
+    - stable
+
+matrix:
+    allow_failures:
+        - rust: nightly
+        - rust: beta # remove after https://github.com/rust-lang/cargo/issues/4699 is fixed
+
+os:
+    - linux
+    - osx
+
+sudo: false
+
+script:
+    - cargo build
+    - cargo test
+    - cargo build --release
+
+before_deploy:
+    - mkdir workspace/hardback_conrod
+    - cd workspace/hardback_conrod
+    - git clone --depth=1 https://github.com/alanpoon/cardgame_widgets ../cardgame_widgets
+    - git clone --depth=1 https://github.com/alanpoon/cardgame_macros ../cardgame_macros
+    - git clone --depth=1 https://github.com/alanpoon/hardback_meta ../hardback_meta
+    - git clone --depth=1 https://github.com/alanpoon/hardback_codec ../hardback_codec
+    - mv target/release/hardback_conrod .
+    - tar -zcvf $zipname assets hardback_conrod
+
+deploy:
+    provider: releases
+    skip_cleanup: true
+    overwrite: true
+    file: $zipname
+    api_key:
+        secure:  yiyWfPzNdpdn3FQkAw6x/4YWIWCOK7Zpw7IBhRfTn/2dHkLa3Uy+7dyO96LW8qtiuEsotyJCrWaXuLr1+wYdWXWL6oeGsw41sB22Umc4WZJP/SryjGb+5b349WNCipf0rMLdU0sqW7fOJfIg0cv9W1k9FiuHLfw3Li1JzU2qo5TWX3oxv8MPFQ9/lVEHAYkI8tvxaSheN/L3xlpWV1Qjrk9vxN1bIVygyCaARJhzTgTAZ+OH4B1h1Mkwc0emY6ITRbcN4khko599E17AvmhVrB7xE0wNtJtVS9z2coWqcC4MO1yLIFGyC8hxH6BubmGTQln1q7KRy48l8uNJczfW+vi6lwj8Sni0HungZZBzyfv6eNPzU0IZE6rh+FN2pmdfaqAxjo8BPfyZvJFuJqJcTNvUkdT9fXyILgHuzdEmQBOVZhzqn3jOJfv3kHpaEF7prywEEzRr0A4S1RvMCyYN9PH7XvcGKGq1dJNEwCHmgnUfuCkROBKBnsa9PvJTPy3tHY7Z0EhveoQYXMnfhlqN3LTBb3l6Gwg2GK1lajLuLB/Q6tGKuGgRI1r5sLwqPFioIjuL71LecnAgyMilm5c=
+    on:
+        tags: true

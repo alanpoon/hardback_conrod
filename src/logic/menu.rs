@@ -31,7 +31,7 @@ pub fn render(ui: &mut conrod::UiCell,
          result_map.get(&ResourceEnum::Sprite(Sprite::UNOFFICIAL)),
          result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
         let w = ui.w_of(ids.master).unwrap();
-        let word_arr = vec![41, 140, 17, 72,1, 108, 126,44];
+        let word_arr = vec![41, 140, 17, 72,1, 104, 126,44];
         let (mut items, _scrollbar) = widget::List::flow_right(word_arr.len())
             .item_size(w / 10.0)
             .w(w)

@@ -2,6 +2,7 @@ use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, ima
              Borderable, Rect, text, Color};
 use conrod::widget::primitive::image::Image;
 use cardgame_widgets::custom_widget::image_hover::{Hoverable, ImageHover};
+use cardgame_widgets::custom_widget::bordered_image::Bordered;
 use cardgame_widgets::custom_widget::arrange_list::{ArrangeList, ExitBy};
 use custom_widget::arrange_list_tile::ItemWidget;
 use custom_widget::buy_list_item;
@@ -48,7 +49,6 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref mut buy_selected,
                    ref mut last_send,
                    ref player_index,
-                   ref page_index,
                    ref mut spell_which_arrangelist,
                    .. } = *gamedata;
     if let &mut Some(ref mut boardcodec) = boardcodec {
@@ -62,7 +62,7 @@ pub fn render(ui: &mut conrod::UiCell,
                                &appdata);
                 }
                 app::GuiState::Game(GameState::Spell) => {
-                    if page_index != player_index {
+                    if *page_index != player_index.unwrap() {
                         view_others(ui,
                                     ids,
                                     _player.clone(),
@@ -70,6 +70,7 @@ pub fn render(ui: &mut conrod::UiCell,
                                     &cardmeta,
                                     spell_which_arrangelist,
                                     overlay_blowup,
+                                    buy_selected,
                                     overlay,
                                     overlay_chat,
                                     overlay_exit,
@@ -78,10 +79,9 @@ pub fn render(ui: &mut conrod::UiCell,
                     } else {
                         spell(ui,
                               ids,
-                              _player,
+                              personal,
                               &appdata,
                               &cardmeta,
-                              personal,
                               spell_which_arrangelist,
                               overlay_blowup,
                               overlay,
@@ -96,10 +96,9 @@ pub fn render(ui: &mut conrod::UiCell,
                 app::GuiState::Game(GameState::TurnToSubmit) => {
                     spell(ui,
                           ids,
-                          _player,
+                          personal,
                           &appdata,
                           &cardmeta,
-                          personal,
                           spell_which_arrangelist,
                           overlay_blowup,
                           overlay,
@@ -147,21 +146,20 @@ pub fn render(ui: &mut conrod::UiCell,
 
     //  draw_hand(ui, ids, gamedata, appdata, result_map);
 }
-fn spell(ui: &mut conrod::UiCell,
-         ids: &Ids,
-         player: &mut Player,
-         appdata: &AppData,
-         cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
-         spell_which_arrangelist: &mut Option<widget::Id>,
-         overlay_blowup: &mut Option<usize>,
-         overlay: &mut bool,
-         overlay_chat: &mut bool,
-         overlay_exit: &mut bool,
-         overlay_human: &mut bool,
-         last_send: &mut Option<Instant>,
-         result_map: &HashMap<ResourceEnum, SupportIdType>,
-         _action_tx: mpsc::Sender<OwnedMessage>) {
-    let mut handvec = player.hand
+fn view_others(ui: &mut conrod::UiCell,
+               ids: &Ids,
+               player: Player,
+               appdata: &AppData,
+               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
+               spell_which_arrangelist: &mut Option<widget::Id>,
+               overlay_blowup: &mut Option<usize>,
+               buyselected: &mut Option<usize>,
+               overlay: &mut bool,
+               overlay_chat: &mut bool,
+               overlay_exit: &mut bool,
+               overlay_human: &mut bool,
+               result_map: &HashMap<ResourceEnum, SupportIdType>) {
+    let handvec = player.hand
         .clone()
         .iter()
         .map(|ref x| {
@@ -170,6 +168,19 @@ fn spell(ui: &mut conrod::UiCell,
                  (*x.clone(), _timeless, _string, _color, _app_font, _rect, _top_left_rect)
              })
         .collect::<Vec<(usize, bool, &str, Color, text::font::Id, Rect, Rect)>>();
+    let footer_list_w = ui.w_of(ids.footer).unwrap() - 300.0;
+    let item_h = footer_list_w / 7.0;
+    let (mut events, scrollbar) = widget::ListSelect::single(handvec.len())
+        .flow_right()
+        .item_size(item_h)
+        .padded_h_of(ids.footer, 10.0)
+        .padded_w_of(ids.footer, 150.0)
+        .top_left_with_margin_on(ids.footer, 10.0)
+        .scrollbar_thickness(50.0)
+        .set(ids.footer_listselect_view, ui);
+    if let Some(s) = scrollbar {
+        s.set(ui);
+    }
     if let (Some(&SupportIdType::ImageId(spinner_image)),
             Some(&SupportIdType::ImageId(back_image)),
             Some(&SupportIdType::ImageId(arrows_image)),
@@ -186,59 +197,79 @@ fn spell(ui: &mut conrod::UiCell,
          result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
         let spinner_rect = graphics_match::spinner_sprite();
         let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
-        let footer_list_w = ui.w_of(ids.footer).unwrap() - 300.0;
-        let (exitid, exitby, scrollbar) = ArrangeList::new(&mut handvec,
-                                                           spell_which_arrangelist,
-                                                           overlay_blowup,
-                                                           Box::new(move |(_v_index,
-                                                                           _timelessbool,
-                                                                           _string,
-                                                                           _color,
-                                                                           _font,
-                                                                           _rect,
-                                                                           _top_left_rect)| {
-            buy_list_item::ItemWidget::new(_timelessbool,
-                                           &_string,
-                                           _rect,
-                                           _top_left_rect,
-                                           "timeless")
-                    .cloudy_image(cloudy)
-                    .game_icon(icon_image)
-                    .coin_info(coin_info)
-                    .coin_info270(coin_info270)
-                    .spinner_image(spinner_image, spinner_rect)
-                    .border_color(color::YELLOW)
-                    .border(15.0)
-                    .alphabet_font_id(_font)
-                    .color(_color)
-        }),
-                                                           Box::new(|(_v_index,
-                                                                      _timelessbool,
-                                                                      _string,
-                                                                      _color,
-                                                                      _font,
-                                                                      _rect,
-                                                                      _top_left_rect)| {
-                                                                        _v_index.clone()
-                                                                    }),
-                                                           footer_list_w / 7.0)
-                .padded_h_of(ids.footer, 10.0)
-                .padded_w_of(ids.footer, 150.0)
-                .top_left_with_margin_on(ids.footer, 10.0)
-                .left_arrow(_l)
-                .right_arrow(_r)
-                .top_arrow(_t)
-                .corner_arrow(_c)
-                .arrow_size(appdata.convert_h(50.0))
-                .set(ids.footerdragdroplistview, ui);
-        match (exitid, exitby) {                
-            (Some(_x), ExitBy::Top) => {
-                _personal.arranged.push((_x.0, false, None, false));
+        let mut buy_selected_id: Option<widget::Id> = None;
+        while let Some(event) = events.next(ui, |i| {
+            let mut y = false;
+            if let &mut Some(_x) = buyselected {
+                if _x == i {
+                    y = true;
+                }
             }
-            _ => {}
+            y
+        }) {
+            use conrod::widget::list_select::Event;
+            match event {
+                // For the `Item` events we instantiate the `List`'s items.
+                Event::Item(item) => {
+                    let &(card_index, _, _, _, _, _, _) = handvec.get(item.i).unwrap();
+                    let (_timeless, _string, _color, _app_font, _rect, _top_lefticon_rect) =
+                        in_game::get_tile_image_withcost(card_index.clone(),
+                                                         cardmeta,
+                                                         appdata,
+                                                         result_map);
+
+                    let mut j = buy_list_item::ItemWidget::new(_timeless,
+                                                               _string,
+                                                               _rect,
+                                                               _top_lefticon_rect,
+                                                               "timeless")
+                            .game_icon(icon_image)
+                            .cloudy_image(cloudy)
+                            .coin_info(coin_info)
+                            .coin_info270(coin_info270)
+                            .border_color(color::YELLOW)
+                            .border(15.0)
+                            .alphabet_font_id(_app_font)
+                            .color(_color);
+                    if let &mut Some(_s) = buyselected {
+                        if _s == item.i {
+                            buy_selected_id = Some(item.widget_id);
+                            j = j.bordered();
+                        }
+                    }
+                    item.set(j, ui);
+                }
+                Event::Selection(selected_id) => {
+                    if let &mut Some(_s) = buyselected {
+                        if _s == selected_id {
+                            buy_selected_id = None;
+                            *buyselected = None;
+                        } else {
+                            *buyselected = Some(selected_id);
+                        }
+                    } else {
+                        *buyselected = Some(selected_id);
+                    }
+                }
+                _ => {}
+            }
         }
-        if let Some(s) = scrollbar {
-            s.set(ui);
+        if let (Some(_buy_selected_id), &mut Some(_buy_selected)) = (buy_selected_id, buyselected) {
+            let j = ImageHover::new(_c)
+                .w_h(item_h * 0.25, item_h * 0.25)
+                .mid_right_with_margin_on(_buy_selected_id, -2.0)
+                .set(ids.corner_arrow, ui);
+            if let &mut Some(mut _overlay_blowup) = overlay_blowup {
+                let (j, _, _, _, _, _, _) = handvec.get(_buy_selected).unwrap().clone();
+                if j != _overlay_blowup {
+                    _overlay_blowup = j;
+                }
+            }
+            for _c in j {
+                let (j, _, _, _, _, _, _) = handvec.get(_buy_selected).unwrap().clone();
+                *overlay_blowup = Some(j);
+            }
+
         }
 
         let exit_door = if *overlay { 9.0 } else { 8.0 };
@@ -276,18 +307,20 @@ fn spell(ui: &mut conrod::UiCell,
     }
 
 }
-fn view_others(ui: &mut conrod::UiCell,
-               ids: &Ids,
-               _player: Player,
-               appdata: &AppData,
-               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
-               spell_which_arrangelist: &mut Option<widget::Id>,
-               overlay_blowup: &mut Option<usize>,
-               overlay: &mut bool,
-               overlay_chat: &mut bool,
-               overlay_exit: &mut bool,
-               overlay_human: &mut bool,
-               result_map: &HashMap<ResourceEnum, SupportIdType>) {
+fn spell(ui: &mut conrod::UiCell,
+         ids: &Ids,
+         personal: &mut Option<Personal>,
+         appdata: &AppData,
+         cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
+         spell_which_arrangelist: &mut Option<widget::Id>,
+         overlay_blowup: &mut Option<usize>,
+         overlay: &mut bool,
+         overlay_chat: &mut bool,
+         overlay_exit: &mut bool,
+         overlay_human: &mut bool,
+         last_send: &mut Option<Instant>,
+         result_map: &HashMap<ResourceEnum, SupportIdType>,
+         _action_tx: mpsc::Sender<OwnedMessage>) {
     if let &mut Some(ref mut _personal) = personal {
         let temp = (*_personal).clone();
         let mut handvec =

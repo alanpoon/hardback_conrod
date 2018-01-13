@@ -20,9 +20,9 @@ use game_conrod::app::BoardStruct;
 use conrod_chat::backend::websocket::client;
 use conrod::event;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
 use futures::sync::mpsc;
 use std::time::Instant;
+use std::sync::{Arc, Mutex};
 use rodio::{Source, Sink};
 
 #[cfg(target_os="android")]
@@ -75,6 +75,9 @@ impl GameApp {
             result_map.remove(&ResourceEnum::Music(MusicEnum::BACKGROUND)) {}
         let (proxy_tx, proxy_rx) = std::sync::mpsc::channel();
         let (proxy_action_tx, proxy_action_rx) = mpsc::channel(2);
+        let s_tx = Arc::new(Mutex::new(proxy_action_tx));
+        let s_rx = Arc::new(Mutex::new(proxy_action_rx));
+        let (ss_tx, _ss_rx) = (s_tx.clone(), s_rx.clone());
         let mut gamedata = app::GameData::new();
         gamedata.guistate = app::GuiState::Menu;
         let cardmeta: [codec_lib::cards::ListCard<BoardStruct>; 180] =
@@ -93,6 +96,10 @@ impl GameApp {
                 if (duration_since_last_update < sixteen_ms) & (c > 0) {
                     std::thread::sleep(sixteen_ms - duration_since_last_update);
                 }
+                let (tx, rx) = mpsc::channel(3);
+                let mut ss_tx = ss_tx.lock().unwrap();
+                *ss_tx = tx;
+                drop(ss_tx);
                 match client::run_owned_message(CONNECTION, proxy_tx.clone(), rx) {
                     Ok(_) => {
                         connected = true;
@@ -142,6 +149,8 @@ impl GameApp {
         let sixteen_ms = std::time::Duration::from_millis(800);
 
         'render: loop {
+            let ss_tx = s_tx.lock().unwrap();
+            let proxy_action_tx = ss_tx.clone();
             let mut to_break = false;
             let mut to_continue = false;
             events_loop.poll_events(|event| {

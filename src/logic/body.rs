@@ -44,7 +44,6 @@ pub fn render(ui: &mut conrod::UiCell,
                    ref mut initial_draft,
                    ref mut overlay_blowup,
                    ref player_index,
-                   ref page_index,
                    ref notification,
                    ref mut personal,
                    ref mut buy_selected,
@@ -80,13 +79,14 @@ pub fn render(ui: &mut conrod::UiCell,
                             result_map);
                 }
                 &mut app::GuiState::Game(GameState::Spell) => {
-                    if player_index != page_index {
+                    if player_index.unwrap() != *page_index {
                         view_others(ui,
                                     ids,
                                     &cardmeta,
                                     _player.clone(),
                                     spell_which_arrangelist,
                                     overlay_blowup,
+                                    buy_selected,
                                     appdata,
                                     result_map);
                     } else {
@@ -526,9 +526,10 @@ fn view_others(ui: &mut conrod::UiCell,
                player: Player,
                spell_which_arrangelist: &mut Option<widget::Id>,
                overlay_blowup: &mut Option<usize>,
+               buyselected: &mut Option<usize>,
                appdata: &AppData,
                result_map: &HashMap<ResourceEnum, SupportIdType>) {
-    let mut arrangedvec = player.arranged
+    let arrangedvec = player.arranged
         .clone()
         .iter()
         .map(|&(ref x, ref ink, ref op_string, ref _timeless)| {
@@ -553,6 +554,19 @@ fn view_others(ui: &mut conrod::UiCell,
              conrod::Rect,
              bool,
              Option<String>)>>();
+    let body_w = ui.w_of(ids.body).unwrap();
+    let item_h = body_w / 7.0;
+    let (mut events, scrollbar) = widget::ListSelect::single(arrangedvec.len())
+        .flow_right()
+        .item_size(item_h)
+        .mid_bottom_of(ids.body)
+        .h(item_h * 1.2)
+        .padded_w_of(ids.body, 20.0)
+        .scrollbar_thickness(10.0)
+        .set(ids.listselect_view, ui);
+    if let Some(s) = scrollbar {
+        s.set(ui);
+    }
     if let (Some(&SupportIdType::ImageId(spinner_image)),
             Some(&SupportIdType::ImageId(back_image)),
             Some(&SupportIdType::ImageId(arrows_image)),
@@ -570,60 +584,82 @@ fn view_others(ui: &mut conrod::UiCell,
         let spinner_rect = graphics_match::spinner_sprite();
         let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
         let body_list_w = ui.w_of(ids.body).unwrap() - 40.0;
-        let (exitid, exitby, scrollbar) = ArrangeList::new(&mut arrangedvec,
-                                                           spell_which_arrangelist,
-                                                           overlay_blowup,
-                                                           Box::new(move |(_v_index,
-                                                                           _timelessbool,
-                                                                           _string,
-                                                                           _color,
-                                                                           _font,
-                                                                           _rect,
-                                                                           _top_left_rect,
-                                                                           _inked,
-                                                                           _opstring)| {
-            buy_list_item::ItemWidget::new(_timelessbool,
-                                           _string,
-                                           _rect,
-                                           _top_left_rect,
-                                           "timeless")
-                    .game_icon(_game_icon)
-                    .cloudy_image(cloudy)
-                    .coin_info(coin_info)
-                    .coin_info270(coin_info270)
-                    .spinner_image(spinner_image, spinner_rect)
-                    .border_color(color::YELLOW)
-                    .border(15.0)
-                    .alphabet_font_id(_font)
-                    .color(_color)
-        }),
-                                                           Box::new(|(_v_index,
-                                                                      _timelessbool,
-                                                                      _string,
-                                                                      _color,
-                                                                      _font,
-                                                                      _rect,
-                                                                      _top_left_rect,
-                                                                      _inked,
-                                                                      _opstring)| {
-                                                                        _v_index.clone()
-                                                                    }),
-                                                           body_list_w / 7.0)
-                .h(appdata.convert_h(210.0))
-                .padded_w_of(ids.body, 20.0)
-                .mid_bottom_with_margin_on(ids.body, appdata.convert_h(50.0))
-                .corner_arrow(_c)
-                .arrow_size(appdata.convert_h(50.0))
-                .set(ids.bodydragdroplistview, ui);
 
-        match (exitid, exitby) {                
-            (Some(_x), ExitBy::Bottom) => {
-                _personal.hand.push(_x.0);
+        let mut buy_selected_id: Option<widget::Id> = None;
+        let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
+        while let Some(event) = events.next(ui, |i| {
+            let mut y = false;
+            if let &mut Some(_x) = buyselected {
+                if _x == i {
+                    y = true;
+                }
             }
-            _ => {}
+            y
+        }) {
+            use conrod::widget::list_select::Event;
+            match event {
+                // For the `Item` events we instantiate the `List`'s items.
+                Event::Item(item) => {
+                    let &(card_index, _, _, _, _, _, _, _, _) = arrangedvec.get(item.i).unwrap();
+                    let (_timeless, _string, _color, _app_font, _rect, _top_lefticon_rect) =
+                        in_game::get_tile_image_withcost(card_index.clone(),
+                                                         cardmeta,
+                                                         appdata,
+                                                         result_map);
+
+                    let mut j = buy_list_item::ItemWidget::new(_timeless,
+                                                               _string,
+                                                               _rect,
+                                                               _top_lefticon_rect,
+                                                               "timeless")
+                            .game_icon(_game_icon)
+                            .cloudy_image(cloudy)
+                            .coin_info(coin_info)
+                            .coin_info270(coin_info270)
+                            .border_color(color::YELLOW)
+                            .border(15.0)
+                            .alphabet_font_id(_app_font)
+                            .color(_color);
+                    if let &mut Some(_s) = buyselected {
+                        if _s == item.i {
+                            buy_selected_id = Some(item.widget_id);
+                            j = j.bordered();
+                        }
+                    }
+                    item.set(j, ui);
+                }
+                Event::Selection(selected_id) => {
+                    if let &mut Some(_s) = buyselected {
+                        if _s == selected_id {
+                            buy_selected_id = None;
+                            *buyselected = None;
+                        } else {
+                            *buyselected = Some(selected_id);
+                        }
+                    } else {
+                        *buyselected = Some(selected_id);
+                    }
+                }
+                _ => {}
+            }
         }
-        if let Some(s) = scrollbar {
-            s.set(ui);
+
+        if let (Some(_buy_selected_id), &mut Some(_buy_selected)) = (buy_selected_id, buyselected) {
+            let j = ImageHover::new(_c)
+                .w_h(item_h * 0.25, item_h * 0.25)
+                .mid_right_with_margin_on(_buy_selected_id, -2.0)
+                .set(ids.corner_arrow, ui);
+            if let &mut Some(mut _overlay_blowup) = overlay_blowup {
+                let (j, _, _, _, _, _, _, _, _) = arrangedvec.get(_buy_selected).unwrap().clone();
+                if j != _overlay_blowup {
+                    _overlay_blowup = j;
+                }
+            }
+            for _c in j {
+                let (j, _, _, _, _, _, _, _, _) = arrangedvec.get(_buy_selected).unwrap().clone();
+                *overlay_blowup = Some(j);
+            }
+
         }
 
     }

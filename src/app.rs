@@ -50,6 +50,7 @@ widget_ids! {
          //spell
          bodydragdroplistview,
          footerdragdroplistview,
+         footer_listselect_view,
          spell_tab_view,
          //turn to submit
          submit_but,

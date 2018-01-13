@@ -171,6 +171,6 @@ fn render_closure()
                                              result_map,
                                              action_tx,
                                              ui);
-                                             
+
     })]
 }

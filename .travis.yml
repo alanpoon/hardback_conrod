@@ -6,14 +6,7 @@ env:
 cache: cargo
 
 rust:
-    - nightly
-    - beta
     - stable
-
-matrix:
-    allow_failures:
-        - rust: nightly
-        - rust: beta # remove after https://github.com/rust-lang/cargo/issues/4699 is fixed
 
 os:
     - linux

@@ -264,5 +264,6 @@ pub fn render(ui: &mut conrod::UiCell,
     }
 }
 fn process(j:&mut String){
- *j="kaosdo".to_owned();   
+ //*j="kaosdo".to_owned();  
+ 
 }

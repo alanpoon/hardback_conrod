@@ -13,14 +13,8 @@ jobs:
     docker:
       - image: tomaka/cargo-apk
     steps:
-      - run: rustup show
-      - run: mkdir workspace/hardback_conrod
-      - run: cd workspace/hardback_conrod
       - checkout
-      - run: git clone --depth=1 https://github.com/alanpoon/cardgame_widgets ../cardgame_widgets
-      - run: git clone --depth=1 https://github.com/alanpoon/cardgame_macros ../cardgame_macros
-      - run: git clone --depth=1 https://github.com/alanpoon/hardback_meta ../hardback_meta
-      - run: git clone --depth=1 https://github.com/alanpoon/hardback_codec ../hardback_codec
+      - run: rustup show
       - run: cargo apk build
       - run: ./.circleci/upload_apk_to_github_releases.sh
 

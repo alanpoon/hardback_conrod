@@ -63,7 +63,7 @@ pub fn render(ui: &mut conrod::UiCell,
            .middle_of(ids.overlaybody_chat)
            .set(ids.middle_tabview, ui) {
         let vec_closure = render_closure();
-        let mut it_j = vec_closure.iter();
+       /* let mut it_j = vec_closure.iter();
         while let (Some(a), Some(item)) = (it_j.next(), items.next(ui)) {
             let action_tx_clone = action_tx.clone();
             (*a)(item,
@@ -74,7 +74,20 @@ pub fn render(ui: &mut conrod::UiCell,
                  action_tx_clone,
                  ui);
         }
-
+        */
+        let mut c=0;
+        while let  Some(item) = items.next(ui) {
+            let action_tx_clone = action_tx.clone();
+            let u= vec_closure.get(c).unwrap();
+            (*u)(item,
+                 ids,
+                 gamedata,
+                 appdata,
+                 result_map,
+                 action_tx_clone,
+                 ui);
+                 c+=1;
+        }
     }
 
 
@@ -99,7 +112,10 @@ pub fn render(ui: &mut conrod::UiCell,
         }),
              Box::new(|w_id, ids, mut gamedata, _appdata, result_map, action_tx, ui| {
             //Chat
-            logic::top_left::draw_lobby_chat(w_id, ids, &mut gamedata, result_map, action_tx, ui);
+           process(&mut gamedata.lobby_textedit);
+            let h = gamedata.lobby_textedit.clone();
+            println!("h {:?}",h);
+         //   logic::top_left::draw_lobby_chat(w_id, ids, &mut gamedata, result_map, action_tx, ui);
         })]
     }
 
@@ -246,4 +262,7 @@ pub fn render(ui: &mut conrod::UiCell,
 
         }
     }
+}
+fn process(j:&mut String){
+ *j="kaosdo".to_owned();   
 }

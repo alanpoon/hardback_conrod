@@ -10,7 +10,7 @@ futures ={ version = "0.1.14", features=["use_std"] }
 cardgame_widgets = {git ="https://github.com/alanpoon/cardgame_widgets.git"}
 cardgame_macros = {git="https://github.com/alanpoon/cardgame_macros.git"}
 hardback_meta = {git = "https://github.com/alanpoon/hardback_meta.git"}
-hardback_codec = {path = "https://github.com/alanpoon/hardback_codec.git"}
+hardback_codec = {git = "https://github.com/alanpoon/hardback_codec.git"}
 websocket = { version ="0.20.2",optional = true}
 tokio-core ="0.1.9"
 serde_json = "1.0"

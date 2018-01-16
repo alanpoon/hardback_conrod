@@ -15,17 +15,9 @@ os:
 sudo: false
 
 script:
-    - cargo build
-    - cargo test
     - cargo build --release
 
 before_deploy:
-    - mkdir workspace/hardback_conrod
-    - cd workspace/hardback_conrod
-    - git clone --depth=1 https://github.com/alanpoon/cardgame_widgets ../cardgame_widgets
-    - git clone --depth=1 https://github.com/alanpoon/cardgame_macros ../cardgame_macros
-    - git clone --depth=1 https://github.com/alanpoon/hardback_meta ../hardback_meta
-    - git clone --depth=1 https://github.com/alanpoon/hardback_codec ../hardback_codec
     - mv target/release/hardback_conrod .
     - tar -zcvf $zipname assets hardback_conrod
 

@@ -1,6 +1,6 @@
 use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,
              Borderable, Rect, text, Color};
-             //
+//
 use conrod::widget::primitive::image::Image;
 use cardgame_widgets::custom_widget::image_hover::{Hoverable, ImageHover};
 use cardgame_widgets::custom_widget::bordered_image::Bordered;
@@ -194,7 +194,7 @@ fn view_others(ui: &mut conrod::UiCell,
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
          result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
-        
+
         let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
         let mut buy_selected_id: Option<widget::Id> = None;
         while let Some(event) = events.next(ui, |i| {

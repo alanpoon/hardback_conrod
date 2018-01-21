@@ -63,7 +63,7 @@ pub fn render(ui: &mut conrod::UiCell,
            .middle_of(ids.overlaybody_chat)
            .set(ids.middle_tabview, ui) {
         let vec_closure = render_closure();
-       /* let mut it_j = vec_closure.iter();
+        /* let mut it_j = vec_closure.iter();
         while let (Some(a), Some(item)) = (it_j.next(), items.next(ui)) {
             let action_tx_clone = action_tx.clone();
             (*a)(item,
@@ -75,10 +75,10 @@ pub fn render(ui: &mut conrod::UiCell,
                  ui);
         }
         */
-        let mut c=0;
-        while let  Some(item) = items.next(ui) {
+        let mut c = 0;
+        while let Some(item) = items.next(ui) {
             let action_tx_clone = action_tx.clone();
-            let u= vec_closure.get(c).unwrap();
+            let u = vec_closure.get(c).unwrap();
             (*u)(item,
                  ids,
                  gamedata,
@@ -86,7 +86,7 @@ pub fn render(ui: &mut conrod::UiCell,
                  result_map,
                  action_tx_clone,
                  ui);
-                 c+=1;
+            c += 1;
         }
     }
 

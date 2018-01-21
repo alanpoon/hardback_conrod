@@ -182,21 +182,19 @@ fn view_others(ui: &mut conrod::UiCell,
     if let Some(s) = scrollbar {
         s.set(ui);
     }
-    if let (Some(&SupportIdType::ImageId(spinner_image)),
-            Some(&SupportIdType::ImageId(back_image)),
+    if let (Some(&SupportIdType::ImageId(_back_image)),
             Some(&SupportIdType::ImageId(arrows_image)),
             Some(&SupportIdType::ImageId(cloudy)),
             Some(&SupportIdType::ImageId(coin_info)),
             Some(&SupportIdType::ImageId(coin_info270)),
             Some(&SupportIdType::ImageId(icon_image))) =
-        (result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)),
-         result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)),
+        (result_map.get(&ResourceEnum::Sprite(Sprite::BACKCARD)),
          result_map.get(&ResourceEnum::Sprite(Sprite::ARROWS)),
          result_map.get(&ResourceEnum::Sprite(Sprite::CLOUDY)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO)),
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
          result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
-        let spinner_rect = graphics_match::spinner_sprite();
+        
         let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
         let mut buy_selected_id: Option<widget::Id> = None;
         while let Some(event) = events.next(ui, |i| {

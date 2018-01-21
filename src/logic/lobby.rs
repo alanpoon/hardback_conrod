@@ -112,10 +112,7 @@ pub fn render(ui: &mut conrod::UiCell,
         }),
              Box::new(|w_id, ids, mut gamedata, _appdata, result_map, action_tx, ui| {
             //Chat
-           process(&mut gamedata.lobby_textedit);
-            let h = gamedata.lobby_textedit.clone();
-            println!("h {:?}",h);
-         //   logic::top_left::draw_lobby_chat(w_id, ids, &mut gamedata, result_map, action_tx, ui);
+            logic::top_left::draw_lobby_chat(w_id, ids, &mut gamedata, result_map, action_tx, ui);
         })]
     }
 
@@ -262,8 +259,4 @@ pub fn render(ui: &mut conrod::UiCell,
 
         }
     }
-}
-fn process(j:&mut String){
- //*j="kaosdo".to_owned();  
- 
 }

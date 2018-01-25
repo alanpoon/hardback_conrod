@@ -49,9 +49,9 @@ fullscreen = true
 "android:uiOptions" = "none"
 "android:configChanges" = "keyboardHidden|orientation|screenSize‌​"
 
-[target.'cfg(target_os="linux")'.dependencies]
+[target.'cfg(not(target_os="android"))'.dependencies]
 find_folder = "0.3.0"
-conrod_chat = {git ="https://github.com/alanpoon/conrod_chat.git", features=["web_socket","backend_glium_winit"]}
+conrod_chat = {git ="https://github.com/alanpoon/conrod_chat.git"}
 
 [target.'cfg(target_os="android")'.dependencies]
 android_glue = "0.2.3"

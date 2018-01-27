@@ -82,7 +82,7 @@ fn render_closure()
                       draw_game_chat(w_id, ids, &mut gamedata, result_map, action_tx, ui);
                   })]
 }
-#[cfg(not(target_os="linux"))]
+#[cfg(any(feature = "android"))]
 fn draw_game_chat(w_id: tabview::Item,
                   _ids: &Ids,
                   gamedata: &mut GameData,
@@ -106,7 +106,7 @@ fn draw_game_chat(w_id: tabview::Item,
         gamedata.keypad_on = w_id.set(k, &mut ui);
     }
 }
-#[cfg(target_os="linux")]
+#[cfg(any(feature = "default"))]
 fn draw_game_chat(w_id: tabview::Item,
                   _ids: &Ids,
                   gamedata: &mut GameData,

@@ -36,11 +36,11 @@ pub enum ConrodMessage {
     Thread(Instant),
 }
 pub struct GameApp {}
-#[cfg(target_os="android")]
+#[cfg(feature="android")]
 fn window() -> glutin::WindowBuilder {
     glutin::WindowBuilder::new()
 }
-#[cfg(target_os="linux")]
+#[cfg(feature="default")]
 fn window() -> glutin::WindowBuilder {
     glutin::WindowBuilder::new().with_dimensions(1040, 542)
 }

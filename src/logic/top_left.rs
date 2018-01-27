@@ -41,7 +41,7 @@ pub fn draw_lobby_chat(w_id: tabview::Item,
         gamedata.keypad_on = w_id.set(k, &mut ui);
     }
 }
-#[cfg(target_os="linux")]
+#[cfg(feature="default")]
 pub fn draw_lobby_chat(w_id: tabview::Item,
                        _ids: &Ids,
                        gamedata: &mut GameData,

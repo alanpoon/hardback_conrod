@@ -1,8 +1,8 @@
-#[cfg(target_os="android")]
+#[cfg(feature="android")]
 pub mod assets_android;
-#[cfg(target_os="android")]
+#[cfg(feature="android")]
 pub use support::assets_android as assets;
-#[cfg(target_os="linux")]
+#[cfg(feature="default")]
 pub mod assets;
 use backend::meta::app::AppData;
 use conrod;
@@ -33,7 +33,7 @@ use conrod::{color, widget, Colorable, Sizeable, Positionable, Widget};
 use std::collections::HashMap;
 use backend::SupportIdType;
 use backend::meta::app::ResourceEnum;
-#[cfg(not(target_os="linux"))]
+#[cfg(any(feature="android"))]
 pub fn textedit(k: &mut String,
                 id: widget::Id,
                 _appdata: &AppData,
@@ -65,7 +65,7 @@ pub fn textedit(k: &mut String,
     }
 
 }
-#[cfg(target_os="linux")]
+#[cfg(feature="default")]
 pub fn textedit(k: &mut String,
                 id: widget::Id,
                 _appdata: &AppData,

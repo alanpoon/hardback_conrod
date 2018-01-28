@@ -9,7 +9,7 @@ jobs:
       - run: rustup show
       - run: git clone --depth=1 https://github.com/alanpoon/cargo-edit cargo-edit
       - run: cargo install --path cargo-edit
-      - run: cargo add https://github.com/alanpoon/conrod_chat --target cfg(android) --features "keypad"
+      - run: cargo add https://github.com/alanpoon/conrod_chat --features "keypad"
       - run: cargo apk run --features android
 
   deploy:

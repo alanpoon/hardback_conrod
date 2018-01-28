@@ -7,9 +7,17 @@ jobs:
     steps:
       - checkout
       - run: rustup show
+      - run: rustup target add armv7-linux-androideabi
+      - run: wget http://www.openssl.org/source/openssl-1.0.1g.tar.gz
+      - run: tar -xvzf openssl-1.0.1g.tar.gz
+      - run: cp ssl_for_android.sh openssl-1.0.1g 
+      - run: cd openssl-1.0.1g
+      - run: sh ssl_for_android.sh
+      - run: cd ..
       - run: git clone --depth=1 https://github.com/alanpoon/cargo-edit cargo-edit
       - run: cargo install --path cargo-edit
       - run: cargo add https://github.com/alanpoon/conrod_chat --features "keypad"
+      - run: sh setenv_android.sh
       - run: cargo apk run --features android
 
   deploy:
@@ -18,6 +26,7 @@ jobs:
     steps:
       - checkout
       - run: rustup show
+      - run: rustup target add armv7-linux-androideabi
       - run: git clone --depth=1 https://github.com/alanpoon/cargo-edit cargo-edit
       - run: cargo install --path cargo-edit
       - run: cargo rm conrod_chat

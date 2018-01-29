@@ -57,6 +57,7 @@ pub fn render(ui: &mut conrod::UiCell,
             .down_from(ids.menu_title_list1, 20.0)
             .set(ids.unofficial_logo, ui);
 
+
         match &gamedata.connection_status {
             &ConnectionStatus::Ok => {
                 if widget::Button::new()

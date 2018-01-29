@@ -3,6 +3,8 @@ target_linux/
 target_android/
 **/*.rs.bk
 Cargo.lock
+libssl_for_android.sh
+setenv_android.sh
 private/
 app-sign.txt
 bk_apk

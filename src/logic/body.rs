@@ -339,6 +339,7 @@ fn shuffle(ui: &mut conrod::UiCell,
             ItemWidget::new(back_logo,
                             _timelessbool,
                             _string,
+                             None,
                             _rect,
                             _top_lefticon_rect,
                             "timeless")
@@ -352,7 +353,7 @@ fn shuffle(ui: &mut conrod::UiCell,
                     .alphabet_font_id(_font)
                     .color(_color)
         }),
-                         Image::new(back_logo).source_rectangle(graphics_match::backcard()))
+                         Image::new(back_logo))
                     .give_out(give_out_vec)
                     .bottom_left_of(ids.body)
                     .h(appdata.convert_h(140.0))
@@ -448,6 +449,7 @@ fn spell(ui: &mut conrod::UiCell,
                     ItemWidget::new(back_image,
                                     _timelessbool,
                                     _string,
+                                    _opstring,
                                     _rect,
                                     _top_left_rect,
                                     "timeless")
@@ -460,6 +462,7 @@ fn spell(ui: &mut conrod::UiCell,
                             .border(15.0)
                             .alphabet_font_id(_font)
                             .color(_color)
+                            .toggle(true)
                 }),
                                  Box::new(|(_v_index,
                                             _timelessbool,
@@ -508,6 +511,7 @@ fn spell(ui: &mut conrod::UiCell,
                 .collect::<Vec<(usize, bool, Option<String>, bool)>>();
 
             if (*_personal).clone() != temp {
+                println!("diff");
                 let now = Instant::now();
                 *last_send = Some(now);
                 let promptsender = PromptSender(_action_tx);
@@ -869,9 +873,11 @@ fn trash_other(ui: &mut conrod::UiCell,
                                                          cardmeta,
                                                          appdata,
                                                          result_map);
+                    let op_string =None;
                     let j = ItemWidget::new(back_logo,
                                             _timeless,
                                             _string,
+                                             op_string,
                                             _rect,
                                             _top_lefticon_rect,
                                             "timeless")

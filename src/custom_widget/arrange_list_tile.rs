@@ -24,11 +24,13 @@ pub struct ItemWidget<'a, S>
     pub cost_rect: Rect,
     pub top_left_rect: Rect,
     pub alphabet: &'a str,
+    pub op_str: &'a mut Option<String>,
     pub timelesstext: &'a str,
     pub cloudy_image: Option<image::Id>,
     pub coin_info: Option<image::Id>,
     pub coin_info270: Option<image::Id>,
     pub game_icon: Option<image::Id>,
+    pub toggle:bool
 }
 
 #[derive( Clone, Debug, Default, PartialEq, WidgetStyle)]
@@ -73,8 +75,6 @@ widget_ids! {
 pub struct State {
     ids: Ids,
     drag: Drag,
-    toggle_bool: bool,
-    op_str: String,
     blink_line_frame: u16,
 }
 
@@ -85,6 +85,7 @@ impl<'a, S> ItemWidget<'a, S>
     pub fn new(toggle_image: image::Id,
                timeless: bool,
                alphabet: &'a str,
+               op_str:&'a mut Option<String>,
                cost_rect: Rect,
                top_left_rect: Rect,
                timelesstext: &'a str)
@@ -96,6 +97,7 @@ impl<'a, S> ItemWidget<'a, S>
             bordered: false,
             style: Style::default(),
             alphabet: alphabet,
+            op_str:op_str,
             timeless: timeless,
             timelesstext: timelesstext,
             cost_rect: cost_rect,
@@ -104,6 +106,7 @@ impl<'a, S> ItemWidget<'a, S>
             game_icon: None,
             coin_info: None,
             coin_info270: None,
+            toggle:false
         }
     }
 
@@ -137,6 +140,10 @@ impl<'a, S> ItemWidget<'a, S>
         self.style.timeless_font_id = Some(Some(font_id));
         self
     }
+    pub fn toggle(mut self,toggle_bool: bool)->Self{
+        self.toggle = toggle_bool;
+        self
+    }
 }
 
 /// A custom Conrod widget must implement the Widget trait. See the **Widget** trait
@@ -157,8 +164,6 @@ impl<'a, S> Widget for ItemWidget<'a, S>
         State {
             ids: Ids::new(id_gen),
             drag: Drag::None,
-            toggle_bool: false,
-            op_str: "".to_owned(),
             blink_line_frame: 0,
         }
     }
@@ -182,7 +187,7 @@ impl<'a, S> Widget for ItemWidget<'a, S>
         } else {
             0.0
         };
-        let mut toggle_bool = state.toggle_bool;
+        
         rectangle_fill(id,
                        state.ids.background,
                        rect,
@@ -200,7 +205,7 @@ impl<'a, S> Widget for ItemWidget<'a, S>
                                                                                    ui);
         }
         // Instantiate the image.
-        if toggle_bool {
+        if let &mut Some(_) = self.op_str {
             widget::Image::new(self.toggle_image)
                 .w_h(w - border, h - border)
                 .middle_of(id)
@@ -270,7 +275,7 @@ impl<'a, S> Widget for ItemWidget<'a, S>
             .graphics_for(id)
             .set(state.ids.alphabet, ui);
 
-        if toggle_bool {
+        if let &mut Some(ref mut _str) = self.op_str {
             let rect = Rect::from_xy_dim([0.0, 0.0], [80.0, 40.0]);
             rectangle_fill(id,
                            state.ids.textedit_background,
@@ -278,17 +283,17 @@ impl<'a, S> Widget for ItemWidget<'a, S>
                            self.style.color(&ui.theme),
                            ui);
 
-            for edit in widget::TextEdit::new(&state.op_str)
+            for edit in widget::TextEdit::new(&_str.clone())
                     .color(self.style.color(&ui.theme).plain_contrast())
                     .middle_of(state.ids.textedit_background)
-                    .padded_wh_of(state.ids.textedit_background, 5.0)
+                    .w(5.0)
+                    .h(5.0)
                     .set(state.ids.textedit_at_toggle, ui) {
-                if state.op_str.chars().count() < 1 {
-                    state.update(|state| state.op_str = edit);
-                }
+                let last_char = edit.chars().rev().take(1).collect();
+                *_str = last_char;            
             }
 
-            if state.op_str.chars().count() != 1 {
+            if _str.chars().count() != 1 {
                 state.update(|state| state.blink_line_frame += 1);
                 if (state.blink_line_frame / 120) == 0 {
                     let line_l = ui.w_of(state.ids.textedit_background).unwrap();
@@ -311,12 +316,11 @@ impl<'a, S> Widget for ItemWidget<'a, S>
         }
 
         let mut drag = state.drag;
-
-        update_drag(id, &mut drag, ui);
-        let draw_spinner_index = update_toggle_bool_spinner_index(&mut drag, &mut toggle_bool);
+        if self.toggle{
+            update_drag(id, &mut drag, ui);
+        let draw_spinner_index = update_toggle_bool_spinner_index(&mut drag, self.op_str);
         state.update(|state| {
                          state.drag = drag;
-                         state.toggle_bool = toggle_bool
                      });
 
         if let Some(spinner_index) = draw_spinner_index {
@@ -325,7 +329,9 @@ impl<'a, S> Widget for ItemWidget<'a, S>
                             self.spinner_image_id,
                             spinner_index,
                             ui);
+        }    
         }
+        
 
     }
     fn drag_area(&self, dim: Dimensions, style: &Style, _theme: &Theme) -> Option<Rect> {
@@ -431,14 +437,14 @@ fn draw_spinner_op<H: Spriteable>(button_id: widget::Id,
     }
 
 }
-fn update_toggle_bool_spinner_index(drag: &mut Drag, toggle_bool: &mut bool) -> Option<u16> {
+fn update_toggle_bool_spinner_index(drag: &mut Drag, op_str:&mut Option<String>) -> Option<u16> {
     match drag {
         &mut Drag::Selecting(ref mut spinner_index, _) => {
             if *spinner_index >= 60 {
-                if *toggle_bool {
-                    *toggle_bool = false;
+                if op_str.is_some() {
+                    *op_str = None;
                 } else {
-                    *toggle_bool = true;
+                    *op_str = Some("".to_owned());
                 }
 
                 *spinner_index = 0;

@@ -142,6 +142,7 @@ impl<'a, T> GameProcess<'a, T>
                               &cardmeta,
                               result_map,
                               action_tx.clone());
+                              
         logic::overlay_blowup::render(ui, ids, &cardmeta, &mut gamedata, &appdata, result_map);
         logic::overlay::render(ui,
                                ids,

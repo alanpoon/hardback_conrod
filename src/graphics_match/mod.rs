@@ -66,9 +66,7 @@ pub fn gameicons_listitem(image_id: image::Id,
          IconStruct(Image::new(image_id).source_rectangle(gameicons_rect(6.0)),d.to_string(),"Size of Draft pile".to_owned()), //draftlen
     ]
 }
-pub fn backcard() -> Rect {
-    Rect::from_corners([670.0, 70.0], [1130.0, 850.0])
-}
+
 pub fn arrow_sprite() -> SpriteInfo {
     SpriteInfo {
         first: (0.0, 600.0), //left corner of first

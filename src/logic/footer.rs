@@ -63,6 +63,7 @@ pub fn render(ui: &mut conrod::UiCell,
                                &appdata);
                 }
                 app::GuiState::Game(GameState::Spell) => {
+                    
                     if *page_index != player_index.unwrap() {
                         view_others(ui,
                                     ids,
@@ -329,9 +330,10 @@ fn spell(ui: &mut conrod::UiCell,
                 .map(|ref x| {
                          let (_timeless, _string, _color, _app_font, _rect, _top_left_rect) =
                         in_game::get_tile_image_withcost(*x.clone(), cardmeta, appdata, result_map);
-                         (*x.clone(), _timeless, _string, _color, _app_font, _rect, _top_left_rect)
+                        let y= None;
+                         (*x.clone(), _timeless, _string,&mut y, _color, _app_font, _rect, _top_left_rect)
                      })
-                .collect::<Vec<(usize, bool, &str, Color, text::font::Id, Rect, Rect)>>();
+                .collect::<Vec<(usize, bool, &str,&mut Option<String>, Color, text::font::Id, Rect, Rect)>>();
         if let (Some(&SupportIdType::ImageId(spinner_image)),
                 Some(&SupportIdType::ImageId(back_image)),
                 Some(&SupportIdType::ImageId(arrows_image)),
@@ -356,6 +358,7 @@ fn spell(ui: &mut conrod::UiCell,
                                  Box::new(move |(_v_index,
                                                  _timelessbool,
                                                  _string,
+                                                 _op_string,
                                                  _color,
                                                  _font,
                                                  _rect,
@@ -363,6 +366,7 @@ fn spell(ui: &mut conrod::UiCell,
                     ItemWidget::new(back_image,
                                     _timelessbool,
                                     &_string,
+                                    _op_string,
                                     _rect,
                                     _top_left_rect,
                                     "timeless")
@@ -375,10 +379,12 @@ fn spell(ui: &mut conrod::UiCell,
                             .border(15.0)
                             .alphabet_font_id(_font)
                             .color(_color)
+                            .toggle(false)
                 }),
                                  Box::new(|(_v_index,
                                             _timelessbool,
                                             _string,
+                                            _op_string,
                                             _color,
                                             _font,
                                             _rect,
@@ -390,6 +396,9 @@ fn spell(ui: &mut conrod::UiCell,
                         .padded_w_of(ids.footer, 150.0)
                         .top_left_with_margin_on(ids.footer, 10.0)
                         .corner_arrow(_c)
+                        .left_arrow(_l)
+                        .right_arrow(_r)
+                        .top_arrow(_t)
                         .arrow_size(appdata.convert_h(50.0))
                         .set(ids.footerdragdroplistview, ui);
             match (exitid, exitby) {                
@@ -402,8 +411,9 @@ fn spell(ui: &mut conrod::UiCell,
                 s.set(ui);
             }
             _personal.hand =
-                handvec.iter().map(|&(x_index, _, _, _, _, _, _)| x_index).collect::<Vec<usize>>();
+                handvec.iter().map(|&(x_index, _, _, _,_, _, _, _)| x_index).collect::<Vec<usize>>();
             if (*_personal).clone() != temp {
+                println!("diff in hand");
                 let now = Instant::now();
                 *last_send = Some(now);
                 let promptsender = PromptSender(_action_tx);

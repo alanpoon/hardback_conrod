@@ -5,7 +5,7 @@ use conrod::widget::primitive::image::Image;
 use cardgame_widgets::custom_widget::image_hover::{Hoverable, ImageHover};
 use cardgame_widgets::custom_widget::bordered_image::Bordered;
 use cardgame_widgets::custom_widget::arrange_list::{ArrangeList, ExitBy};
-use custom_widget::arrange_list_tile::ItemWidget;
+use custom_widget::arrange_list_tile::{ArrangeTuple,ItemWidget};
 use custom_widget::buy_list_item;
 use cardgame_widgets::custom_widget::instructionset::InstructionSet;
 use cardgame_widgets::custom_widget::animated_canvas;
@@ -167,7 +167,7 @@ fn view_others(ui: &mut conrod::UiCell,
         .map(|ref x| {
                  let (_timeless, _string, _color, _app_font, _rect, _top_left_rect) =
                 in_game::get_tile_image_withcost(*x.clone(), cardmeta, appdata, result_map);
-                 (*x.clone(), _timeless, _string, _color, _app_font, _rect, _top_left_rect)
+                 (*x.clone(), _timeless.to_owned(), _string, _color, _app_font, _rect, _top_left_rect)
              })
         .collect::<Vec<(usize, bool, &str, Color, text::font::Id, Rect, Rect)>>();
     let footer_list_w = ui.w_of(ids.footer).unwrap() - 300.0;
@@ -330,10 +330,9 @@ fn spell(ui: &mut conrod::UiCell,
                 .map(|ref x| {
                          let (_timeless, _string, _color, _app_font, _rect, _top_left_rect) =
                         in_game::get_tile_image_withcost(*x.clone(), cardmeta, appdata, result_map);
-                        let y= None;
-                         (*x.clone(), _timeless, _string,&mut y, _color, _app_font, _rect, _top_left_rect)
+                         (*x.clone(), _timeless, _string.to_owned(),None, _color, _app_font, _rect, _top_left_rect)
                      })
-                .collect::<Vec<(usize, bool, &str,&mut Option<String>, Color, text::font::Id, Rect, Rect)>>();
+                .collect::<Vec<ArrangeTuple>>();
         if let (Some(&SupportIdType::ImageId(spinner_image)),
                 Some(&SupportIdType::ImageId(back_image)),
                 Some(&SupportIdType::ImageId(arrows_image)),
@@ -355,21 +354,10 @@ fn spell(ui: &mut conrod::UiCell,
                 ArrangeList::new(&mut handvec,
                                  spell_which_arrangelist,
                                  overlay_blowup,
-                                 Box::new(move |(_v_index,
-                                                 _timelessbool,
-                                                 _string,
-                                                 _op_string,
-                                                 _color,
-                                                 _font,
-                                                 _rect,
-                                                 _top_left_rect)| {
+                                 Box::new(move |tuple| {
                     ItemWidget::new(back_image,
-                                    _timelessbool,
-                                    &_string,
-                                    _op_string,
-                                    _rect,
-                                    _top_left_rect,
-                                    "timeless")
+                                    tuple,
+                                    "timeless".to_owned())
                             .cloudy_image(cloudy)
                             .game_icon(icon_image)
                             .coin_info(coin_info)
@@ -377,8 +365,6 @@ fn spell(ui: &mut conrod::UiCell,
                             .spinner_image(spinner_image, spinner_rect)
                             .border_color(color::YELLOW)
                             .border(15.0)
-                            .alphabet_font_id(_font)
-                            .color(_color)
                             .toggle(false)
                 }),
                                  Box::new(|(_v_index,

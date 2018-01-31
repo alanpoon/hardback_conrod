@@ -20,15 +20,13 @@ pub struct ItemWidget<'a, S>
     style: Style,
     pub toggle_image: image::Id,
     pub spinner_image_id: Option<(image::Id, S)>,
-    pub timeless: bool,
-    pub cost_rect: Rect,
-    pub top_left_rect: Rect,
-    pub alphabet: &'a str,
-    pub timelesstext: &'a str,
+    pub tuple:&'a mut ArrangeTuple,
+    pub timelesstext: String,
     pub cloudy_image: Option<image::Id>,
     pub coin_info: Option<image::Id>,
     pub coin_info270: Option<image::Id>,
     pub game_icon: Option<image::Id>,
+    pub toggle:bool
 }
 
 #[derive( Clone, Debug, Default, PartialEq, WidgetStyle)]
@@ -45,12 +43,6 @@ pub struct Style {
     /// Dragable
     #[conrod(default="false")]
     pub draggable: Option<bool>,
-    /// Alphabet Font Id
-    #[conrod(default="theme.font_id")]
-    pub alphabet_font_id: Option<Option<text::font::Id>>,
-    /// Timeless Font Id
-    #[conrod(default="theme.font_id")]
-    pub timeless_font_id: Option<Option<text::font::Id>>,
 }
 
 widget_ids! {
@@ -73,8 +65,6 @@ widget_ids! {
 pub struct State {
     ids: Ids,
     drag: Drag,
-    toggle_bool: bool,
-    op_str: String,
     blink_line_frame: u16,
 }
 
@@ -83,11 +73,8 @@ impl<'a, S> ItemWidget<'a, S>
 {
     /// Create a button context to be built upon.
     pub fn new(toggle_image: image::Id,
-               timeless: bool,
-               alphabet: &'a str,
-               cost_rect: Rect,
-               top_left_rect: Rect,
-               timelesstext: &'a str)
+               tuple:&'a mut ArrangeTuple,
+               timelesstext: String)
                -> Self {
         ItemWidget {
             toggle_image: toggle_image,
@@ -95,15 +82,13 @@ impl<'a, S> ItemWidget<'a, S>
             common: widget::CommonBuilder::default(),
             bordered: false,
             style: Style::default(),
-            alphabet: alphabet,
-            timeless: timeless,
             timelesstext: timelesstext,
-            cost_rect: cost_rect,
-            top_left_rect: top_left_rect,
+            tuple:tuple,
             cloudy_image: None,
             game_icon: None,
             coin_info: None,
             coin_info270: None,
+            toggle:false
         }
     }
 
@@ -129,12 +114,9 @@ impl<'a, S> ItemWidget<'a, S>
         self.game_icon = Some(game_icon);
         self
     }
-    pub fn alphabet_font_id(mut self, font_id: text::font::Id) -> Self {
-        self.style.alphabet_font_id = Some(Some(font_id));
-        self
-    }
-    pub fn timeless_font_id(mut self, font_id: text::font::Id) -> Self {
-        self.style.timeless_font_id = Some(Some(font_id));
+
+    pub fn toggle(mut self,toggle_bool: bool)->Self{
+        self.toggle = toggle_bool;
         self
     }
 }
@@ -157,8 +139,6 @@ impl<'a, S> Widget for ItemWidget<'a, S>
         State {
             ids: Ids::new(id_gen),
             drag: Drag::None,
-            toggle_bool: false,
-            op_str: "".to_owned(),
             blink_line_frame: 0,
         }
     }
@@ -174,7 +154,7 @@ impl<'a, S> Widget for ItemWidget<'a, S>
         // Finally, we'll describe how we want our widget drawn by simply instantiating the
         // necessary primitive graphics widgets.
         //
-
+        let (q_cardindex,q_timeless,q_alphabet,mut q_op_str,q_color,q_text_id,q_cost_rect,q_top_left_rect) = self.tuple.clone();
         let (_interaction, _times_triggered) = interaction_and_times_triggered(id, ui);
         let (_, _, w, h) = rect.x_y_w_h();
         let border = if self.bordered {
@@ -182,7 +162,7 @@ impl<'a, S> Widget for ItemWidget<'a, S>
         } else {
             0.0
         };
-        let mut toggle_bool = state.toggle_bool;
+        
         rectangle_fill(id,
                        state.ids.background,
                        rect,
@@ -200,7 +180,7 @@ impl<'a, S> Widget for ItemWidget<'a, S>
                                                                                    ui);
         }
         // Instantiate the image.
-        if toggle_bool {
+        if let  Some(_) = q_op_str {
             widget::Image::new(self.toggle_image)
                 .w_h(w - border, h - border)
                 .middle_of(id)
@@ -216,36 +196,35 @@ impl<'a, S> Widget for ItemWidget<'a, S>
                     .parent(id)
                     .graphics_for(id)
                     .set(state.ids.cloudy, ui);
-                if self.timeless {
+                if q_timeless {
                     widget::Image::new(_coin_info270)
-                        .source_rectangle(self.cost_rect)
+                        .source_rectangle(q_cost_rect)
                         .wh([w, h * 0.2])
                         .mid_bottom_of(id)
                         .parent(id)
                         .set(state.ids.coin_info, ui);
                     widget::Image::new(_game_icon)
-                        .source_rectangle(self.top_left_rect)
+                        .source_rectangle(q_top_left_rect)
                         .wh([h * 0.2, h * 0.2])
                         .mid_left_of(state.ids.coin_info)
                         .set(state.ids.top_lefticon, ui);
                     let fontsize = get_font_size_hn(h * 0.18, 1.0);
-                    let timeless_font_id =
-                        self.style.timeless_font_id(&ui.theme).or(ui.fonts.ids().next());
-                    widget::Text::new(self.timelesstext)
+                    let timeless_font_id =q_text_id;
+                    widget::Text::new(&self.timelesstext)
                         .mid_left_with_margin_on(state.ids.coin_info, 20.0)
                         .font_size(fontsize)
                         .color(color::WHITE)
-                        .and_then(timeless_font_id, widget::Text::font_id)
+                        .and_then(Some(timeless_font_id), widget::Text::font_id)
                         .set(state.ids.coin_info_timeless, ui);
                 } else {
                     widget::Image::new(_coin_info)
-                        .source_rectangle(self.cost_rect)
+                        .source_rectangle(q_cost_rect)
                         .wh([w * 0.2, h])
                         .mid_left_of(id)
                         .parent(id)
                         .set(state.ids.coin_info, ui);
                     widget::Image::new(_game_icon)
-                        .source_rectangle(self.top_left_rect)
+                        .source_rectangle(q_top_left_rect)
                         .wh([w * 0.2, w * 0.2])
                         .mid_top_of(state.ids.coin_info)
                         .set(state.ids.top_lefticon, ui);
@@ -254,23 +233,22 @@ impl<'a, S> Widget for ItemWidget<'a, S>
         }
 
         let fontsize = get_font_size_hn(h, 2.0);
-        let alphabet_font_id = self.style.alphabet_font_id(&ui.theme).or(ui.fonts.ids().next());
-        let fontsize1 = if (self.alphabet == "m") | (self.alphabet == "w") {
+        let fontsize1 = if (q_alphabet== "m") | (q_alphabet== "w") {
             (fontsize as f64 * 0.6) as u32
         } else {
             fontsize
         };
-        let j = self.alphabet.to_uppercase();
+        let j = q_alphabet.to_uppercase();
 
         widget::Text::new(&j)
             .mid_right_with_margin_on(id, 0.3 * w)
             .parent(id)
             .font_size(fontsize1)
-            .and_then(alphabet_font_id, widget::Text::font_id)
+            .and_then(Some(q_text_id), widget::Text::font_id)
             .graphics_for(id)
             .set(state.ids.alphabet, ui);
 
-        if toggle_bool {
+        if let  Some(ref mut _str) = q_op_str {
             let rect = Rect::from_xy_dim([0.0, 0.0], [80.0, 40.0]);
             rectangle_fill(id,
                            state.ids.textedit_background,
@@ -278,17 +256,17 @@ impl<'a, S> Widget for ItemWidget<'a, S>
                            self.style.color(&ui.theme),
                            ui);
 
-            for edit in widget::TextEdit::new(&state.op_str)
+            for edit in widget::TextEdit::new(&_str.clone())
                     .color(self.style.color(&ui.theme).plain_contrast())
                     .middle_of(state.ids.textedit_background)
-                    .padded_wh_of(state.ids.textedit_background, 5.0)
+                    .w(5.0)
+                    .h(5.0)
                     .set(state.ids.textedit_at_toggle, ui) {
-                if state.op_str.chars().count() < 1 {
-                    state.update(|state| state.op_str = edit);
-                }
+                let last_char = edit.chars().rev().take(1).collect();
+                *_str = last_char;            
             }
 
-            if state.op_str.chars().count() != 1 {
+            if _str.chars().count() != 1 {
                 state.update(|state| state.blink_line_frame += 1);
                 if (state.blink_line_frame / 120) == 0 {
                     let line_l = ui.w_of(state.ids.textedit_background).unwrap();
@@ -311,12 +289,11 @@ impl<'a, S> Widget for ItemWidget<'a, S>
         }
 
         let mut drag = state.drag;
-
-        update_drag(id, &mut drag, ui);
-        let draw_spinner_index = update_toggle_bool_spinner_index(&mut drag, &mut toggle_bool);
+        if self.toggle{
+            update_drag(id, &mut drag, ui);
+        let draw_spinner_index = update_toggle_bool_spinner_index(&mut drag,&mut q_op_str);
         state.update(|state| {
                          state.drag = drag;
-                         state.toggle_bool = toggle_bool
                      });
 
         if let Some(spinner_index) = draw_spinner_index {
@@ -325,7 +302,9 @@ impl<'a, S> Widget for ItemWidget<'a, S>
                             self.spinner_image_id,
                             spinner_index,
                             ui);
+        }    
         }
+        *(self.tuple) = (q_cardindex,q_timeless,q_alphabet,q_op_str,q_color,q_text_id,q_cost_rect,q_top_left_rect);
 
     }
     fn drag_area(&self, dim: Dimensions, style: &Style, _theme: &Theme) -> Option<Rect> {
@@ -431,14 +410,14 @@ fn draw_spinner_op<H: Spriteable>(button_id: widget::Id,
     }
 
 }
-fn update_toggle_bool_spinner_index(drag: &mut Drag, toggle_bool: &mut bool) -> Option<u16> {
+fn update_toggle_bool_spinner_index(drag: &mut Drag, op_str:&mut Option<String>) -> Option<u16> {
     match drag {
         &mut Drag::Selecting(ref mut spinner_index, _) => {
             if *spinner_index >= 60 {
-                if *toggle_bool {
-                    *toggle_bool = false;
+                if op_str.is_some() {
+                    *op_str = None;
                 } else {
-                    *toggle_bool = true;
+                    *op_str = Some("".to_owned());
                 }
 
                 *spinner_index = 0;
@@ -479,3 +458,5 @@ enum Interaction {
     Hover,
     Press,
 }
+pub type ArrangeTuple = (usize, bool, String,Option<String>, Color, text::font::Id, Rect, Rect);
+//(*x.clone(), _timeless, _string,None, _color, _app_font, _rect, _top_left_rect

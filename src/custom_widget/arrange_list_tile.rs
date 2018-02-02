@@ -2,6 +2,7 @@ use cardgame_widgets::custom_widget::arrange_list::{WidgetMut,Hoverable, Arrange
 use conrod::{widget, Color, Colorable, Borderable, Positionable, UiCell, Widget, event, input,
              image, Theme, Sizeable, text, FontSize, color};
 use conrod::position::{Rect, Scalar, Dimensions, Point};
+use conrod::widget::list::{Right,Fixed};
 use cardgame_widgets::sprite::{Spriteable, spriteable_rect};
 use cardgame_widgets::text::get_font_size_hn;
 use conrod::widget::Rectangle;
@@ -448,7 +449,7 @@ impl<'a, S,T> Colorable for ItemWidget<'a, S,T>
 {
     builder_method!(color { style.color = Some(Color) });
 }
-impl<'a, S> Borderable for ItemWidget<'a, S>
+impl<'a, S,T> Borderable for ItemWidget<'a, S,T>
     where S: Spriteable
 {
     builder_methods!{

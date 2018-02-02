@@ -1,4 +1,4 @@
-use cardgame_widgets::custom_widget::arrange_list::{Hoverable, Arrangeable, TimesClicked};
+use cardgame_widgets::custom_widget::arrange_list::{WidgetMut,Hoverable, Arrangeable, TimesClicked};
 use conrod::{widget, Color, Colorable, Borderable, Positionable, UiCell, Widget, event, input,
              image, Theme, Sizeable, text, FontSize, color};
 use conrod::position::{Rect, Scalar, Dimensions, Point};
@@ -120,7 +120,11 @@ impl<'a, S> ItemWidget<'a, S>
         self
     }
 }
-
+impl<'a, S> WidgetMut<T> for ItemWidget<'a,S> where S:Spriteable{
+    fn set_mut<'c,'b>(self,widget_list_item:widget::list::Item<Right,Fixed>,ui:&'c mut UiCell<'b>)->T{
+        widget_list_item.set(self,ui)
+    }
+}
 /// A custom Conrod widget must implement the Widget trait. See the **Widget** trait
 /// documentation for more details.
 impl<'a, S> Widget for ItemWidget<'a, S>

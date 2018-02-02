@@ -9,8 +9,8 @@ use conrod::widget::Rectangle;
 
 /// The type upon which we'll implement the `Widget` trait.
 #[derive(WidgetCommon)]
-pub struct ItemWidget<'a, S,T>
-    where S: Spriteable,
+pub struct ItemWidget<'a, S>
+    where S: Spriteable
 {
     /// An object that handles some of the dirty work of rendering a GUI. We don't
     /// really have to worry about it.
@@ -69,7 +69,7 @@ pub struct State {
     blink_line_frame: u16,
 }
 
-impl<'a, S,T> ItemWidget<'a, S,T>
+impl<'a, S> ItemWidget<'a, S>
     where S: Spriteable
 {
     /// Create a button context to be built upon.
@@ -121,15 +121,16 @@ impl<'a, S,T> ItemWidget<'a, S,T>
         self
     }
 }
-impl<'a, S,T> WidgetMut<T> for ItemWidget<'a,S,T> where S:Spriteable{
-    fn set_mut<'c,'b>(self,widget_list_item:widget::list::Item<Right,Fixed>,ui:&'c mut UiCell<'b>)->T{
+impl<'a, S> WidgetMut<ArrangeTuple> for ItemWidget<'a,S> where S:Spriteable{
+    fn set_mut<'c,'b>(self,widget_list_item:widget::list::Item<Right,Fixed>,ui:&'c mut UiCell<'b>)->ArrangeTuple{
         widget_list_item.set(self,ui)
     }
 }
 /// A custom Conrod widget must implement the Widget trait. See the **Widget** trait
 /// documentation for more details.
 impl<'a, S,T> Widget for ItemWidget<'a, S,T>
-    where S: Spriteable
+    where S: Spriteable,
+    T:Clone
 {
     /// The State struct that we defined above.
     type State = State;
@@ -138,7 +139,7 @@ impl<'a, S,T> Widget for ItemWidget<'a, S,T>
     /// The event produced by instantiating the widget.
     ///
     /// `Some` when clicked, otherwise `None`.
-    type Event = ();
+    type Event = T;
 
     fn init_state(&self, id_gen: widget::id::Generator) -> Self::State {
         State {
@@ -310,7 +311,7 @@ impl<'a, S,T> Widget for ItemWidget<'a, S,T>
         }    
         }
         *(self.tuple) = (q_cardindex,q_timeless,q_alphabet,q_op_str,q_color,q_text_id,q_cost_rect,q_top_left_rect);
-
+        self.mut_value.clone()
     }
     fn drag_area(&self, dim: Dimensions, style: &Style, _theme: &Theme) -> Option<Rect> {
         if let Some(_) = style.draggable {

@@ -167,9 +167,9 @@ fn view_others(ui: &mut conrod::UiCell,
         .map(|ref x| {
                  let (_timeless, _string, _color, _app_font, _rect, _top_left_rect) =
                 in_game::get_tile_image_withcost(*x.clone(), cardmeta, appdata, result_map);
-                 (*x.clone(), _timeless.to_owned(), _string, _color, _app_font, _rect, _top_left_rect)
+                 (*x.clone(), _timeless, _string.to_owned(),None, _color, _app_font, _rect, _top_left_rect,false)
              })
-        .collect::<Vec<(usize, bool, &str, Color, text::font::Id, Rect, Rect)>>();
+        .collect::<Vec<ArrangeTuple>>();
     let footer_list_w = ui.w_of(ids.footer).unwrap() - 300.0;
     let item_h = footer_list_w / 7.0;
     let (mut events, scrollbar) = widget::ListSelect::single(handvec.len())
@@ -211,7 +211,7 @@ fn view_others(ui: &mut conrod::UiCell,
             match event {
                 // For the `Item` events we instantiate the `List`'s items.
                 Event::Item(item) => {
-                    let &(card_index, _, _, _, _, _, _) = handvec.get(item.i).unwrap();
+                    let &(card_index, _, _, _,_, _, _, _,_) = handvec.get(item.i).unwrap();
                     let (_timeless, _string, _color, _app_font, _rect, _top_lefticon_rect) =
                         in_game::get_tile_image_withcost(card_index.clone(),
                                                          cardmeta,
@@ -260,13 +260,13 @@ fn view_others(ui: &mut conrod::UiCell,
                 .mid_right_with_margin_on(_buy_selected_id, -2.0)
                 .set(ids.corner_arrow, ui);
             if let &mut Some(mut _overlay_blowup) = overlay_blowup {
-                let (j, _, _, _, _, _, _) = handvec.get(_buy_selected).unwrap().clone();
+                let (j, _, _, _, _, _, _,_,_) = handvec.get(_buy_selected).unwrap().clone();
                 if j != _overlay_blowup {
                     _overlay_blowup = j;
                 }
             }
             for _c in j {
-                let (j, _, _, _, _, _, _) = handvec.get(_buy_selected).unwrap().clone();
+                let (j, _, _, _, _, _, _,_,_) = handvec.get(_buy_selected).unwrap().clone();
                 *overlay_blowup = Some(j);
             }
 
@@ -330,7 +330,7 @@ fn spell(ui: &mut conrod::UiCell,
                 .map(|ref x| {
                          let (_timeless, _string, _color, _app_font, _rect, _top_left_rect) =
                         in_game::get_tile_image_withcost(*x.clone(), cardmeta, appdata, result_map);
-                         (*x.clone(), _timeless, _string.to_owned(),None, _color, _app_font, _rect, _top_left_rect)
+                         (*x.clone(), _timeless, _string.to_owned(),None, _color, _app_font, _rect, _top_left_rect,false)
                      })
                 .collect::<Vec<ArrangeTuple>>();
         if let (Some(&SupportIdType::ImageId(spinner_image)),
@@ -355,8 +355,10 @@ fn spell(ui: &mut conrod::UiCell,
                                  spell_which_arrangelist,
                                  overlay_blowup,
                                  Box::new(move |tuple| {
+                    let mut tuple1=tuple.clone();
+                    tuple1.3 =None;                                     
                     ItemWidget::new(back_image,
-                                    tuple,
+                                    tuple1,
                                     "timeless".to_owned())
                             .cloudy_image(cloudy)
                             .game_icon(icon_image)
@@ -374,7 +376,8 @@ fn spell(ui: &mut conrod::UiCell,
                                             _color,
                                             _font,
                                             _rect,
-                                            _top_left_rect)| {
+                                            _top_left_rect,
+                                            _inked)| {
                                               _v_index.clone()
                                           }),
                                  footer_list_w / 7.0)
@@ -397,7 +400,7 @@ fn spell(ui: &mut conrod::UiCell,
                 s.set(ui);
             }
             _personal.hand =
-                handvec.iter().map(|&(x_index, _, _, _,_, _, _, _)| x_index).collect::<Vec<usize>>();
+                handvec.iter().map(|&(x_index, _, _, _,_, _, _, _,_)| x_index).collect::<Vec<usize>>();
             if (*_personal).clone() != temp {
                 println!("diff in hand");
                 let now = Instant::now();

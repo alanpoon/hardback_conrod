@@ -127,14 +127,14 @@ impl<'a, T> GameProcess<'a, T>
             .frame_rate(30)
             .border(0.0)
             .set(ids.master, ui);
-       /* logic::body::render(ui,
+        logic::body::render(ui,
                             ids,
                             &mut gamedata,
                             &appdata,
                             &cardmeta,
                             result_map,
                             action_tx.clone());
-                            */
+                            
         logic::footer::render(ui,
                               ids,
                               &mut gamedata,

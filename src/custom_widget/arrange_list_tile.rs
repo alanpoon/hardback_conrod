@@ -9,7 +9,7 @@ use conrod::widget::Rectangle;
 
 /// The type upon which we'll implement the `Widget` trait.
 #[derive(WidgetCommon)]
-pub struct ItemWidget<'a, S>
+pub struct ItemWidget<S>
     where S: Spriteable
 {
     /// An object that handles some of the dirty work of rendering a GUI. We don't
@@ -21,7 +21,7 @@ pub struct ItemWidget<'a, S>
     style: Style,
     pub toggle_image: image::Id,
     pub spinner_image_id: Option<(image::Id, S)>,
-    pub tuple:&'a mut ArrangeTuple,
+    pub tuple:ArrangeTuple,
     pub timelesstext: String,
     pub cloudy_image: Option<image::Id>,
     pub coin_info: Option<image::Id>,
@@ -69,12 +69,12 @@ pub struct State {
     blink_line_frame: u16,
 }
 
-impl<'a, S> ItemWidget<'a, S>
+impl<S> ItemWidget<S>
     where S: Spriteable
 {
     /// Create a button context to be built upon.
     pub fn new(toggle_image: image::Id,
-               tuple:&'a mut ArrangeTuple,
+               tuple:ArrangeTuple,
                timelesstext: String)
                -> Self {
         ItemWidget {
@@ -121,16 +121,15 @@ impl<'a, S> ItemWidget<'a, S>
         self
     }
 }
-impl<'a, S> WidgetMut<ArrangeTuple> for ItemWidget<'a,S> where S:Spriteable{
+impl<S> WidgetMut<ArrangeTuple> for ItemWidget<S> where S:Spriteable{
     fn set_mut<'c,'b>(self,widget_list_item:widget::list::Item<Right,Fixed>,ui:&'c mut UiCell<'b>)->ArrangeTuple{
         widget_list_item.set(self,ui)
     }
 }
 /// A custom Conrod widget must implement the Widget trait. See the **Widget** trait
 /// documentation for more details.
-impl<'a, S,T> Widget for ItemWidget<'a, S,T>
-    where S: Spriteable,
-    T:Clone
+impl<S> Widget for ItemWidget<S>
+    where S: Spriteable
 {
     /// The State struct that we defined above.
     type State = State;
@@ -139,7 +138,7 @@ impl<'a, S,T> Widget for ItemWidget<'a, S,T>
     /// The event produced by instantiating the widget.
     ///
     /// `Some` when clicked, otherwise `None`.
-    type Event = T;
+    type Event = ArrangeTuple;
 
     fn init_state(&self, id_gen: widget::id::Generator) -> Self::State {
         State {
@@ -160,7 +159,7 @@ impl<'a, S,T> Widget for ItemWidget<'a, S,T>
         // Finally, we'll describe how we want our widget drawn by simply instantiating the
         // necessary primitive graphics widgets.
         //
-        let (q_cardindex,q_timeless,q_alphabet,mut q_op_str,q_color,q_text_id,q_cost_rect,q_top_left_rect) = self.tuple.clone();
+        let (q_cardindex,q_timeless,q_alphabet,mut q_op_str,q_color,q_text_id,q_cost_rect,q_top_left_rect,q_ink) = self.tuple.clone();
         let (_interaction, _times_triggered) = interaction_and_times_triggered(id, ui);
         let (_, _, w, h) = rect.x_y_w_h();
         let border = if self.bordered {
@@ -261,14 +260,16 @@ impl<'a, S,T> Widget for ItemWidget<'a, S,T>
                            rect,
                            self.style.color(&ui.theme),
                            ui);
-
+            println!("_str {:?}",_str.clone());
             for edit in widget::TextEdit::new(&_str.clone())
                     .color(self.style.color(&ui.theme).plain_contrast())
                     .middle_of(state.ids.textedit_background)
-                    .w(5.0)
-                    .h(5.0)
+                    .w(10.0)
+                    .h(10.0)
                     .set(state.ids.textedit_at_toggle, ui) {
+                        println!("edit {:?}",edit);
                 let last_char = edit.chars().rev().take(1).collect();
+                println!("last char {:?}",last_char);
                 *_str = last_char;            
             }
 
@@ -308,10 +309,9 @@ impl<'a, S,T> Widget for ItemWidget<'a, S,T>
                             self.spinner_image_id,
                             spinner_index,
                             ui);
-        }    
         }
-        *(self.tuple) = (q_cardindex,q_timeless,q_alphabet,q_op_str,q_color,q_text_id,q_cost_rect,q_top_left_rect);
-        self.mut_value.clone()
+        }
+         (q_cardindex,q_timeless,q_alphabet,q_op_str,q_color,q_text_id,q_cost_rect,q_top_left_rect,q_ink)
     }
     fn drag_area(&self, dim: Dimensions, style: &Style, _theme: &Theme) -> Option<Rect> {
         if let Some(_) = style.draggable {
@@ -423,7 +423,7 @@ fn update_toggle_bool_spinner_index(drag: &mut Drag, op_str:&mut Option<String>)
                 if op_str.is_some() {
                     *op_str = None;
                 } else {
-                    *op_str = Some("".to_owned());
+                    *op_str = Some("a".to_owned());
                 }
 
                 *spinner_index = 0;
@@ -437,7 +437,7 @@ fn update_toggle_bool_spinner_index(drag: &mut Drag, op_str:&mut Option<String>)
         _ => None,
     }
 }
-impl<'a, S,T> Arrangeable for ItemWidget<'a, S,T>
+impl<S> Arrangeable for ItemWidget<S>
     where S: Spriteable
 {
     fn selectable(mut self) -> Self {
@@ -445,12 +445,12 @@ impl<'a, S,T> Arrangeable for ItemWidget<'a, S,T>
         self
     }
 }
-impl<'a, S,T> Colorable for ItemWidget<'a, S,T>
+impl<S> Colorable for ItemWidget<S>
     where S: Spriteable
 {
     builder_method!(color { style.color = Some(Color) });
 }
-impl<'a, S,T> Borderable for ItemWidget<'a, S,T>
+impl<S> Borderable for ItemWidget<S>
     where S: Spriteable
 {
     builder_methods!{
@@ -464,5 +464,5 @@ enum Interaction {
     Hover,
     Press,
 }
-pub type ArrangeTuple = (usize, bool, String,Option<String>, Color, text::font::Id, Rect, Rect);
-//(*x.clone(), _timeless, _string,None, _color, _app_font, _rect, _top_left_rect
+pub type ArrangeTuple = (usize, bool, String,Option<String>, Color, text::font::Id, Rect, Rect,bool);
+//(*x.clone(), _timeless, _string,None, _color, _app_font, _rect, _top_left_rect,inked

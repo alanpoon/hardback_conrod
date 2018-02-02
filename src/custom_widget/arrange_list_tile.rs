@@ -8,8 +8,8 @@ use conrod::widget::Rectangle;
 
 /// The type upon which we'll implement the `Widget` trait.
 #[derive(WidgetCommon)]
-pub struct ItemWidget<'a, S>
-    where S: Spriteable
+pub struct ItemWidget<'a, S,T>
+    where S: Spriteable,
 {
     /// An object that handles some of the dirty work of rendering a GUI. We don't
     /// really have to worry about it.
@@ -68,7 +68,7 @@ pub struct State {
     blink_line_frame: u16,
 }
 
-impl<'a, S> ItemWidget<'a, S>
+impl<'a, S,T> ItemWidget<'a, S,T>
     where S: Spriteable
 {
     /// Create a button context to be built upon.
@@ -120,14 +120,14 @@ impl<'a, S> ItemWidget<'a, S>
         self
     }
 }
-impl<'a, S> WidgetMut<T> for ItemWidget<'a,S> where S:Spriteable{
+impl<'a, S,T> WidgetMut<T> for ItemWidget<'a,S,T> where S:Spriteable{
     fn set_mut<'c,'b>(self,widget_list_item:widget::list::Item<Right,Fixed>,ui:&'c mut UiCell<'b>)->T{
         widget_list_item.set(self,ui)
     }
 }
 /// A custom Conrod widget must implement the Widget trait. See the **Widget** trait
 /// documentation for more details.
-impl<'a, S> Widget for ItemWidget<'a, S>
+impl<'a, S,T> Widget for ItemWidget<'a, S,T>
     where S: Spriteable
 {
     /// The State struct that we defined above.
@@ -435,7 +435,7 @@ fn update_toggle_bool_spinner_index(drag: &mut Drag, op_str:&mut Option<String>)
         _ => None,
     }
 }
-impl<'a, S> Arrangeable for ItemWidget<'a, S>
+impl<'a, S,T> Arrangeable for ItemWidget<'a, S,T>
     where S: Spriteable
 {
     fn selectable(mut self) -> Self {
@@ -443,7 +443,7 @@ impl<'a, S> Arrangeable for ItemWidget<'a, S>
         self
     }
 }
-impl<'a, S> Colorable for ItemWidget<'a, S>
+impl<'a, S,T> Colorable for ItemWidget<'a, S,T>
     where S: Spriteable
 {
     builder_method!(color { style.color = Some(Color) });

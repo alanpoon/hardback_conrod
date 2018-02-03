@@ -17,8 +17,8 @@ jobs:
       - run: git clone --depth=1 https://github.com/alanpoon/cargo-edit cargo-edit
       - run: cargo install --path cargo-edit
       - run: cargo add https://github.com/alanpoon/conrod_chat --features "keypad"
-      - run: sh ssl_for_android.sh
-      - run: cargo apk run --features android
+      - run: sh ssl_for_android.sh
+      - run: cargo apk run --features android
 
   deploy:
     docker:
@@ -31,7 +31,7 @@ jobs:
       - run: cargo install --path cargo-edit
       - run: cargo rm conrod_chat
       - run: cargo add https://github.com/alanpoon/conrod_chat --features "keypad"
-      - run: cargo apk run --features android --release
+      - run: cargo apk run --features android --release
       - run: ./.circleci/upload_apk_to_github_releases.sh
 
 workflows:

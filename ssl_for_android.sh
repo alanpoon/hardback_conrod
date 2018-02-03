@@ -76,3 +76,6 @@ make -s && make install
 
 cp -f "${SCRIPT_DIR}/Android.mk" "${OUTPUT_DIR}/Android.mk"
 rm -rf "${NDK_TOOLCHAIN_PATH}"
+
+export OPENSSL_DIR="/usr/local/ssl/android-21/armeabi-v7a"
+export OPENSSL_LIB_DIR="/usr/local/ssl/android-21/armeabi-v7a/lib"

@@ -9,7 +9,7 @@ set -e
 tag=$CIRCLE_TAG
 owner=$CIRCLE_PROJECT_USERNAME
 repo=$CIRCLE_PROJECT_REPONAME
-filename=./zemeroth-debug.apk
+filename=./hardback.apk
 GH_REPO="https://api.github.com/repos/$owner/$repo"
 GH_TAGS="$GH_REPO/releases/tags/$tag"
 AUTH="Authorization: token $GITHUB_API_TOKEN"

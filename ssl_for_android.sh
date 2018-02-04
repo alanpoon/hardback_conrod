@@ -5,7 +5,7 @@ set -eu
 # Android Platform Version
 ANDROID_PLATFORM="android-21"
 # NDK home
-NDK_HOME="/usr/local/lib/android/Sdk/android-ndk-r12b"
+NDK_HOME="/usr/local/android-ndk-r15b"
 # Output Directory Path
 OUTPUT_DIR="/usr/local/ssl/$ANDROID_PLATFORM"
 

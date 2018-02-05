@@ -37,7 +37,7 @@ X86_TOOLCHAIN_PREFIX="${X86_TOOLCHAIN_PATH}/bin/i686-linux-android-"
 
 # make Android NDK standalone-toolchain(ARM)
 rm -rf "${ARM_TOOLCHAIN_PATH}"
-"${NDK_HOME}/build/tools/make-standalone-toolchain.sh" --arch=arm --toolchain="${ARM_TOOLCHAIN}" --install-dir="${ARM_TOOLCHAIN_PATH}" --platform="${ANDROID_PLATFORM}"
+"${NDK_HOME}/build/tools/make-standalone-toolchain.sh" --arch=arm --toolchain="${ARM_TOOLCHAIN}" --install-dir="${ARM_TOOLCHAIN_PATH}" --platform="${ANDROID_PLATFORM}" --verbose
 
 # make Android NDK standalone-toolchain(x86)
 rm -rf "${X86_TOOLCHAIN_PATH}"

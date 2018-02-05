@@ -14,8 +14,7 @@ matrix:
   allow_failures:
   - os: osx
 before_deploy:
-- mv target/release/hardback_conrod .
-- tar -zcvf $zipname assets hardback_conrod
+- tar -zcvf $zipname target
 addons:
   apt:
     packages:

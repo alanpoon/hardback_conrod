@@ -27,5 +27,7 @@ deploy:
   region: ap-southeast-1
   bucket: hardback
   skip_cleanup: true
+  edge:
+    branch: s3-backward-compat
   overwrite: true
   local_dir: target

@@ -13,7 +13,6 @@ jobs:
       - run: tar -xvzf openssl-1.0.2l.tar.gz
       - run: cp ssl_for_android.sh openssl-1.0.2l
       - run: cd openssl-1.0.2l
-      - run: cat Readme.md      
       - run: sh ssl_for_android.sh --verbose
       - run: cd ..
       - run: git clone --depth=1 https://github.com/alanpoon/cargo-edit cargo-edit

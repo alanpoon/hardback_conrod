@@ -74,6 +74,8 @@ make clean
 ./Configure --prefix="${PREFIX}" --cross-compile-prefix="${CROSS_COMPILE_PREFIX}" "${CONFIG}" threads no-shared
 make -s && make install
 
+pwd
+
 cp -f "Android.mk" "${OUTPUT_DIR}/Android.mk"
 rm -rf "${NDK_TOOLCHAIN_PATH}"
 

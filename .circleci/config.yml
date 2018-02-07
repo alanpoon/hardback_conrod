@@ -19,7 +19,7 @@ jobs:
       - 
         run: "cp ssl_for_android.sh openssl-1.0.2l"
       - 
-        run: "cd /openssl-1.0.2l"
+        run: "cd ./openssl-1.0.2l"
       -
         run: "pwd"
       - 

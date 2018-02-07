@@ -74,7 +74,7 @@ make clean
 ./Configure --prefix="${PREFIX}" --cross-compile-prefix="${CROSS_COMPILE_PREFIX}" "${CONFIG}" threads no-shared
 make -s && make install
 
-cp -f "$0/Android.mk" "${OUTPUT_DIR}/Android.mk"
+cp -f "Android.mk" "${OUTPUT_DIR}/Android.mk"
 rm -rf "${NDK_TOOLCHAIN_PATH}"
 
 export OPENSSL_DIR="/usr/local/ssl/android-21/armeabi-v7a"

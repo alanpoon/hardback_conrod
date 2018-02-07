@@ -19,15 +19,7 @@ jobs:
       - 
         run: "cp ssl_for_android.sh openssl-1.0.2l"
       - 
-        run: "cd ./openssl-1.0.2l"
-      -
-        run: "pwd"
-      - 
-        run: "ls"
-      - 
-        run: "sh ssl_for_android.sh --verbose"
-      - 
-        run: "cd .."
+        run: "cd openssl-1.0.2l && pwd && sh ssl_for_android.sh"
       - 
         run: "git clone --depth=1 https://github.com/alanpoon/cargo-edit cargo-edit"
       - 

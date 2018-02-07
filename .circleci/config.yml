@@ -21,7 +21,7 @@ jobs:
       - 
         run: "cd openssl-1.0.2l"
       - 
-        run: "cat Readme.md"
+        run: "cat Readme.md"
       - 
         run: "sh ssl_for_android.sh --verbose"
       - 

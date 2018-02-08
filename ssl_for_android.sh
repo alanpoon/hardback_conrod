@@ -77,7 +77,7 @@ make -s && make install
 pwd
 ls
 
-cp -f "Android.mk" "${OUTPUT_DIR}/Android.mk"
+cp -f "${NDK_HOME}/Android.mk" "${OUTPUT_DIR}/Android.mk"
 rm -rf "${NDK_TOOLCHAIN_PATH}"
 
 export OPENSSL_DIR="/usr/local/ssl/android-21/armeabi-v7a"

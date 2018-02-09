@@ -6,9 +6,9 @@ jobs:
         image: tomaka/cargo-apk
     environment: 
       - 
-        OPENSSL_DIR: /usr/local/ssl/android-21/armeabi-v7a
+        OPENSSL_2DIR: /usr/local/ssl/android-21/armeabi-v7a
       - 
-        OPENSSL_LIB_DIR: /usr/local/ssl/android-21/armeabi-v7a/lib
+        OPENSSL_2LIB_DIR: /usr/local/ssl/android-21/armeabi-v7a/lib
     steps: 
       - checkout
       - 

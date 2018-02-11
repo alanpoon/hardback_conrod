@@ -17,7 +17,7 @@ pub fn render(_ui: &mut conrod::UiCell,
 
 
 }
-#[cfg(target_os="android")]
+#[cfg(features ="keypad")]
 pub fn draw_lobby_chat(w_id: tabview::Item,
                        ids: &Ids,
                        gamedata: &mut GameData,

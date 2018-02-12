@@ -82,7 +82,7 @@ fn render_closure()
                       draw_game_chat(w_id, ids, &mut gamedata, result_map, action_tx, ui);
                   })]
 }
-#[cfg(any(feature = "keypad"))]
+#[cfg(any(feature = "android"))]
 fn draw_game_chat(w_id: tabview::Item,
                   _ids: &Ids,
                   gamedata: &mut GameData,
@@ -107,6 +107,7 @@ fn draw_game_chat(w_id: tabview::Item,
     }
 }
 
+#[cfg(any(feature = "default"))]
 fn draw_game_chat(w_id: tabview::Item,
                   _ids: &Ids,
                   gamedata: &mut GameData,

@@ -3,7 +3,7 @@
 set -eu
 
 # Android Platform Version
-ANDROID_PLATFORM="android-21"
+ANDROID_PLATFORM="android-18"
 # NDK home
 NDK_HOME="/usr/local/android-ndk-r15b"
 # Output Directory Path
@@ -79,5 +79,5 @@ ls
 ls ${NDK_HOME}
 rm -rf "${NDK_TOOLCHAIN_PATH}"
 
-export OPENSSL_DIR="/usr/local/ssl/android-21/armeabi-v7a"
-export OPENSSL_LIB_DIR="/usr/local/ssl/android-21/armeabi-v7a/lib"
+export OPENSSL_DIR="/usr/local/ssl/${ANDROID_PLATFORM}/armeabi-v7a"
+export OPENSSL_LIB_DIR="/usr/local/ssl/${ANDROID_PLATFORM}/armeabi-v7a/lib"

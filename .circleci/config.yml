@@ -4,6 +4,8 @@ jobs:
     docker: 
       - 
         image: tomaka/cargo-apk
+        environment:
+          ANDROID_PLATFORM: android-18
     steps: 
       - checkout
       - 
@@ -30,17 +32,17 @@ jobs:
         run: 
           command: "cd openssl-1.0.2l && pwd && sh ssl_for_android.sh"
           environment: 
-            OPENSSL_DIR: /usr/local/ssl/android-21/armeabi-v7a
-            OPENSSL_LIB_DIR: /usr/local/ssl/android-21/armeabi-v7a/lib
+            OPENSSL_DIR: /usr/local/ssl/${ANDROID_PLATFORM}/armeabi-v7a
+            OPENSSL_LIB_DIR: /usr/local/ssl/${ANDROID_PLATFORM}/armeabi-v7a/lib
           name: ssl_for_android
       -
-        run: yes | ${ANDROID_HOME}/tools/bin/sdkmanager "platforms;android-21"
+        run: yes | ${ANDROID_HOME}/tools/bin/sdkmanager "platforms;${ANDROID_PLATFORM}"
       - 
         run: 
           command: "cargo apk run --features android --no-default-features"
           environment: 
-            OPENSSL_DIR: /usr/local/ssl/android-21/armeabi-v7a
-            OPENSSL_LIB_DIR: /usr/local/ssl/android-21/armeabi-v7a/lib
+            OPENSSL_DIR: /usr/local/ssl/${ANDROID_PLATFORM}/armeabi-v7a
+            OPENSSL_LIB_DIR: /usr/local/${ANDROID_PLATFORM}/armeabi-v7a/lib
           name: "apk run"
   deploy: 
     docker: 

@@ -63,7 +63,9 @@ jobs:
       - 
         run: "cargo apk run --features android --release"
       - 
-        run: ./.circleci/upload_apk_to_github_releases.sh
+        run:
+          name: Deploy to S3
+          command: aws s3 target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk s3://hardback --delete -Region ap-southeast-1
 version: 2
 workflows: 
   build-and-deploy: 

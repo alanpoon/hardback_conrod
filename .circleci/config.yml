@@ -30,7 +30,7 @@ jobs:
         run: "cp ssl_for_android.sh openssl-1.0.2l"
       - 
         run: 
-          command: "cd openssl-1.0.2l && pwd && sh ssl_for_android.sh"
+          command: "cd openssl-1.0.2l && pwd && sh ssl_for_android.sh && ls /usr/local/ssl/${ANDROID_PLATFORM}"
           environment: 
             OPENSSL_DIR: /usr/local/ssl/${ANDROID_PLATFORM}/armeabi-v7a
             OPENSSL_LIB_DIR: /usr/local/ssl/${ANDROID_PLATFORM}/armeabi-v7a/lib

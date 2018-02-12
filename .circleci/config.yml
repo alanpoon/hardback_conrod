@@ -33,6 +33,8 @@ jobs:
             OPENSSL_DIR: /usr/local/ssl/android-21/armeabi-v7a
             OPENSSL_LIB_DIR: /usr/local/ssl/android-21/armeabi-v7a/lib
           name: ssl_for_android
+      -
+        run: yes | ${ANDROID_HOME}/tools/bin/sdkmanager "platforms;android-21"
       - 
         run: 
           command: "cargo apk run --features android --no-default-features"

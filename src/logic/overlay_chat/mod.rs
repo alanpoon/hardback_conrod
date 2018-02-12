@@ -106,7 +106,7 @@ fn draw_game_chat(w_id: tabview::Item,
         gamedata.keypad_on = w_id.set(k, &mut ui);
     }
 }
-#[cfg(any(feature = "default"))]
+
 fn draw_game_chat(w_id: tabview::Item,
                   _ids: &Ids,
                   gamedata: &mut GameData,

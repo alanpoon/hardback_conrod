@@ -21,7 +21,9 @@ jobs:
       - 
         run: "cargo add https://github.com/alanpoon/conrod_chat --features \"keypad\""
       - 
-        run: "apt-get -y install python"
+        run: "apt-get -y install python-pip"
+      - 
+        run: "pip -V"
       - 
         run: "wget http://www.openssl.org/source/openssl-1.0.2l.tar.gz"
       - 
@@ -42,26 +44,10 @@ jobs:
             OPENSSL_DIR: /usr/local/ssl/android-18/armeabi-v7a
             OPENSSL_LIB_DIR: /usr/local/ssl/android-18/armeabi-v7a/lib
           name: "apk build"
-  deploy: 
-    docker: 
       - 
-        image: tomaka/cargo-apk
-    steps: 
-      - checkout
+        run: "pip install awscli --upgrade --user"
       - 
-        run: "rustup show"
-      - 
-        run: "rustup target add armv7-linux-androideabi"
-      - 
-        run: "git clone --depth=1 https://github.com/alanpoon/cargo-edit cargo-edit"
-      - 
-        run: "cargo install --path cargo-edit"
-      - 
-        run: "cargo rm conrod_chat"
-      - 
-        run: "cargo add https://github.com/alanpoon/conrod_chat --features \"keypad\""
-      - 
-        run: "cargo apk run --features android --release"
+        run: "aws --version"
       - 
         run: 
           command: "aws s3 target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk s3://hardback --delete -Region ap-southeast-1"
@@ -75,11 +61,4 @@ workflows:
           filters: 
             tags: 
               ignore: /.*/
-      - 
-        deploy: 
-          filters: 
-            branches: 
-              ignore: /.*/
-            tags: 
-              only: /.*/
   version: 2

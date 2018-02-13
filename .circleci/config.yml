@@ -43,7 +43,7 @@ jobs:
             OPENSSL_LIB_DIR: /usr/local/ssl/android-18/armeabi-v7a/lib
           name: "apk build"
       -
-        run: "apt-get install python-pip"
+        run: "yes | apt-get install python-pip"
       -
         run: "pip -V"
       -

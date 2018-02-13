@@ -50,6 +50,8 @@ jobs:
         run: "pip install awscli --upgrade --user"
       - 
         run: "ls -a ~"
+      -
+        run: "chmod +x ~/.local/bin/aws"
       - 
         run: "export PATH=~/.local/bin:$PATH"   
       - 

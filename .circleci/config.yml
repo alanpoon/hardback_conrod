@@ -42,6 +42,10 @@ jobs:
             OPENSSL_DIR: /usr/local/ssl/android-18/armeabi-v7a
             OPENSSL_LIB_DIR: /usr/local/ssl/android-18/armeabi-v7a/lib
           name: "apk build"
+      -
+        run: "pip install awscli --upgrade --user"
+      -
+        run: "aws --version"
       - 
         run: 
           command: "aws s3 target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk s3://hardback --delete -Region ap-southeast-1"

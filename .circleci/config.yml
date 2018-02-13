@@ -62,7 +62,7 @@ jobs:
         run: "~/.local/bin/aws --version"
       - 
         run: 
-          command: "aws s3 target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk s3://hardback --delete -Region ap-southeast-1"
+          command: "~/.local/bin/aws s3 target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk s3://hardback --delete -Region ap-southeast-1"
           name: "Deploy to S3"
 version: 2
 workflows: 

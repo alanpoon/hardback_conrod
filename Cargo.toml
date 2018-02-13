@@ -53,4 +53,3 @@ fullscreen = true
 [package.metadata.android.activity_attributes]
 "android:screenOrientation" = "landscape"
 "android:uiOptions" = "none"
-"android:configChanges" = "keyboardHidden|orientation|screenSize‌​"

@@ -53,7 +53,7 @@ jobs:
       - 
         run: "export PATH=~/.local/bin:$PATH"   
       - 
-        run: "source ~/.bash_profile"        
+        run: "source ~/.profile"        
       -
         run: "aws --version"
       - 

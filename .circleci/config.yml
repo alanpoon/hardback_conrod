@@ -48,6 +48,12 @@ jobs:
           name: "apk build"
       - 
         run: "pip install awscli --upgrade --user"
+      - 
+        run: "ls -a ~"
+      - 
+        run: "export PATH=~/.local/bin:$PATH"   
+      - 
+        run: "source ~/.bash_profile"        
       -
         run: "aws --version"
       - 

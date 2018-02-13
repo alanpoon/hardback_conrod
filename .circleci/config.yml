@@ -43,6 +43,10 @@ jobs:
             OPENSSL_LIB_DIR: /usr/local/ssl/android-18/armeabi-v7a/lib
           name: "apk build"
       -
+        run: "apt-get install python-pip python-dev build-essential"
+      -
+        run: "pip install --upgrade pip && pip install --upgrade virtualenv"
+      -
         run: "pip install awscli --upgrade --user"
       -
         run: "aws --version"

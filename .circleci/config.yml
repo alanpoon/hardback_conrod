@@ -37,11 +37,11 @@ jobs:
           name: ssl_for_android
       - 
         run: 
-          command: "cargo apk run --features android --no-default-features"
+          command: "cargo apk build --features android --no-default-features"
           environment: 
             OPENSSL_DIR: /usr/local/ssl/android-18/armeabi-v7a
             OPENSSL_LIB_DIR: /usr/local/ssl/android-18/armeabi-v7a/lib
-          name: "apk run"
+          name: "apk build"
   deploy: 
     docker: 
       - 

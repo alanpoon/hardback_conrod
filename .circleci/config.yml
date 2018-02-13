@@ -46,7 +46,7 @@ jobs:
           name: "apk build"
       - 
         run: "pip install awscli --upgrade --user"
-      - 
+      -
         run: "aws --version"
       - 
         run: 

@@ -25,6 +25,8 @@ jobs:
       - 
         run: "pip -V"
       - 
+        run: "pip install --upgrade pip"        
+      - 
         run: "wget http://www.openssl.org/source/openssl-1.0.2l.tar.gz"
       - 
         run: "tar -xvzf openssl-1.0.2l.tar.gz"

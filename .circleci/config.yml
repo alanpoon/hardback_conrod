@@ -3,9 +3,9 @@ jobs:
   build: 
     docker: 
       - 
-        image: tomaka/cargo-apk
-        environment:
+        environment: 
           ANDROID_PLATFORM: android-18
+        image: tomaka/cargo-apk
     steps: 
       - checkout
       - 
@@ -32,15 +32,15 @@ jobs:
         run: 
           command: "cd openssl-1.0.2l && pwd && sh ssl_for_android.sh && ls /usr/local/ssl/${ANDROID_PLATFORM}"
           environment: 
-            OPENSSL_DIR: /usr/local/ssl/${ANDROID_PLATFORM}/armeabi-v7a
-            OPENSSL_LIB_DIR: /usr/local/ssl/${ANDROID_PLATFORM}/armeabi-v7a/lib
+            OPENSSL_DIR: "/usr/local/ssl/${ANDROID_PLATFORM}/armeabi-v7a"
+            OPENSSL_LIB_DIR: "/usr/local/ssl/${ANDROID_PLATFORM}/armeabi-v7a/lib"
           name: ssl_for_android
       - 
         run: 
           command: "cargo apk run --features android --no-default-features"
           environment: 
             OPENSSL_DIR: /usr/local/ssl/android-18/armeabi-v7a
-            OPENSSL_LIB_DIR: /usr/local/ssl/android-18/armeabi-v7a/lib
+            OPENSSL_LIB_DIR: /usr/local/ssl/android-18/armeabi-v7a/lib
           name: "apk run"
   deploy: 
     docker: 
@@ -63,9 +63,9 @@ jobs:
       - 
         run: "cargo apk run --features android --release"
       - 
-        run:
-          name: Deploy to S3
-          command: aws s3 target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk s3://hardback --delete -Region ap-southeast-1
+        run: 
+          command: "aws s3 target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk s3://hardback --delete -Region ap-southeast-1"
+          name: "Deploy to S3"
 version: 2
 workflows: 
   build-and-deploy: 

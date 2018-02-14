@@ -49,16 +49,6 @@ jobs:
       - 
         run: "pip install awscli --upgrade --user"
       - 
-        run: "ls target"        
-      - 
-        run: "ls target/android-artifacts"        
-      - 
-        run: "ls target/android-artifacts/app"
-      - 
-        run: "ls target/android-artifacts/app/build"
-      - 
-        run: "ls target/android-artifacts/app/build/outputs"
-      - 
         run: "ls target/android-artifacts/app/build/outputs/apk"
       -
         run: "chmod +x ~/.local/bin/aws"    

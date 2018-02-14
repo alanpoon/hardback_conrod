@@ -23,8 +23,6 @@ jobs:
       - 
         run: "apt-get -y install python-pip"
       - 
-        run: "pip -V"
-      - 
         run: "pip install --upgrade pip"        
       - 
         run: "wget http://www.openssl.org/source/openssl-1.0.2l.tar.gz"

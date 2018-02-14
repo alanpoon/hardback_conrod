@@ -39,6 +39,8 @@ jobs:
             OPENSSL_DIR: "/usr/local/ssl/${ANDROID_PLATFORM}/armeabi-v7a"
             OPENSSL_LIB_DIR: "/usr/local/ssl/${ANDROID_PLATFORM}/armeabi-v7a/lib"
           name: ssl_for_android
+      -
+        run: "rm -r target"
       - 
         run: 
           command: "cargo apk build --release --features android --no-default-features"
@@ -48,16 +50,6 @@ jobs:
           name: "apk build"
       - 
         run: "pip install awscli --upgrade --user"
-      - 
-        run: "ls target"        
-      - 
-        run: "ls target/android-artifacts"        
-      - 
-        run: "ls target/android-artifacts/app"
-      - 
-        run: "ls target/android-artifacts/app/build"
-      - 
-        run: "ls target/android-artifacts/app/build/outputs"
       - 
         run: "ls target/android-artifacts/app/build/outputs/apk"
       -

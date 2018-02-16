@@ -32,7 +32,9 @@ before_deploy:
 deploy:
     provider: S3
     access_key_id: AKIAJYTGSC6HEOD2PLEQ
-    secret_access_key: oZlZYP66BvT9hXbaAxs3+fTO5kEQ0R5dmDRqUeMrK6kAkbhD8fFWTi8B2z0lXCK8Mx0XcDwciQR1/lw1N1//KI1oPlW7YG/93K03bnk6brvXmdqf1W5BtfNlqthK0FPEogt18EiGaoNP313gj+e1hKrs0yknYZ0pl/i0Zwj5855eU8rv75O82O1kdZ852e2AVtnTUPxQn3943LJ05FITx+e4ZCyHntfFAg2MXPo8t8SB3iPKmt/LZRI8hs6pG4v+8+1D4hE5LZyroTfAPrylnCx8ooT0sgWPSIwKYAJ9bwr0qa7Sam2QW9ckK9q8pUTPCsk4Rt9ZxKAWcl5WRHduxE7PMSq0a9606vkE9l3/2bpGiZAdODUrnM7qGuHwMsZbUiQXXiK8hSpUIm3JSheBRhJ5TTmLeyQFqW4EMeRCdX6w+RcgjQmaAnJQ0g7M3eXc/JEHx9rOx0cuiKvDxqBsUFHtT4IJtHGcLROMUexn91OURRRS31QeSpFwJ2fWDOY6zGqxPGr9kmfRQbIxvScU9MUcUIaikELLE/EO/bkSY5dmxDWC4t9EWPIjYTqxgsWH1NU8VJasIHJfpRhTmYMIsTc8B9WD/vZvFaYAjmtqGjvHSbI0bOJ7KxcMUhWkfSfhhLl7SJGCay1C6Rjg4C5rJ/0f165FMtNYYbsChuLFtu0=
+    secret_access_key:
+      secure: Unrx4EIFXNJyoEG2osZLyyqTITJj6ea4XsHl/mSJ/WstEFBTZUQJSj6DDeCCykOy
     bucket: hardback
     region: ap-southeast-1
     artifact: /.*\.zip/
+    encrypt: true

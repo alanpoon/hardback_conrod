@@ -1,1 +1,1 @@
-travis.ruby2.5
+travis.ruby2.5 setup s3 --force

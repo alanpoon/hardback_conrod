@@ -13,8 +13,6 @@ script:
 matrix:
   allow_failures:
   - os: osx
-before_deploy:
-- tar -zcvf $zipname target
 addons:
   apt:
     packages:
@@ -25,7 +23,7 @@ deploy:
   secret_access_key:
     secure: jMtHCX+LnmG8zol7qUymSBMKfwNrdB1fGc93l7iAGt6A3mqosk/PAf5sXLkMwAuTClSUVbFD31mq12GKrLnNp5l2Jw47X3rSQQAQ2p91Aek2ODFPSuFgTGETguzB9BE6cquYPj5PG7i6gc/I3TNCBjUOI4HwT62QMSNs89vFHG9C2G0zzBtIpdxK47XXFArv/Q7bJDSVd3wpSTXqKCKtp5opr69Pjl9+lj3ZUvZsiT7SdTaFU4rjxLAZBpkHsbRKIGDZu+b6UG6vh1Q3bBazcotYFjMNlmkWVCZI7HxayAjtMBctdzFMXgCUjW/C1P5wDfAfLWXQkODpp5qF4TyzCaGow/jq0FrOuS9CDWtJUdZfZtaDqa6RLxlidCeuwMhYBXe/gvLldDXSYxmc5ndEMqnQjlp9x5U/QHq+wnVHUT3wk074PTmkJ/1UARsy6P+/6u6Gnuui4FchM1ivuCsNCJONZ3f2Q9xLwG25Ew1/NLw2gzF4bIy3CbwnUGi2jh1VvCjL4WhvqW9ugL1H0o/pK0452p0udXBh8ysPLuUGo61o9lGNSPxOZVa0xSRofxbWA03YhXdHRXtSe1GjmPo/HAaZUlmt0o72m6SLM24T+lyKsDN8muOR3PdnirBjb8bvRaPBOir89EkH9LZ/InZtsOiycv0ONoI46zH+aaNrWo8=
   bucket: hardback
-  file: $zipname
+  artifact: target
   acl: private
   on:
     repo: alanpoon/hardback_conrod

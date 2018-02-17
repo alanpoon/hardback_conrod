@@ -18,7 +18,7 @@ addons:
     packages:
     - libasound2-dev
 before_deploy:
-- tar -zcvf $zipname target
+  - tar -zcvf $zipname target
 deploy:
   provider: releases
   api_key:

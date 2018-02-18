@@ -41,5 +41,3 @@ deploy:
     artifact: /.*\.zip/
     on:
         appveyor_repo_tag: true
-        branch:
-            - github_release

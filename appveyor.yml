@@ -26,15 +26,20 @@ cache:
     - C:\Users\appveyor\.cargo\registry -> Cargo.lock
 
 before_deploy:
+    - mkdir staging
+    - mkdir staging\assets
+    - copy target\release\hardback.exe staging
+    - cd staging
     - 7z a ../%PROJECT_NAME%-%TARGET%.zip *
     - appveyor PushArtifact ../%PROJECT_NAME%-%TARGET%.zip
 
 deploy:
-    provider: S3
-    access_key_id: AKIAJYTGSC6HEOD2PLEQ
-    secret_access_key:
-      secure: Unrx4EIFXNJyoEG2osZLyyqTITJj6ea4XsHl/mSJ/WstEFBTZUQJSj6DDeCCykOy
-    bucket: hardback
-    region: ap-southeast-1
+    provider: GitHub
+    auth_token:
+        secure: LyH3l0DxyuT52Ryg5f2OuIm35Q7CroEBdUI5IxIkdFNjOkBEcPbDdLQQZUDTHZVH6cvmtKAShFzWV7erwx2BnWVGvcyDQSfAbf12oBrZwszgg/uHa/wLuyHmsdeXWNkpfFamhc9eCDVk91qEDcCRAX30iIQK8/RjwmenqcOB/0Ykj64IZn21Z5X/4oQ9siaKrK16OQsN/0K7LEAJyFlK3WSxcQGsTS6C2GcJCyH+q/egzdb3CSoXBX7wDMldVNsstgka6athvtsM50teKTRm3SCSMczoDMKJS/DBkTNuem2dFykoJJsnuy1cYMmNG+ngKWGvUu9plBKwUcSQGss7UJrroBUr634OVySI23dxMMVY2/XTSBIMhhq88roFGtVUa/C9e78OZKGKp0hczXt3e4arPNrnTIiOqsVUnWSmEEymD7wV2I5vJ548D1YvnWqrsSCka9JmiF0LIh0/4brkr5h05wWrlJN1ezGq2T2X3HTwSgef2lpsRXGEjG1WrDLem3KkVUkJiatr8iWqjoijd3oHmol21/LNzloNSi7H4SW0cShG7nnbx0myf3r5dCrHYlannK0QiZaQ2IsYHsk3uz+BrJk7jPUxvEkTp0fhWvFVTRsgqhVX/78ZynxeNSlW0ij8tu+EU0zNl+X3+6D1uUsvJ7VcAty3q2+D6o9zN5twN6LEhA4FPdYC1A/VDqqjZ4cyXDtOYjsOwZqN+FkfzZHoh6scFzsyGGWyb0guklO2tahIj5d2WAHX+BLT12PFDoYo8lod0MdqD2IpZ4X/EWyJzBjyg30FcwJJyfbmpfBVMSI1twXCEWaoLgoZVJdZ1ipZpEUIvnVBhlufISq6EkGaNlxwklyk3Byd4MYrm0bsTWOGeHI5CrsMY4v3KwhnhSmUpW4dTayF0QrAR8OvRQ==
+    repository: hardback_conrod
     artifact: /.*\.zip/
-    encrypt: true
+    on:
+        appveyor_repo_tag: true
+        branch:
+            - github_release

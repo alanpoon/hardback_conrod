@@ -8,7 +8,11 @@ private/
 app-sign.txt
 bk_apk
 README.md1
+<<<<<<< HEAD
 README.md
 **/*.zip
 **/*.gz
 hardback-linux
+=======
+README.md
+>>>>>>> github_release

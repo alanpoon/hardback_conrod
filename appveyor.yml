@@ -37,5 +37,4 @@ deploy:
     provider: GitHub
     auth_token:
         secure: SQHsCGfjqroLLrup3gcNOY2czmxs3TAVEFYwYwCwSD9RiSadX
-    repository: hardback_conrod
     artifact: /.*\.zip/

@@ -260,17 +260,18 @@ impl<S> Widget for ItemWidget<S>
                            rect,
                            self.style.color(&ui.theme),
                            ui);
-            println!("_str {:?}",_str.clone());
             for edit in widget::TextEdit::new(&_str.clone())
                     .color(self.style.color(&ui.theme).plain_contrast())
                     .middle_of(state.ids.textedit_background)
-                    .w(10.0)
+                    .w(100.0)
                     .h(10.0)
                     .set(state.ids.textedit_at_toggle, ui) {
                         println!("edit {:?}",edit);
-                let last_char = edit.chars().rev().take(1).collect();
-                println!("last char {:?}",last_char);
-                *_str = last_char;            
+              /*  let last_char = edit.chars().rev().take(1).collect();
+                println!("last char {:?}",last_char);                
+                *_str = last_char; 
+                */
+                *_str = edit;
             }
 
             if _str.chars().count() != 1 {

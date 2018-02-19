@@ -263,6 +263,7 @@ impl<S> Widget for ItemWidget<S>
             for edit in widget::TextEdit::new(&_str.clone())
                     .color(self.style.color(&ui.theme).plain_contrast())
                     .middle_of(state.ids.textedit_background)
+                    .parent(id)
                     .w(100.0)
                     .h(10.0)
                     .set(state.ids.textedit_at_toggle, ui) {

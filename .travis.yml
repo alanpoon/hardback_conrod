@@ -15,7 +15,7 @@ deploy:
   file: $zipname
   provider: releases
   true: 
-    branch: github_release
+    branch: master
     repo: alanpoon/hardback_conrod
 env: 
   - zipname="hardback-$TRAVIS_OS_NAME.tar.gz"

@@ -36,5 +36,7 @@ before_deploy:
 deploy:
     provider: GitHub
     auth_token:
-        secure: SQHsCGfjqroLLrup3gcNOY2czmxs3TAVEFYwYwCwSD9RiSadX
+        secure: DOOGyeUs8hT+YyvDk4P+ZvvWOXaE9vhSr/uCuxDSpg0XCqm6TdqcfET2v3ivGAB4
     artifact: /.*\.zip/
+    repository: alanpoon/hardback_conrod
+    draft: true

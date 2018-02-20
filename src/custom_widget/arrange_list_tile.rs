@@ -253,7 +253,7 @@ impl<S> Widget for ItemWidget<S>
             .graphics_for(id)
             .set(state.ids.alphabet, ui);
 
-        if let  Some(ref mut _str) = q_op_str.clone() {
+        if let  Some(ref mut _str) = q_op_str {
             let rect = Rect::from_xy_dim([0.0, 0.0], [80.0, 40.0]);
             rectangle_fill(id,
                            state.ids.textedit_background,

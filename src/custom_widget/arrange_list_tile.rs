@@ -253,18 +253,18 @@ impl<S> Widget for ItemWidget<S>
             .graphics_for(id)
             .set(state.ids.alphabet, ui);
 
-        if let  Some(ref mut _str) = q_op_str {
+        if let  Some(ref mut _str) = q_op_str.clone() {
             let rect = Rect::from_xy_dim([0.0, 0.0], [80.0, 40.0]);
             rectangle_fill(id,
                            state.ids.textedit_background,
                            rect,
                            self.style.color(&ui.theme),
                            ui);
-            for edit in widget::TextEdit::new(&_str.clone())
+            for edit in widget::TextEdit::new(&_str)
                     .color(self.style.color(&ui.theme).plain_contrast())
                     .middle_of(state.ids.textedit_background)
                     .parent(id)
-                    .w(100.0)
+                    .w(30.0)
                     .h(10.0)
                     .set(state.ids.textedit_at_toggle, ui) {
                         println!("edit {:?}",edit);
@@ -425,7 +425,7 @@ fn update_toggle_bool_spinner_index(drag: &mut Drag, op_str:&mut Option<String>)
                 if op_str.is_some() {
                     *op_str = None;
                 } else {
-                    *op_str = Some("a".to_owned());
+                    *op_str = Some("aasd".to_owned());
                 }
 
                 *spinner_index = 0;

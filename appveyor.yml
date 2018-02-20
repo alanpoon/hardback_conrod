@@ -27,6 +27,7 @@ cache:
 
 before_deploy:
     - mkdir staging
+    - dir
     - copy assets staging
     - copy target\release\hardback.exe staging
     - cd staging

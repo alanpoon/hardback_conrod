@@ -265,7 +265,7 @@ impl<S> Widget for ItemWidget<S>
                     .middle_of(state.ids.textedit_background)
                     .parent(id)
                     .w(30.0)
-                    .h(10.0)
+                    .h(50.0)
                     .set(state.ids.textedit_at_toggle, ui) {
                         println!("edit {:?}",edit);
               /*  let last_char = edit.chars().rev().take(1).collect();

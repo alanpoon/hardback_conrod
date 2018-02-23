@@ -265,7 +265,7 @@ impl<S> Widget for ItemWidget<S>
                     .middle_of(state.ids.textedit_background)
                     .parent(id)
                     .w(30.0)
-                    .h(50.0)
+                    .h(40.0)
                     .set(state.ids.textedit_at_toggle, ui) {
                         
               let last_char = edit.chars().rev().take(1).collect();
@@ -298,7 +298,7 @@ impl<S> Widget for ItemWidget<S>
         let mut drag = state.drag;
         if self.toggle{
             update_drag(id, &mut drag, ui);
-        let draw_spinner_index = update_toggle_bool_spinner_index(&mut drag,&mut q_op_str);
+        let draw_spinner_index = update_toggle_bool_spinner_index(&mut drag,&mut q_op_str,j);
         state.update(|state| {
                          state.drag = drag;
                      });
@@ -416,14 +416,14 @@ fn draw_spinner_op<H: Spriteable>(button_id: widget::Id,
     }
 
 }
-fn update_toggle_bool_spinner_index(drag: &mut Drag, op_str:&mut Option<String>) -> Option<u16> {
+fn update_toggle_bool_spinner_index(drag: &mut Drag, op_str:&mut Option<String>,alphabet:String) -> Option<u16> {
     match drag {
         &mut Drag::Selecting(ref mut spinner_index, _) => {
             if *spinner_index >= 60 {
                 if op_str.is_some() {
                     *op_str = None;
                 } else {
-                    *op_str = Some("aasd".to_owned());
+                    *op_str = Some(alphabet.clone());
                 }
 
                 *spinner_index = 0;

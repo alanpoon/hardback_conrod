@@ -267,12 +267,10 @@ impl<S> Widget for ItemWidget<S>
                     .w(30.0)
                     .h(10.0)
                     .set(state.ids.textedit_at_toggle, ui) {
-                        println!("edit {:?}",edit);
-              /*  let last_char = edit.chars().rev().take(1).collect();
+                        
+              let last_char = edit.chars().rev().take(1).collect();
                 println!("last char {:?}",last_char);                
                 *_str = last_char; 
-                */
-                *_str = edit;
             }
 
             if _str.chars().count() != 1 {

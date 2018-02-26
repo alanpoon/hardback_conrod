@@ -12,7 +12,7 @@ use std::collections::HashMap;
 use support;
 /// The type upon which we'll implement the `Widget` trait.
 #[derive(WidgetCommon)]
-pub struct ItemWidget<S,'a>
+pub struct ItemWidget<'a,S>
     where S: Spriteable
 {
     /// An object that handles some of the dirty work of rendering a GUI. We don't
@@ -30,7 +30,7 @@ pub struct ItemWidget<S,'a>
     pub coin_info: Option<image::Id>,
     pub coin_info270: Option<image::Id>,
     pub game_icon: Option<image::Id>,
-    pub used_for_keypad:(&'a AppData,&'a HashMap<ResourceEnum, SupportIdType>,widget::Id),
+    pub used_for_keypad:Option<(&'a AppData,&'a HashMap<ResourceEnum, SupportIdType>,bool,widget::Id)>,
     pub toggle:bool
 }
 
@@ -73,13 +73,14 @@ pub struct State {
     blink_line_frame: u16,
 }
 
-impl<S,'a> ItemWidget<S,'a>
+impl<'a,S> ItemWidget<'a,S>
     where S: Spriteable
 {
     /// Create a button context to be built upon.
     pub fn new(toggle_image: image::Id,
                tuple:ArrangeTuple,
-               timelesstext: String,used_for_keypad:(&'a AppData,&'a HashMap<ResourceEnum, SupportIdType>,bool,widget::Id))
+               timelesstext: String,
+               used_for_keypad:Option<(&'a AppData,&'a HashMap<ResourceEnum, SupportIdType>,bool,widget::Id)>)
                -> Self {
         ItemWidget {
             toggle_image: toggle_image,
@@ -126,14 +127,14 @@ impl<S,'a> ItemWidget<S,'a>
         self
     }
 }
-impl<S,'a> WidgetMut<ArrangeTuple> for ItemWidget<S,'a> where S:Spriteable{
+impl<'a,S> WidgetMut<ArrangeTuple> for ItemWidget<'a,S> where S:Spriteable{
     fn set_mut<'c,'b>(self,widget_list_item:widget::list::Item<Right,Fixed>,ui:&'c mut UiCell<'b>)->ArrangeTuple{
         widget_list_item.set(self,ui)
     }
 }
 /// A custom Conrod widget must implement the Widget trait. See the **Widget** trait
 /// documentation for more details.
-impl<S,'a> Widget for ItemWidget<S,'a>
+impl<'a,S> Widget for ItemWidget<'a,S>
     where S: Spriteable
 {
     /// The State struct that we defined above.
@@ -164,7 +165,7 @@ impl<S,'a> Widget for ItemWidget<S,'a>
         // Finally, we'll describe how we want our widget drawn by simply instantiating the
         // necessary primitive graphics widgets.
         //
-        let (appdata,result_map,gamedata_keypad_on,wh,id_master)=self.used_for_keypad;
+        
         let (q_cardindex,q_timeless,q_alphabet,mut q_op_str,q_color,q_text_id,q_cost_rect,q_top_left_rect,q_ink) = self.tuple.clone();
         let (_interaction, _times_triggered) = interaction_and_times_triggered(id, ui);
         let (_, _, w, h) = rect.x_y_w_h();
@@ -259,7 +260,7 @@ impl<S,'a> Widget for ItemWidget<S,'a>
             .graphics_for(id)
             .set(state.ids.alphabet, ui);
 
-        if let  Some(ref mut _str) = q_op_str {
+        if let  (Some(ref mut _str),Some((appdata,result_map,gamedata_keypad_on,id_master))) = (q_op_str,self.used_for_keypad){
             let rect = Rect::from_xy_dim([0.0, 0.0], [80.0, 40.0]);
             rectangle_fill(id,
                            state.ids.textedit_background,
@@ -272,7 +273,7 @@ impl<S,'a> Widget for ItemWidget<S,'a>
                                 result_map,
                                 [30.0, 50.0],
                                 Some(1),
-                                gamedata_keypad_on,
+                                &mut gamedata_keypad_on,
                                 state.ids.textedit_background,
                                 15.0,
                                 id_master,
@@ -442,7 +443,7 @@ fn update_toggle_bool_spinner_index(drag: &mut Drag, op_str:&mut Option<String>,
         _ => None,
     }
 }
-impl<S,'a> Arrangeable for ItemWidget<S,'a>
+impl<'a,S> Arrangeable for ItemWidget<'a,S>
     where S: Spriteable
 {
     fn selectable(mut self) -> Self {
@@ -450,12 +451,12 @@ impl<S,'a> Arrangeable for ItemWidget<S,'a>
         self
     }
 }
-impl<S,'a> Colorable for ItemWidget<S,'a>
+impl<'a,S> Colorable for ItemWidget<'a,S>
     where S: Spriteable
 {
     builder_method!(color { style.color = Some(Color) });
 }
-impl<S,'a> Borderable for ItemWidget<S,'a>
+impl<'a,S> Borderable for ItemWidget<'a,S>
     where S: Spriteable
 {
     builder_methods!{

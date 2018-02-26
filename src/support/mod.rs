@@ -62,7 +62,7 @@ pub fn textedit(k: &mut String,
         for edit in editz {
             if let Some(_limited_to_chars)=limited_to_chars{
                 let last_char = edit.chars().rev().take(_limited_to_chars).collect();             
-                *_str = last_char; 
+                *k = last_char; 
             }else{
                 *k = edit;
             }
@@ -92,7 +92,7 @@ pub fn textedit(k: &mut String,
             .set(id, ui) {
          if let Some(_limited_to_chars)=limited_to_chars{
                 let last_char = edit.chars().rev().take(_limited_to_chars).collect();             
-                *_str = last_char; 
+                *k = last_char; 
             }else{
                 *k = edit;
             }

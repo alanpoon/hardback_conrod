@@ -39,6 +39,7 @@ pub fn textedit(k: &mut String,
                 _appdata: &AppData,
                 result_map: &HashMap<ResourceEnum, SupportIdType>,
                 dim: [f64; 2],
+                limited_to_chars:Option<usize>,
                 keypad_on_: &mut bool,
                 right_of: widget::Id,
                 right_margin: f64,
@@ -59,11 +60,15 @@ pub fn textedit(k: &mut String,
                     .restrict_to_height(true) // Let the height grow infinitely and scroll.
                     .set(id, ui);
         for edit in editz {
-            *k = edit;
+            if let Some(_limited_to_chars)=limited_to_chars{
+                let last_char = edit.chars().rev().take(_limited_to_chars).collect();             
+                *_str = last_char; 
+            }else{
+                *k = edit;
+            }
         }
         *keypad_on_ = keypad_bool;
     }
-
 }
 #[cfg(feature="default")]
 pub fn textedit(k: &mut String,
@@ -71,12 +76,13 @@ pub fn textedit(k: &mut String,
                 _appdata: &AppData,
                 _result_map: &HashMap<ResourceEnum, SupportIdType>,
                 dim: [f64; 2],
+                limited_to_chars:Option<usize>,
                 _keypad_on_: &mut bool,
                 right_of: widget::Id,
                 right_margin: f64,
                 _parent_of: widget::Id,
                 ui: &mut conrod::UiCell) {
-    for editz in widget::TextEdit::new(k)
+    for edit in widget::TextEdit::new(k)
             .color(color::BLACK)
             .wh(dim)
             .right_from(right_of,right_margin)
@@ -84,7 +90,12 @@ pub fn textedit(k: &mut String,
             .line_spacing(2.5)
             .restrict_to_height(true) // Let the height grow infinitely and scroll.
             .set(id, ui) {
-        *k = editz;
+         if let Some(_limited_to_chars)=limited_to_chars{
+                let last_char = edit.chars().rev().take(_limited_to_chars).collect();             
+                *_str = last_char; 
+            }else{
+                *k = edit;
+            }
     }
 
 }

@@ -421,7 +421,8 @@ fn spell(ui: &mut conrod::UiCell,
                                  Box::new(move |tuple| {
                     ItemWidget::new(back_image,
                                     tuple,
-                                    "timeless".to_owned())
+                                    "timeless".to_owned(),
+                                    (appdata,result_map,ids.body))
                             .cloudy_image(cloudy)
                             .game_icon(game_icon)
                             .coin_info(coin_info)

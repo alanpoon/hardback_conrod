@@ -6,10 +6,13 @@ use conrod::widget::list::{Right,Fixed};
 use cardgame_widgets::sprite::{Spriteable, spriteable_rect};
 use cardgame_widgets::text::get_font_size_hn;
 use conrod::widget::Rectangle;
-
+use backend::meta::app::{AppData,ResourceEnum};
+use backend::SupportIdType;
+use std::collections::HashMap;
+use support;
 /// The type upon which we'll implement the `Widget` trait.
 #[derive(WidgetCommon)]
-pub struct ItemWidget<S>
+pub struct ItemWidget<S,'a>
     where S: Spriteable
 {
     /// An object that handles some of the dirty work of rendering a GUI. We don't
@@ -27,6 +30,7 @@ pub struct ItemWidget<S>
     pub coin_info: Option<image::Id>,
     pub coin_info270: Option<image::Id>,
     pub game_icon: Option<image::Id>,
+    pub used_for_keypad:(&'a AppData,&'a HashMap<ResourceEnum, SupportIdType>,widget::Id),
     pub toggle:bool
 }
 
@@ -69,13 +73,13 @@ pub struct State {
     blink_line_frame: u16,
 }
 
-impl<S> ItemWidget<S>
+impl<S,'a> ItemWidget<S,'a>
     where S: Spriteable
 {
     /// Create a button context to be built upon.
     pub fn new(toggle_image: image::Id,
                tuple:ArrangeTuple,
-               timelesstext: String)
+               timelesstext: String,used_for_keypad:(&'a AppData,&'a HashMap<ResourceEnum, SupportIdType>,bool,widget::Id))
                -> Self {
         ItemWidget {
             toggle_image: toggle_image,
@@ -89,6 +93,7 @@ impl<S> ItemWidget<S>
             game_icon: None,
             coin_info: None,
             coin_info270: None,
+            used_for_keypad:used_for_keypad,
             toggle:false
         }
     }
@@ -121,14 +126,14 @@ impl<S> ItemWidget<S>
         self
     }
 }
-impl<S> WidgetMut<ArrangeTuple> for ItemWidget<S> where S:Spriteable{
+impl<S,'a> WidgetMut<ArrangeTuple> for ItemWidget<S,'a> where S:Spriteable{
     fn set_mut<'c,'b>(self,widget_list_item:widget::list::Item<Right,Fixed>,ui:&'c mut UiCell<'b>)->ArrangeTuple{
         widget_list_item.set(self,ui)
     }
 }
 /// A custom Conrod widget must implement the Widget trait. See the **Widget** trait
 /// documentation for more details.
-impl<S> Widget for ItemWidget<S>
+impl<S,'a> Widget for ItemWidget<S,'a>
     where S: Spriteable
 {
     /// The State struct that we defined above.
@@ -159,6 +164,7 @@ impl<S> Widget for ItemWidget<S>
         // Finally, we'll describe how we want our widget drawn by simply instantiating the
         // necessary primitive graphics widgets.
         //
+        let (appdata,result_map,gamedata_keypad_on,wh,id_master)=self.used_for_keypad;
         let (q_cardindex,q_timeless,q_alphabet,mut q_op_str,q_color,q_text_id,q_cost_rect,q_top_left_rect,q_ink) = self.tuple.clone();
         let (_interaction, _times_triggered) = interaction_and_times_triggered(id, ui);
         let (_, _, w, h) = rect.x_y_w_h();
@@ -260,19 +266,17 @@ impl<S> Widget for ItemWidget<S>
                            rect,
                            self.style.color(&ui.theme),
                            ui);
-            for edit in widget::TextEdit::new(&_str)
-                    .color(self.style.color(&ui.theme).plain_contrast())
-                    .middle_of(state.ids.textedit_background)
-                    .parent(id)
-                    .w(30.0)
-                    .h(50.0)
-                    .set(state.ids.textedit_at_toggle, ui) {
-                        
-              let last_char = edit.chars().rev().take(1).collect();
-                println!("last char {:?}",last_char);                
-                *_str = last_char; 
-            }
-
+            support::textedit(&mut _str,
+                                state.ids.textedit_at_toggle,
+                                appdata,
+                                result_map,
+                                [30.0, 50.0],
+                                Some(1),
+                                gamedata_keypad_on,
+                                state.ids.textedit_background,
+                                15.0,
+                                id_master,
+                                ui);            
             if _str.chars().count() != 1 {
                 state.update(|state| state.blink_line_frame += 1);
                 if (state.blink_line_frame / 120) == 0 {
@@ -437,7 +441,7 @@ fn update_toggle_bool_spinner_index(drag: &mut Drag, op_str:&mut Option<String>)
         _ => None,
     }
 }
-impl<S> Arrangeable for ItemWidget<S>
+impl<S,'a> Arrangeable for ItemWidget<S,'a>
     where S: Spriteable
 {
     fn selectable(mut self) -> Self {
@@ -445,12 +449,12 @@ impl<S> Arrangeable for ItemWidget<S>
         self
     }
 }
-impl<S> Colorable for ItemWidget<S>
+impl<S,'a> Colorable for ItemWidget<S,'a>
     where S: Spriteable
 {
     builder_method!(color { style.color = Some(Color) });
 }
-impl<S> Borderable for ItemWidget<S>
+impl<S,'a> Borderable for ItemWidget<S,'a>
     where S: Spriteable
 {
     builder_methods!{

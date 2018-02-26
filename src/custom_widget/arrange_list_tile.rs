@@ -277,6 +277,7 @@ impl<S,'a> Widget for ItemWidget<S,'a>
                                 15.0,
                                 id_master,
                                 ui);            
+
             if _str.chars().count() != 1 {
                 state.update(|state| state.blink_line_frame += 1);
                 if (state.blink_line_frame / 120) == 0 {
@@ -302,7 +303,7 @@ impl<S,'a> Widget for ItemWidget<S,'a>
         let mut drag = state.drag;
         if self.toggle{
             update_drag(id, &mut drag, ui);
-        let draw_spinner_index = update_toggle_bool_spinner_index(&mut drag,&mut q_op_str);
+        let draw_spinner_index = update_toggle_bool_spinner_index(&mut drag,&mut q_op_str,j);
         state.update(|state| {
                          state.drag = drag;
                      });
@@ -420,14 +421,14 @@ fn draw_spinner_op<H: Spriteable>(button_id: widget::Id,
     }
 
 }
-fn update_toggle_bool_spinner_index(drag: &mut Drag, op_str:&mut Option<String>) -> Option<u16> {
+fn update_toggle_bool_spinner_index(drag: &mut Drag, op_str:&mut Option<String>,alphabet:String) -> Option<u16> {
     match drag {
         &mut Drag::Selecting(ref mut spinner_index, _) => {
             if *spinner_index >= 60 {
                 if op_str.is_some() {
                     *op_str = None;
                 } else {
-                    *op_str = Some("aasd".to_owned());
+                    *op_str = Some(alphabet.clone());
                 }
 
                 *spinner_index = 0;

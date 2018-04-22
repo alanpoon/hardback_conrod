@@ -418,15 +418,15 @@ fn spell(ui: &mut conrod::UiCell,
             let spinner_rect = graphics_match::spinner_sprite();
             let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
             let body_list_w = ui.w_of(ids.body).unwrap() - 40.0;
-            let (exitid, exitby, scrollbar) =
+            let (exitid, exitby, scrollbar,keypad_bool_new) =
                 ArrangeList::new(&mut arrangedvec,
                                  spell_which_arrangelist,
                                  overlay_blowup,
-                                 Box::new(move |tuple| {
+                                 Box::new(|tuple,keypad_bool_ind| {
                     ItemWidget::new(back_image,
                                     tuple,
                                     "timeless".to_owned(),
-                                    Some((appdata,result_map,keypad_bool,ids.body)))
+                                    Some((appdata,result_map,keypad_bool_ind,ids.body)))
                             .cloudy_image(cloudy)
                             .game_icon(game_icon)
                             .coin_info(coin_info)
@@ -457,8 +457,9 @@ fn spell(ui: &mut conrod::UiCell,
                         .bottom_arrow(_b)
                         .corner_arrow(_c)
                         .arrow_size(appdata.convert_h(50.0))
+                        .keypad_bool(keypad_bool.clone())
                         .set(ids.bodydragdroplistview, ui);
-
+            *keypad_bool = keypad_bool_new;
             match (exitid, exitby) {                
                 (Some(_x), ExitBy::Bottom) => {
                     _personal.hand.push(_x.0);

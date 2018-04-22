@@ -350,11 +350,11 @@ fn spell(ui: &mut conrod::UiCell,
             let spinner_rect = graphics_match::spinner_sprite();
             let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
             let footer_list_w = ui.w_of(ids.footer).unwrap() - 300.0;
-            let (exitid, exitby, scrollbar) =
+            let (exitid, exitby, scrollbar,_) =
                 ArrangeList::new(&mut handvec,
                                  spell_which_arrangelist,
                                  overlay_blowup,
-                                 Box::new(move |tuple| {
+                                 Box::new(move |tuple,_| {
                     let mut tuple1=tuple.clone();
                     tuple1.3 =None;                                     
                     ItemWidget::new(back_image,
@@ -389,6 +389,7 @@ fn spell(ui: &mut conrod::UiCell,
                         .right_arrow(_r)
                         .top_arrow(_t)
                         .arrow_size(appdata.convert_h(50.0))
+                        .keypad_bool(false)
                         .set(ids.footerdragdroplistview, ui);
             match (exitid, exitby) {                
                 (Some(_x), ExitBy::Top) => {

@@ -80,7 +80,7 @@ impl<'a,S> ItemWidget<'a,S>
     pub fn new(toggle_image: image::Id,
                tuple:ArrangeTuple,
                timelesstext: String,
-               used_for_keypad:Option<(&'a AppData,&'a HashMap<ResourceEnum, SupportIdType>,bool,widget::Id)>)
+               used_for_keypad:Option<(&'a AppData,&'a HashMap<ResourceEnum, SupportIdType>, bool,widget::Id)>)
                -> Self {
         ItemWidget {
             toggle_image: toggle_image,
@@ -128,7 +128,7 @@ impl<'a,S> ItemWidget<'a,S>
     }
 }
 impl<'a,S> WidgetMut<ArrangeTuple> for ItemWidget<'a,S> where S:Spriteable{
-    fn set_mut<'c,'b>(self,widget_list_item:widget::list::Item<Right,Fixed>,ui:&'c mut UiCell<'b>)->ArrangeTuple{
+    fn set_mut<'c,'d>(self,widget_list_item:widget::list::Item<Right,Fixed>,ui:&'c mut UiCell<'d>)->(ArrangeTuple,bool){
         widget_list_item.set(self,ui)
     }
 }
@@ -143,8 +143,8 @@ impl<'a,S> Widget for ItemWidget<'a,S>
     type Style = Style;
     /// The event produced by instantiating the widget.
     ///
-    /// `Some` when clicked, otherwise `None`.
-    type Event = ArrangeTuple;
+    /// bool is keypad
+    type Event = (ArrangeTuple,bool);
 
     fn init_state(&self, id_gen: widget::id::Generator) -> Self::State {
         State {
@@ -259,15 +259,15 @@ impl<'a,S> Widget for ItemWidget<'a,S>
             .and_then(Some(q_text_id), widget::Text::font_id)
             .graphics_for(id)
             .set(state.ids.alphabet, ui);
-
-        if let  (Some(ref mut _str),Some((appdata,result_map,gamedata_keypad_on,id_master))) = (q_op_str,self.used_for_keypad){
+        let mut keypad_new=false;
+        if let  (Some(ref mut _str),Some((appdata,result_map,mut gamedata_keypad_on,id_master))) = (q_op_str,self.used_for_keypad){
             let rect = Rect::from_xy_dim([0.0, 0.0], [80.0, 40.0]);
             rectangle_fill(id,
                            state.ids.textedit_background,
                            rect,
                            self.style.color(&ui.theme),
                            ui);
-            support::textedit(&mut _str,
+            support::textedit(_str,
                                 state.ids.textedit_at_toggle,
                                 appdata,
                                 result_map,
@@ -278,7 +278,7 @@ impl<'a,S> Widget for ItemWidget<'a,S>
                                 15.0,
                                 id_master,
                                 ui);            
-
+            keypad_new = gamedata_keypad_on;
             if _str.chars().count() != 1 {
                 state.update(|state| state.blink_line_frame += 1);
                 if (state.blink_line_frame / 120) == 0 {
@@ -317,7 +317,7 @@ impl<'a,S> Widget for ItemWidget<'a,S>
                             ui);
         }
         }
-         (q_cardindex,q_timeless,q_alphabet,q_op_str,q_color,q_text_id,q_cost_rect,q_top_left_rect,q_ink)
+         ((q_cardindex,q_timeless,q_alphabet,q_op_str,q_color,q_text_id,q_cost_rect,q_top_left_rect,q_ink),keypad_new)
     }
     fn drag_area(&self, dim: Dimensions, style: &Style, _theme: &Theme) -> Option<Rect> {
         if let Some(_) = style.draggable {

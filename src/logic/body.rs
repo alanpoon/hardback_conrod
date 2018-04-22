@@ -418,7 +418,6 @@ fn spell(ui: &mut conrod::UiCell,
             let spinner_rect = graphics_match::spinner_sprite();
             let (_l, _t, _r, _b, _c) = graphics_match::all_arrows(arrows_image);
             let body_list_w = ui.w_of(ids.body).unwrap() - 40.0;
-            let mut keypad_bool_deref=*keypad_bool;
             let (exitid, exitby, scrollbar) =
                 ArrangeList::new(&mut arrangedvec,
                                  spell_which_arrangelist,
@@ -427,7 +426,7 @@ fn spell(ui: &mut conrod::UiCell,
                     ItemWidget::new(back_image,
                                     tuple,
                                     "timeless".to_owned(),
-                                    Some((appdata.clone(),result_map,keypad_bool_deref,ids.body)))
+                                    Some((appdata,result_map,keypad_bool,ids.body)))
                             .cloudy_image(cloudy)
                             .game_icon(game_icon)
                             .coin_info(coin_info)

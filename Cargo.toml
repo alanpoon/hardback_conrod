@@ -4,8 +4,8 @@ version = "0.1.0"
 authors = ["alanpoon"]
 
 [dependencies]
-conrod = { git ="https://github.com/alanpoon/conrod.git", features = ["glium","winit"]}
-conrod_derive = "0.1.0"
+conrod = { git ="https://github.com/PistonDevelopers/conrod.git", branch="master", features = ["glium","winit"]}
+conrod_derive = {git ="https://github.com/PistonDevelopers/conrod.git", branch="master"}
 futures ={ version = "0.1.14", features=["use_std"] }
 cardgame_widgets = {git ="https://github.com/alanpoon/cardgame_widgets.git"}
 cardgame_macros = {git="https://github.com/alanpoon/cardgame_macros.git"}

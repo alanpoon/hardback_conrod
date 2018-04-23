@@ -267,7 +267,7 @@ impl<'a,S> Widget for ItemWidget<'a,S>
                            rect,
                            self.style.color(&ui.theme),
                            ui);
-            support::textedit(_str,
+            support::textedit(&mut _str,
                                 state.ids.textedit_at_toggle,
                                 appdata,
                                 result_map,

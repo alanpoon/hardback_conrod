@@ -45,11 +45,17 @@ jobs:
             OPENSSL_LIB_DIR: /usr/local/ssl/android-18/armeabi-v7a/lib
           name: "apk build"
       - 
-        run: "ls target/android-artifacts/app/build/outputs/apk"  
+        run: "pip install awscli --upgrade --user"
+      - 
+        run: "ls target/android-artifacts/app/build/outputs/apk"
+      -
+        run: "chmod +x ~/.local/bin/aws"    
+      -
+        run: "~/.local/bin/aws --version"
       - 
         run: 
-          command: "./.circleci/upload_apk_to_github_releases.sh"
-          name: "Deploy to Github"
+          command: "~/.local/bin/aws s3 sync target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk s3://hardback --delete --region ap-southeast-1"
+          name: "Deploy to S3"
 version: 2
 workflows: 
   build-and-deploy: 

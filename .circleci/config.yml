@@ -45,7 +45,9 @@ jobs:
             OPENSSL_LIB_DIR: /usr/local/ssl/android-18/armeabi-v7a/lib
           name: "apk build"
       - 
-        run: "ls target/android-artifacts/app/build/outputs/apk"  
+        run: "ls target/android-artifacts/app/build/outputs/apk" 
+      -
+        run: "chmod +x .circleci/upload_github_release.sh"
       - 
         run: 
           command: "./.circleci/upload_github_release.sh"

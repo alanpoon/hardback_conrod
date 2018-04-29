@@ -260,7 +260,8 @@ impl<'a,S> Widget for ItemWidget<'a,S>
             .graphics_for(id)
             .set(state.ids.alphabet, ui);
         let mut keypad_new=false;
-        if let  (Some(ref mut _str),Some((appdata,result_map,mut gamedata_keypad_on,id_master))) = (q_op_str,self.used_for_keypad){
+        
+        if let  (&mut Some(ref mut _str),Some((appdata,result_map,mut gamedata_keypad_on,id_master))) = (&mut q_op_str,self.used_for_keypad){
             let rect = Rect::from_xy_dim([0.0, 0.0], [80.0, 40.0]);
             rectangle_fill(id,
                            state.ids.textedit_background,

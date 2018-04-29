@@ -307,8 +307,8 @@ impl<'a,S> Widget for ItemWidget<'a,S>
         let mut drag = state.drag;
         if self.toggle{
             update_drag(id, &mut drag, ui);
-       // let draw_spinner_index = update_toggle_bool_spinner_index(&mut drag,&mut q_op_str,j);
-       let draw_spinner_index = Some(16u16);
+        let draw_spinner_index = update_toggle_bool_spinner_index(&mut drag,&mut q_op_str,j);
+       
  state.update(|state| {
                          state.drag = drag;
                      });

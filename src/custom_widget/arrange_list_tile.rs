@@ -268,7 +268,7 @@ impl<'a,S> Widget for ItemWidget<'a,S>
                            rect,
                            self.style.color(&ui.theme),
                            ui);
-/*
+
             support::textedit(&mut _str,
                                 state.ids.textedit_at_toggle,
                                 appdata,
@@ -280,7 +280,7 @@ impl<'a,S> Widget for ItemWidget<'a,S>
                                 15.0,
                                 id_master,
                                 ui);
-*/            
+            
             keypad_new = gamedata_keypad_on;
             if _str.chars().count() != 1 {
                 state.update(|state| state.blink_line_frame += 1);

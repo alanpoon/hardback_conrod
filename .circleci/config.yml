@@ -48,7 +48,7 @@ jobs:
         run: "ls target/android-artifacts/app/build/outputs/apk"  
       - 
         run: 
-          command: "./.circleci/upload_apk_to_github_releases.sh"
+          command: "sh .circleci/upload_apk_to_github_releases.sh"
           name: "Deploy to Github"
 version: 2
 workflows: 

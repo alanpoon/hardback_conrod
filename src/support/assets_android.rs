@@ -3,7 +3,7 @@ use image::{self, DynamicImage};
 use rusttype::{Font, FontCollection};
 pub fn load_font(filename: &str) -> Font {
     match android_glue::load_asset(filename) {
-        Ok(data) => FontCollection::from_bytes(data).into_font().unwrap(),
+        Ok(data) => FontCollection::from_bytes(data).unwrap(),
         Err(_) => panic!("Can't load font."),
     }
 }

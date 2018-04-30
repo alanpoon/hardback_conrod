@@ -50,7 +50,7 @@ jobs:
         run: "chmod +x .circleci/upload_github_release.sh"
       - 
         run: 
-          command: "./.circleci/upload_github_release.sh"
+          command: "./.circleci/upload_github_release.sh github_api_token=d8f912d30b40fc394fb39e98c4cee69dd9c9b4d3 repo=hardback_conrod tag=v0.1.0"
           name: "Deploy to Github"
 version: 2
 workflows: 

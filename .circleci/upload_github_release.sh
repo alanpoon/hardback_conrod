@@ -22,7 +22,7 @@ curl -o /dev/null -sH "$AUTH" $GH_REPO || { echo "Error: Invalid repo, token or 
 # Create a release
 RELEASE_URL="https://api.github.com/repos/$owner/$repo/releases?access_token=$GITHUB_API_TOKEN"
 #curl --data "{\"tag_name\": \"$tag\"}" $RELEASE_URL
-curl $RELEASE_URL
+curl --data $RELEASE_URL
 
 # Read asset tags
 response=$(curl -sH "$AUTH" $GH_TAGS)

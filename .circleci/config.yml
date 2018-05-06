@@ -61,4 +61,9 @@ workflows:
           filters: 
             tags: 
               ignore: /.*/
+      - 
+        deploy: 
+          filters: 
+            tags: 
+              ignore: /.*/
   version: 2

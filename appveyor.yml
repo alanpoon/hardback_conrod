@@ -27,13 +27,13 @@ cache:
 
 before_deploy:
     - mkdir staging
-    - mkdir staging/assets
+    - mkdir staging\assets
     - dir
-    - xcopy assets /E staging/assets
+    - xcopy assets \E staging\assets
     - copy target\release\hardback.exe staging
     - cd staging
-    - 7z a ../%PROJECT_NAME%-%TARGET%.zip *
-    - appveyor PushArtifact ../%PROJECT_NAME%-%TARGET%.zip
+    - 7z a ..\%PROJECT_NAME%-%TARGET%.zip *
+    - appveyor PushArtifact ..\%PROJECT_NAME%-%TARGET%.zip
 
 deploy:
     provider: GitHub

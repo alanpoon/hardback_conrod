@@ -19,7 +19,6 @@ widget_ids! {
          footer,
          //server_lookup
          server_lookup,
-         server_lookup_text_edit,
          footerprevious,
          footernext,
          footer_overlay_but,
@@ -37,9 +36,9 @@ widget_ids! {
         middle_tabview,
         new_table_but,
         name_text,
-        user_name,
+        user_name, //also use in server_lookup
         name_rect,
-        name_text_edit,
+        name_text_edit, //also use in server_lookup
         name_change_but,
         table_list,
          body,

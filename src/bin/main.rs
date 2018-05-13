@@ -103,7 +103,7 @@ impl GameApp {
                 let mut ss_tx = ss_tx.lock().unwrap();
                 *ss_tx = tx;
                 drop(ss_tx);
-                match client::run_owned_message(server_lookup_text, proxy_tx.clone(), rx) {
+                match client::run_owned_message(server_lookup_text.clone(), proxy_tx.clone(), rx) {
                     Ok(_) => {
                         connected = true;
                     }

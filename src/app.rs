@@ -17,6 +17,9 @@ widget_ids! {
     pub struct Ids {
          master,
          footer,
+         //server_lookup
+         server_lookup,
+         server_lookup_text_edit,
          footerprevious,
          footernext,
          footer_overlay_but,
@@ -106,6 +109,7 @@ widget_ids! {
 
 #[derive(Debug,Clone,PartialEq)]
 pub enum GuiState {
+    ServerLookup,
     Menu,
     Lobby,
     Loading,
@@ -132,6 +136,8 @@ pub struct GameData {
     pub version: &'static str,
     pub guistate: GuiState,
     pub footer: Footer,
+    pub server_lookup:String,
+    pub server_lookup_txt:String,
     pub page_vec: Vec<(Page, Texture)>,
     pub page_index: usize,
     pub go_to_page_index: Option<usize>,
@@ -173,8 +179,10 @@ impl GameData {
     pub fn new() -> GameData {
         GameData {
             version: "v0.1.0",
-            guistate: GuiState::Menu,
+            guistate: GuiState::ServerLookup,
             footer: Footer::ShowHand,
+            server_lookup:"".to_owned(),
+            server_lookup_txt:"".to_owned(),
             page_vec: vec![(Page::new(), Texture::PAGE1F),
                            (Page::new(), Texture::PAGE2F),
                            (Page::new(), Texture::PAGE3F),
@@ -225,6 +233,8 @@ impl GameData {
     pub fn reset(&mut self) {
         self.footer = Footer::ShowHand;
         self.game_history = vec![];
+        self.server_lookup = "".to_owned();
+        self.server_lookup_txt = "".to_owned();
         self.game_textedit = "".to_owned();
         self.boardcodec = None;
         self.personal = None;

@@ -74,6 +74,7 @@ impl GameApp {
 
         if let Some(SupportIdType::MusicId(background_music)) =
             result_map.remove(&ResourceEnum::Music(MusicEnum::BACKGROUND)) {}
+        let (server_lookup_tx, server_lookup_rx) = std::sync::mpsc::channel();
         let (proxy_tx, proxy_rx) = std::sync::mpsc::channel();
         let (proxy_action_tx, proxy_action_rx) = mpsc::channel(2);
         let s_tx = Arc::new(Mutex::new(proxy_action_tx));
@@ -86,10 +87,11 @@ impl GameApp {
         let (load_asset_tx, load_asset_rx) = std::sync::mpsc::channel();
         let mut action_instant = Instant::now(); //let the app to sleep after 1 min
         let time_to_sleep = std::time::Duration::new(15, 0);
+        let mut con_dest = None;
         std::thread::spawn(move || {
-            let mut connected = false;
             let mut last_update = std::time::Instant::now();
             let mut c = 0;
+            while let Ok(server_lookup_text) = server_lookup_rx.try_recv() {
             while !connected {
                 let sixteen_ms = std::time::Duration::from_millis(500);
                 let now = std::time::Instant::now();
@@ -101,7 +103,7 @@ impl GameApp {
                 let mut ss_tx = ss_tx.lock().unwrap();
                 *ss_tx = tx;
                 drop(ss_tx);
-                match client::run_owned_message(CONNECTION, proxy_tx.clone(), rx) {
+                match client::run_owned_message(server_lookup_text, proxy_tx.clone(), rx) {
                     Ok(_) => {
                         connected = true;
                     }
@@ -212,7 +214,8 @@ impl GameApp {
                                   &mut (gamedata),
                                   &result_map,
                                   load_asset_tx.clone(),
-                                  proxy_action_tx.clone());
+                                  proxy_action_tx.clone(),
+                                  server_lookup_tx.clone());
 
                     action_instant = std::time::Instant::now();
                 }
@@ -224,7 +227,8 @@ impl GameApp {
                                       &mut (gamedata),
                                       &result_map,
                                       load_asset_tx.clone(),
-                                      proxy_action_tx.clone());
+                                      proxy_action_tx.clone(),
+                                      server_lookup_tx.clone());
                     }
 
                 }

@@ -48,7 +48,8 @@ impl<'a, T> GameProcess<'a, T>
                load_asset_tx: Sender<(ResourceEnum,
                                       Option<image::RgbaImage>,
                                       Option<text::Font>)>,
-               action_tx: mpsc::Sender<OwnedMessage>) {
+               action_tx: mpsc::Sender<OwnedMessage>,
+               server_lookup_tx:Sender<String>) {
         let ids = &self.ids;
         // remove last_send if elasped 2 second
         if let Some(_last_send) = gamedata.last_send {
@@ -79,6 +80,15 @@ impl<'a, T> GameProcess<'a, T>
                                      result_map,
                                      action_tx);
                 }
+            }
+            &GuiState::ServerLookup=>{
+                logic::server_lookup::render(&mut ui.set_widgets(),
+                                    &ids,
+                                    &mut gamedata,
+                                    &self.appdata,
+                                    &cardmeta,
+                                    result_map,
+                                    server_lookup_tx);
             }
             &GuiState::Menu => {
                 logic::menu::render(&mut ui.set_widgets(),

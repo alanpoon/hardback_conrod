@@ -86,7 +86,6 @@ impl<'a, T> GameProcess<'a, T>
                                     &ids,
                                     &mut gamedata,
                                     &self.appdata,
-                                    &cardmeta,
                                     result_map,
                                     server_lookup_tx);
             }

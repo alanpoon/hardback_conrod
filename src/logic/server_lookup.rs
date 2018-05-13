@@ -16,13 +16,14 @@ pub fn render(ui: &mut conrod::UiCell,
               gamedata: &mut GameData,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
-              server_lookup_tx: Sender<String>,
-              notification: Option<(String, Instant)>
+              server_lookup_tx: Sender<String>
               ) {
     animated_canvas::Canvas::new().color(color::TRANSPARENT).frame_rate(30).set(ids.master, ui);
-    //
+    let GameData { 
+                ref notification,
+                .. } = *gamedata;
     let wh = ui.wh_of(ids.master).unwrap();
-    widget::Text::new(&gamedata.name)
+    widget::Text::new("Server: ")
                     .color(color::WHITE)
                     .right_from(ids.name_text, 0.0)
                     .w_h(appdata.convert_w(200.0), appdata.convert_h(wh[1] * 0.06))
@@ -51,7 +52,7 @@ pub fn render(ui: &mut conrod::UiCell,
         .set(ids.submit_but, ui) {
             server_lookup_tx.send(gamedata.server_lookup.clone()).unwrap();
         }
-    if let Some((s, i)) = notification {
+    if let Some((s, i)) = notification.clone() {
         Notification::new(&s, i)
             .top_right_of(ids.body)
             .color(color::GREY)

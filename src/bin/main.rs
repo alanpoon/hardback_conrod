@@ -74,7 +74,7 @@ impl GameApp {
 
         if let Some(SupportIdType::MusicId(background_music)) =
             result_map.remove(&ResourceEnum::Music(MusicEnum::BACKGROUND)) {}
-        let (server_lookup_tx, server_lookup_rx) = std::sync::mpsc::channel();
+        let (server_lookup_tx, server_lookup_rx) = std::sync::mpsc::channel::<String>();
         let (proxy_tx, proxy_rx) = std::sync::mpsc::channel();
         let (proxy_action_tx, proxy_action_rx) = mpsc::channel(2);
         let s_tx = Arc::new(Mutex::new(proxy_action_tx));
@@ -87,10 +87,10 @@ impl GameApp {
         let (load_asset_tx, load_asset_rx) = std::sync::mpsc::channel();
         let mut action_instant = Instant::now(); //let the app to sleep after 1 min
         let time_to_sleep = std::time::Duration::new(15, 0);
-        let mut con_dest = None;
         std::thread::spawn(move || {
             let mut last_update = std::time::Instant::now();
             let mut c = 0;
+            let mut connected = false;
             while let Ok(server_lookup_text) = server_lookup_rx.try_recv() {
             while !connected {
                 let sixteen_ms = std::time::Duration::from_millis(500);
@@ -114,7 +114,7 @@ impl GameApp {
                 last_update = std::time::Instant::now();
                 c += 1;
             }
-
+          }
         });
         let mut _page = page::Page::new();
         {

@@ -8,13 +8,15 @@ use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum};
 use backend::codec_lib::codec::GameState;
+use cardgame_widgets::custom_widget::notification::Notification;
 #[allow(unused_mut)]
 pub fn render(ui: &mut conrod::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
-              server_lookup_tx: Sender<String>
+              server_lookup_tx: Sender<String>,
+              notification: Option<(String, Instant)>
               ) {
     animated_canvas::Canvas::new().color(color::TRANSPARENT).frame_rate(30).set(ids.master, ui);
     support::textedit(&mut gamedata.server_lookup,
@@ -37,9 +39,11 @@ pub fn render(ui: &mut conrod::UiCell,
         .set(ids.submit_but, ui) {
             server_lookup_tx.send(gamedata.server_lookup.clone()).unwrap();
         }
-    widget::Text::new(gamedata.server_lookup_txt)
-            .bottom_right_with_margin_on(ids.master, 50.0)
-            .color(color::WHITE)
-            .font_size(40)
-            .set(ids.menu_version_num, ui);
+    if let Some((s, i)) = notification {
+        Notification::new(&s, i)
+            .top_right_of(top_right_of)
+            .color(color::GREY)
+            .wh([240.0, 80.0])
+            .set(ids.notification_view, ui);
+    }
 }

@@ -108,11 +108,18 @@ widget_ids! {
 
 #[derive(Debug,Clone,PartialEq)]
 pub enum GuiState {
-    ServerLookup,
+    ServerLookup(LookupState),
     Menu,
     Lobby,
     Loading,
     Game(GameState),
+}
+#[derive(Debug,Clone,PartialEq)]
+pub enum LookupState{
+    Input,
+    Process,
+    Success,
+    Failure
 }
 #[derive(Debug,Clone,PartialEq)]
 pub enum OverlayStatus {

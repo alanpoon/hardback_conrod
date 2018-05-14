@@ -88,30 +88,32 @@ impl GameApp {
         let time_to_sleep = std::time::Duration::new(15, 0);
         std::thread::spawn(move || {
             let mut last_update = std::time::Instant::now();
-            let mut c = 0;
             let mut connected = false;
             while let Ok(server_lookup_text) = server_lookup_rx.try_recv() {
             while !connected {
                 let sixteen_ms = std::time::Duration::from_millis(500);
                 let now = std::time::Instant::now();
                 let duration_since_last_update = now.duration_since(last_update);
-                if (duration_since_last_update < sixteen_ms) & (c > 0) {
+                if (duration_since_last_update < sixteen_ms) {
                     std::thread::sleep(sixteen_ms - duration_since_last_update);
                 }
                 let (tx, rx) = mpsc::channel(3);
                 let mut ss_tx = ss_tx.lock().unwrap();
                 *ss_tx = tx;
                 drop(ss_tx);
-                match client::run_owned_message(server_lookup_text.clone(), proxy_tx.clone(), rx) {
+                let mut server_lookup_t = "ws://".to_owned();
+                server_lookup_t.push_str(&server_lookup_text);
+                match client::run_owned_message(server_lookup_t, proxy_tx.clone(), rx) {
                     Ok(_) => {
                         connected = true;
+                        print!("Success");
                     }
                     Err(_err) => {
                         connected = false;
+                        print!("Failure");
                     }
                 }
                 last_update = std::time::Instant::now();
-                c += 1;
             }
           }
         });

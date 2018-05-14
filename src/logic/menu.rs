@@ -2,7 +2,7 @@ use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, Lab
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use std::sync::mpsc::Sender;
-use std::time::Instant;
+use chrono::{DateTime};
 use app::{BoardStruct, GameData, Ids, GuiState};
 use cardgame_widgets::custom_widget::animated_canvas;
 use custom_widget::show_draft_item;
@@ -109,7 +109,8 @@ pub fn render(ui: &mut conrod::UiCell,
                 let mut txt = "Connecting to ".to_owned();
                 txt.push_str(&server_lookup);
                 txt.push_str(" for ");
-                let elapsed = try_time.elapsed().as_secs().to_string();
+                let current = DateTime::now();
+                let elapsed = current.signed_duration_since(try_time).as_secs().to_string();
                 txt.push_str(elapsed);
                 txt.push_str("secs");
                 widget::Text::new(txt)

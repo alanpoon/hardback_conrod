@@ -185,7 +185,7 @@ impl GameData {
     pub fn new() -> GameData {
         GameData {
             version: "v0.1.0",
-            guistate: GuiState::ServerLookup,
+            guistate: GuiState::Menu,
             footer: Footer::ShowHand,
             server_lookup:"".to_owned(),
             server_lookup_txt:"".to_owned(),

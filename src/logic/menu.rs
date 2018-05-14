@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use futures::sync::mpsc;
 use std::sync::mpsc::Sender;
 use chrono::{DateTime,Local};
-use app::{BoardStruct, GameData, Ids, GuiState};
+use app::{BoardStruct, GameData, Ids, GuiState,LookupState};
 use cardgame_widgets::custom_widget::animated_canvas;
 use custom_widget::show_draft_item;
 use backend::OwnedMessage;
@@ -12,6 +12,7 @@ use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use graphics_match;
 use logic::in_game;
 use logic;
+use support;
 use backend::codec_lib;
 use backend::codec_lib::codec::{ConnectionStatus, ConnectionError};
 #[allow(unused_mut)]
@@ -74,6 +75,7 @@ pub fn render(ui: &mut conrod::UiCell,
                 }
             }
             &ConnectionStatus::None => {
+                let wh = ui.wh_of(ids.master).unwrap();
                 widget::Text::new("Server: ")
                 .color(color::WHITE)
                 .mid_left_with_margin(ids.master, 50.0)
@@ -109,15 +111,15 @@ pub fn render(ui: &mut conrod::UiCell,
             }
             &ConnectionStatus::Try(try_time) => {
                 let mut txt = "Connecting to ".to_owned();
-                txt.push_str(&server_lookup);
+                txt.push_str(&gamedata.server_lookup);
                 txt.push_str(" for ");
                 let current = DateTime::now();
                 let elapsed = current.signed_duration_since(try_time).as_secs().to_string();
                 txt.push_str(elapsed);
                 txt.push_str("secs");
-                widget::Text::new(txt)
+                widget::Text::new(&txt)
                     .color(color::WHITE)
-                    .mid_left_with_margin(ids.master, 50.0)
+                    .mid_left_with_margin(50.0)
                     .w_h(appdata.convert_w(100.0), appdata.convert_h(wh[1] * 0.06))
                     .set(ids.user_name, ui);
                 widget::Text::new(appdata.texts.waiting_for_connection)
@@ -127,7 +129,7 @@ pub fn render(ui: &mut conrod::UiCell,
                     .set(ids.menu_waiting_connection, ui);
             }
             &ConnectionStatus::Error(con_err)=>{
-                *gamedata.connection_status = ConnectionStatus::None;
+                gamedata.connection_status = ConnectionStatus::None;
             }
             _=>{}
         }

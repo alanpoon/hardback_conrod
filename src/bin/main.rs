@@ -81,7 +81,6 @@ impl GameApp {
         let s_rx = Arc::new(Mutex::new(proxy_action_rx));
         let (ss_tx, _ss_rx) = (s_tx.clone(), s_rx.clone());
         let mut gamedata = app::GameData::new();
-        gamedata.guistate = app::GuiState::Menu;
         let cardmeta: [codec_lib::cards::ListCard<BoardStruct>; 180] =
             cards::populate::<BoardStruct>();
         let (load_asset_tx, load_asset_rx) = std::sync::mpsc::channel();

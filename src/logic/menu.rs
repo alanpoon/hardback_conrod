@@ -102,7 +102,18 @@ pub fn render(ui: &mut conrod::UiCell,
                         *guistate= GuiState::ServerLookup(LookupState::Process);
                 }
             }
-            _ => {
+            &ConnectionStatus::Try(try_time) => {
+                let mut txt = "Connecting to ".to_owned();
+                txt.push_str(&server_lookup);
+                txt.push_str(" for ");
+                let elapsed = try_time.elapsed().as_secs().to_string();
+                txt.push_str(elapsed);
+                txt.push_str("secs");
+                widget::Text::new(txt)
+                .color(color::WHITE)
+                .mid_left_with_margin(ids.master, 50.0)
+                .w_h(appdata.convert_w(100.0), appdata.convert_h(wh[1] * 0.06))
+                .set(ids.user_name, ui);
                 widget::Text::new(appdata.texts.waiting_for_connection)
                     .font_size(40)
                     .bottom_left_with_margins_on(ids.master, 100.0, 20.0)
@@ -110,6 +121,7 @@ pub fn render(ui: &mut conrod::UiCell,
                     .set(ids.menu_waiting_connection, ui);
                 logic::notification::render(ui, ids, ids.master, gamedata.notification.clone());
             }
+            _=>{}
         }
         for _ in widget::Button::image(icon_image)
                 .source_rectangle(graphics_match::gameicons_rect(10.0))

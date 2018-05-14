@@ -61,7 +61,7 @@ pub fn render(ui: &mut conrod::UiCell,
             .down_from(ids.menu_title_list1, 20.0)
             .set(ids.unofficial_logo, ui);
 
-
+        let wh = ui.wh_of(ids.master).unwrap();
         match &gamedata.connection_status {
             &ConnectionStatus::Ok => {
                 if widget::Button::new()
@@ -75,7 +75,6 @@ pub fn render(ui: &mut conrod::UiCell,
                 }
             }
             &ConnectionStatus::None => {
-                let wh = ui.wh_of(ids.master).unwrap();
                 widget::Text::new("Server: ")
                 .color(color::WHITE)
                 .mid_left_with_margin(ids.master, 50.0)
@@ -104,7 +103,7 @@ pub fn render(ui: &mut conrod::UiCell,
                     .w_h(wh[0] * 0.3, wh[1] * 0.06)
                     .set(ids.submit_but, ui) {
                         server_lookup_tx.send(gamedata.server_lookup.clone()).unwrap();
-                        *guistate= GuiState::ServerLookup(LookupState::Process);
+                        gamedata.guistate= GuiState::ServerLookup(LookupState::Process);
                         let now = Local::now();
                         gamedata.connection_status=ConnectionStatus::Try(now);
                 }

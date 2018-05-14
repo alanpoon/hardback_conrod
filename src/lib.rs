@@ -17,6 +17,7 @@ pub extern crate hardback_codec;
 extern crate futures;
 extern crate image;
 extern crate rodio;
+extern crate chrono;
 #[cfg(target_os="android")]
 extern crate rusttype;
 #[cfg(target_os="android")]

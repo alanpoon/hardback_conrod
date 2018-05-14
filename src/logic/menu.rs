@@ -2,7 +2,7 @@ use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, Lab
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use std::sync::mpsc::Sender;
-use chrono::{DateTime};
+use chrono::{DateTime,Local};
 use app::{BoardStruct, GameData, Ids, GuiState};
 use cardgame_widgets::custom_widget::animated_canvas;
 use custom_widget::show_draft_item;
@@ -103,6 +103,8 @@ pub fn render(ui: &mut conrod::UiCell,
                     .set(ids.submit_but, ui) {
                         server_lookup_tx.send(gamedata.server_lookup.clone()).unwrap();
                         *guistate= GuiState::ServerLookup(LookupState::Process);
+                        let now = Local::now();
+                        gamedata.connection_status=ConnectionStatus::Try(now);
                 }
             }
             &ConnectionStatus::Try(try_time) => {

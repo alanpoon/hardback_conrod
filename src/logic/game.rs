@@ -81,21 +81,14 @@ impl<'a, T> GameProcess<'a, T>
                                      action_tx);
                 }
             }
-            &GuiState::ServerLookup=>{
-                logic::server_lookup::render(&mut ui.set_widgets(),
-                                    &ids,
-                                    &mut gamedata,
-                                    &self.appdata,
-                                    result_map,
-                                    server_lookup_tx);
-            }
             &GuiState::Menu => {
                 logic::menu::render(&mut ui.set_widgets(),
                                     &ids,
                                     &mut gamedata,
                                     &self.appdata,
                                     &cardmeta,
-                                    result_map);
+                                    result_map,
+                                    server_lookup_tx);
             }
             &GuiState::Lobby => {
                 logic::lobby::render(&mut ui.set_widgets(),

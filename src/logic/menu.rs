@@ -1,6 +1,8 @@
 use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, Labelable};
 use std::collections::HashMap;
 use futures::sync::mpsc;
+use std::sync::mpsc::Sender;
+use std::time::Instant;
 use app::{BoardStruct, GameData, Ids, GuiState};
 use cardgame_widgets::custom_widget::animated_canvas;
 use custom_widget::show_draft_item;
@@ -18,7 +20,8 @@ pub fn render(ui: &mut conrod::UiCell,
               mut gamedata: &mut GameData,
               appdata: &AppData,
               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
-              result_map: &HashMap<ResourceEnum, SupportIdType>) {
+              result_map: &HashMap<ResourceEnum, SupportIdType>,
+              server_lookup_tx: Sender<String>) {
     animated_canvas::Canvas::new().color(color::LIGHT_ORANGE).frame_rate(30).set(ids.master, ui);
     if let (Some(&SupportIdType::ImageId(cloudy)),
             Some(&SupportIdType::ImageId(coin_info)),
@@ -110,16 +113,18 @@ pub fn render(ui: &mut conrod::UiCell,
                 txt.push_str(elapsed);
                 txt.push_str("secs");
                 widget::Text::new(txt)
-                .color(color::WHITE)
-                .mid_left_with_margin(ids.master, 50.0)
-                .w_h(appdata.convert_w(100.0), appdata.convert_h(wh[1] * 0.06))
-                .set(ids.user_name, ui);
+                    .color(color::WHITE)
+                    .mid_left_with_margin(ids.master, 50.0)
+                    .w_h(appdata.convert_w(100.0), appdata.convert_h(wh[1] * 0.06))
+                    .set(ids.user_name, ui);
                 widget::Text::new(appdata.texts.waiting_for_connection)
                     .font_size(40)
                     .bottom_left_with_margins_on(ids.master, 100.0, 20.0)
                     .color(color::LIGHT_GREEN)
                     .set(ids.menu_waiting_connection, ui);
-                logic::notification::render(ui, ids, ids.master, gamedata.notification.clone());
+            }
+            &ConnectionStatus::Error(con_err)=>{
+                *gamedata.connection_status = ConnectionStatus::None;
             }
             _=>{}
         }
@@ -136,4 +141,5 @@ pub fn render(ui: &mut conrod::UiCell,
             .font_size(40)
             .set(ids.menu_version_num, ui);
     }
+    logic::notification::render(ui, ids, ids.master, gamedata.notification.clone());
 }

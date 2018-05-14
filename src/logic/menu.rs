@@ -77,7 +77,7 @@ pub fn render(ui: &mut conrod::UiCell,
             &ConnectionStatus::None => {
                 widget::Text::new("Server: ")
                 .color(color::WHITE)
-                .mid_left_with_margin(ids.master, 50.0)
+                .mid_left_with_margin(50.0)
                 .w_h(appdata.convert_w(100.0), appdata.convert_h(wh[1] * 0.06))
                 .set(ids.user_name, ui);
                 widget::Rectangle::fill_with([appdata.convert_w(200.0), wh[1] * 0.06],
@@ -112,7 +112,7 @@ pub fn render(ui: &mut conrod::UiCell,
                 let mut txt = "Connecting to ".to_owned();
                 txt.push_str(&gamedata.server_lookup);
                 txt.push_str(" for ");
-                let current = DateTime::now();
+                let current = Local::now();
                 let elapsed = current.signed_duration_since(try_time).as_secs().to_string();
                 txt.push_str(elapsed);
                 txt.push_str("secs");

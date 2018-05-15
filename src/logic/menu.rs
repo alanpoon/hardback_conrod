@@ -113,7 +113,7 @@ pub fn render(ui: &mut conrod::UiCell,
                 txt.push_str(&gamedata.server_lookup);
                 txt.push_str(" for ");
                 let current = Local::now();
-                let elapsed = current.signed_duration_since(try_time).as_secs().to_string();
+                let elapsed = current.signed_duration_since(try_time).num_seconds().to_string();
                 txt.push_str(elapsed);
                 txt.push_str("secs");
                 widget::Text::new(&txt)

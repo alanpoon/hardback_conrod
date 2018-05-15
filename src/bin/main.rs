@@ -89,8 +89,8 @@ impl GameApp {
         std::thread::spawn(move || {
             let mut last_update = std::time::Instant::now();
             let mut connected = false;
-            while let Ok(server_lookup_text) = server_lookup_rx.try_recv() {
             while !connected {
+                while let Ok(server_lookup_text) = server_lookup_rx.try_recv() {
                 let sixteen_ms = std::time::Duration::from_millis(500);
                 let now = std::time::Instant::now();
                 let duration_since_last_update = now.duration_since(last_update);

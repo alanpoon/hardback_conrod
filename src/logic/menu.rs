@@ -127,7 +127,7 @@ pub fn render(ui: &mut conrod::UiCell,
                     .color(color::LIGHT_GREEN)
                     .set(ids.menu_waiting_connection, ui);
             }
-            &ConnectionStatus::Error(con_err)=>{
+            &ConnectionStatus::Error(_)=>{
                 gamedata.connection_status = ConnectionStatus::None;
             }
             _=>{}

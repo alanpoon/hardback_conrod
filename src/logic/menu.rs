@@ -106,6 +106,7 @@ pub fn render(ui: &mut conrod::UiCell,
                         gamedata.guistate= GuiState::ServerLookup(LookupState::Process);
                         let now = Local::now();
                         gamedata.connection_status=ConnectionStatus::Try(now);
+                        print!("connect to try");
                 }
             }
             &ConnectionStatus::Try(try_time) => {
@@ -116,6 +117,8 @@ pub fn render(ui: &mut conrod::UiCell,
                 let elapsed = current.signed_duration_since(try_time).num_seconds().to_string();
                 txt.push_str(&elapsed);
                 txt.push_str("secs");
+                print!(" text: {:?}",txt);
+                /*
                 widget::Text::new(&txt)
                     .color(color::WHITE)
                     .mid_left_with_margin(50.0)
@@ -126,6 +129,7 @@ pub fn render(ui: &mut conrod::UiCell,
                     .bottom_left_with_margins_on(ids.master, 100.0, 20.0)
                     .color(color::LIGHT_GREEN)
                     .set(ids.menu_waiting_connection, ui);
+                    */
             }
             &ConnectionStatus::Error(_)=>{
                 gamedata.connection_status = ConnectionStatus::None;

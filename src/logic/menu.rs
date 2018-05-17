@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use futures::sync::mpsc;
 use std::sync::mpsc::Sender;
 use chrono::{DateTime,Local};
-use app::{BoardStruct, GameData, Ids, GuiState,LookupState};
+use app::{BoardStruct, GameData, Ids, GuiState};
 use cardgame_widgets::custom_widget::animated_canvas;
 use custom_widget::show_draft_item;
 use backend::OwnedMessage;

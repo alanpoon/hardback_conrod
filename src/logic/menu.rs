@@ -103,7 +103,6 @@ pub fn render(ui: &mut conrod::UiCell,
                     .w_h(wh[0] * 0.3, wh[1] * 0.06)
                     .set(ids.submit_but, ui) {
                         server_lookup_tx.send(gamedata.server_lookup.clone()).unwrap();
-                        gamedata.guistate= GuiState::ServerLookup(LookupState::Process);
                         let now = Local::now();
                         gamedata.connection_status=ConnectionStatus::Try(now);
                         print!("connect to try");

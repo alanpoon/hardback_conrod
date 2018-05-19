@@ -105,6 +105,10 @@ pub fn render(ui: &mut conrod::UiCell,
                     .set(ids.submit_but, ui);
                     if j.was_clicked(){
                         println!("clicked");
+                        server_lookup_tx.send(gamedata.server_lookup.clone()).unwrap();
+                        let now = Local::now();
+                        gamedata.connection_status=ConnectionStatus::Try(now);
+                        println!("connect to try");
                     }
                     /*.was_clicked() {
                         println!("clicked");

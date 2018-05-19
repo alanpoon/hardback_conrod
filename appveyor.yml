@@ -29,7 +29,7 @@ before_deploy:
     - mkdir staging
     - mkdir staging\assets
     - dir
-    - xcopy assets /E staging\assets
+    #- xcopy assets /E staging\assets
     - copy target\release\hardback.exe staging
     - cd staging
     - 7z a ..\%PROJECT_NAME%-%TARGET%.zip *

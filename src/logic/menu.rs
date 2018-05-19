@@ -34,11 +34,11 @@ pub fn render(ui: &mut conrod::UiCell,
          result_map.get(&ResourceEnum::Sprite(Sprite::COININFO270)),
          result_map.get(&ResourceEnum::Sprite(Sprite::UNOFFICIAL)),
          result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
-        let w = ui.w_of(ids.master).unwrap();
+        let wh = ui.wh_of(ids.master).unwrap();
         let word_arr = vec![41, 140, 17, 72,1, 104, 126,44];
         let (mut items, _scrollbar) = widget::List::flow_right(word_arr.len())
-            .item_size(w / 10.0)
-            .w(w)
+            .item_size(wh[0] / 10.0)
+            .w(wh[0])
             .h(appdata.convert_h(200.0))
             .mid_top_with_margin_on(ids.master, appdata.convert_h(40.0))
             .set(ids.menu_title_list1, ui);
@@ -61,7 +61,7 @@ pub fn render(ui: &mut conrod::UiCell,
             .down_from(ids.menu_title_list1, 20.0)
             .set(ids.unofficial_logo, ui);
 
-        let wh = ui.wh_of(ids.master).unwrap();
+
         match &gamedata.connection_status {
             &ConnectionStatus::Ok => {
                 if widget::Button::new()
@@ -117,18 +117,20 @@ pub fn render(ui: &mut conrod::UiCell,
                 txt.push_str(&elapsed);
                 txt.push_str("secs");
                 print!(" text: {:?}",txt);
-                /*
+                
                 widget::Text::new(&txt)
                     .color(color::WHITE)
                     .mid_left_with_margin(50.0)
                     .w_h(appdata.convert_w(100.0), appdata.convert_h(wh[1] * 0.06))
                     .set(ids.user_name, ui);
+                
                 widget::Text::new(appdata.texts.waiting_for_connection)
-                    .font_size(40)
-                    .bottom_left_with_margins_on(ids.master, 100.0, 20.0)
+                    .font_size(30)
+                    .bottom_left_with_margins_on(ids.master, 100.0, 30.0)
+                    .w_h(appdata.convert_w(300.0), appdata.convert_h(wh[1] * 0.08))
                     .color(color::LIGHT_GREEN)
                     .set(ids.menu_waiting_connection, ui);
-                    */
+                    
             }
             &ConnectionStatus::Error(_)=>{
                 gamedata.connection_status = ConnectionStatus::None;

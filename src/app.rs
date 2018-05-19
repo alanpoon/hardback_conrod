@@ -136,7 +136,6 @@ pub struct GameData {
     pub guistate: GuiState,
     pub footer: Footer,
     pub server_lookup:String,
-    pub server_lookup_txt:String,
     pub page_vec: Vec<(Page, Texture)>,
     pub page_index: usize,
     pub go_to_page_index: Option<usize>,
@@ -180,8 +179,7 @@ impl GameData {
             version: "v0.1.0",
             guistate: GuiState::Menu,
             footer: Footer::ShowHand,
-            server_lookup:"".to_owned(),
-            server_lookup_txt:"".to_owned(),
+            server_lookup:"0.0.0.0:8080".to_owned(),
             page_vec: vec![(Page::new(), Texture::PAGE1F),
                            (Page::new(), Texture::PAGE2F),
                            (Page::new(), Texture::PAGE3F),
@@ -233,7 +231,6 @@ impl GameData {
         self.footer = Footer::ShowHand;
         self.game_history = vec![];
         self.server_lookup = "".to_owned();
-        self.server_lookup_txt = "".to_owned();
         self.game_textedit = "".to_owned();
         self.boardcodec = None;
         self.personal = None;

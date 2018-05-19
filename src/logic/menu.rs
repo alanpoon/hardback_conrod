@@ -35,6 +35,7 @@ pub fn render(ui: &mut conrod::UiCell,
          result_map.get(&ResourceEnum::Sprite(Sprite::UNOFFICIAL)),
          result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
         let wh = ui.wh_of(ids.master).unwrap();
+        //let wh =[500.0,400.0];
         let word_arr = vec![41, 140, 17, 72,1, 104, 126,44];
         let (mut items, _scrollbar) = widget::List::flow_right(word_arr.len())
             .item_size(wh[0] / 10.0)
@@ -61,7 +62,6 @@ pub fn render(ui: &mut conrod::UiCell,
             .down_from(ids.menu_title_list1, 20.0)
             .set(ids.unofficial_logo, ui);
 
-
         match &gamedata.connection_status {
             &ConnectionStatus::Ok => {
                 if widget::Button::new()
@@ -84,7 +84,7 @@ pub fn render(ui: &mut conrod::UiCell,
                                             color::WHITE)
                     .right_from(ids.user_name, 0.0)
                     .set(ids.name_rect, ui);
-                support::textedit(&mut gamedata.server_lookup,
+               /* support::textedit(&mut gamedata.server_lookup,
                             ids.name_text_edit,
                             appdata,
                             result_map,
@@ -95,18 +95,22 @@ pub fn render(ui: &mut conrod::UiCell,
                             wh[0] * 0.025,
                             ids.master,
                             ui);
-                for _i in widget::Button::new()
+                */
+                let j= widget::Button::new()
                     .label(appdata.texts.connect)
                     .label_font_size(14)
                     .label_color(color::BLACK)
                     .right_from(ids.name_rect, 2.0)
                     .w_h(wh[0] * 0.3, wh[1] * 0.06)
-                    .set(ids.submit_but, ui) {
-                        server_lookup_tx.send(gamedata.server_lookup.clone()).unwrap();
-                        let now = Local::now();
-                        gamedata.connection_status=ConnectionStatus::Try(now);
-                        print!("connect to try");
-                }
+                    .set(ids.submit_but, ui);
+                    println!("j {:?}",j);
+                    /*.was_clicked() {
+                        println!("clicked");
+                     //   server_lookup_tx.send(gamedata.server_lookup.clone()).unwrap();
+                     //   let now = Local::now();
+                     //   gamedata.connection_status=ConnectionStatus::Try(now);
+                        println!("connect to try");
+                }*/
             }
             &ConnectionStatus::Try(try_time) => {
                 let mut txt = "Connecting to ".to_owned();
@@ -125,12 +129,12 @@ pub fn render(ui: &mut conrod::UiCell,
                     .set(ids.user_name, ui);
                 
                 widget::Text::new(appdata.texts.waiting_for_connection)
-                    .font_size(30)
+                    .font_size(15)
                     .bottom_left_with_margins_on(ids.master, 100.0, 30.0)
                     .w_h(appdata.convert_w(300.0), appdata.convert_h(wh[1] * 0.08))
                     .color(color::LIGHT_GREEN)
                     .set(ids.menu_waiting_connection, ui);
-                    
+                
             }
             &ConnectionStatus::Error(_)=>{
                 gamedata.connection_status = ConnectionStatus::None;

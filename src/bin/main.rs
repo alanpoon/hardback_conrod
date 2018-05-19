@@ -89,14 +89,19 @@ impl GameApp {
         std::thread::spawn(move || {
             let mut last_update = std::time::Instant::now();
             let mut connected = false;
+            let mut count =0;
             while !connected {
-                while let Ok(server_lookup_text) = server_lookup_rx.try_recv() {
-                let sixteen_ms = std::time::Duration::from_millis(500);
+                println!("not connected {}",count);
+                count= count+1;
+                let sixteen_ms = std::time::Duration::from_millis(5000);
                 let now = std::time::Instant::now();
                 let duration_since_last_update = now.duration_since(last_update);
+                last_update = now;
                 if (duration_since_last_update < sixteen_ms) {
                     std::thread::sleep(sixteen_ms - duration_since_last_update);
                 }
+                while let Ok(server_lookup_text) = server_lookup_rx.try_recv() {
+   
                 let (tx, rx) = mpsc::channel(3);
                 let mut ss_tx = ss_tx.lock().unwrap();
                 *ss_tx = tx;
@@ -132,7 +137,7 @@ impl GameApp {
         let program =
             glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
                 .unwrap();
-        let mut last_update = std::time::Instant::now();
+        
         let mut game_proc =
             logic::game::GameProcess::<OwnedMessage>::new(&mut ui,
                                                           appdata,
@@ -151,8 +156,17 @@ impl GameApp {
         let mut old_captured_event: Option<ConrodMessage> = None;
         let mut captured_event: Option<ConrodMessage> = None;
         let sixteen_ms = std::time::Duration::from_millis(800);
-
+        let mut last_update = std::time::Instant::now();
+        let mut gui_count=0;
         'render: loop {
+            //println!("gui_count {:?}",gui_count);
+            let sixteen_ms = std::time::Duration::from_millis(16);
+            let now = std::time::Instant::now();
+            let duration_since_last_update = now.duration_since(last_update);
+            if duration_since_last_update < sixteen_ms {
+                std::thread::sleep(sixteen_ms - duration_since_last_update);
+            }
+
             let ss_tx = s_tx.lock().unwrap();
             let proxy_action_tx = ss_tx.clone();
             let mut to_break = false;
@@ -160,6 +174,7 @@ impl GameApp {
             events_loop.poll_events(|event| {
                 match event.clone() {
                     glium::glutin::Event::WindowEvent { event, .. } => {
+                        println!("event {:?}",event.clone());
                         match event {
                             glium::glutin::WindowEvent::Closed |
                             glium::glutin::WindowEvent::KeyboardInput {
@@ -209,7 +224,7 @@ impl GameApp {
                     }
                     old_captured_event = Some(ConrodMessage::Event(d, input.clone()));
                     // Set the widgets.
-
+                    //println!("update game_proc first");
                     game_proc.run(&mut ui,
                                   &cardmeta,
                                   &mut (gamedata),
@@ -223,6 +238,7 @@ impl GameApp {
                 Some(ConrodMessage::Thread(_t)) => {
                     // Set the widgets.
                     if action_instant.elapsed() <= time_to_sleep {
+                        println!("update game_proc secon");
                         game_proc.run(&mut ui,
                                       &cardmeta,
                                       &mut (gamedata),
@@ -237,6 +253,7 @@ impl GameApp {
                     let now = std::time::Instant::now();
                     let duration_since_last_update = now.duration_since(last_update);
                     if duration_since_last_update < sixteen_ms {
+                        println!("gui sleeping {:?}",now);
                         std::thread::sleep(sixteen_ms - duration_since_last_update);
                     }
                     let t = std::time::Instant::now();
@@ -274,6 +291,7 @@ impl GameApp {
             }
             // Draw the `Ui` if it has changed.
             if action_instant.elapsed() <= time_to_sleep {
+                //println!("redrawing {}",gui_count);
                 let primitives = ui.draw();
                 renderer.fill(&display, primitives, &image_map);
                 let mut target = display.draw();
@@ -289,6 +307,7 @@ impl GameApp {
             }
 
             last_update = std::time::Instant::now();
+            gui_count = gui_count+1;
         }
         Ok(())
     }

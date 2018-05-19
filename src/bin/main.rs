@@ -238,7 +238,6 @@ impl GameApp {
                 Some(ConrodMessage::Thread(_t)) => {
                     // Set the widgets.
                     if action_instant.elapsed() <= time_to_sleep {
-                        println!("update game_proc secon");
                         game_proc.run(&mut ui,
                                       &cardmeta,
                                       &mut (gamedata),

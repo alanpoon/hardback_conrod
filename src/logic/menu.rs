@@ -103,7 +103,9 @@ pub fn render(ui: &mut conrod::UiCell,
                     .right_from(ids.name_rect, 2.0)
                     .w_h(wh[0] * 0.3, wh[1] * 0.06)
                     .set(ids.submit_but, ui);
-                    println!("j {:?}",j);
+                    if j.was_clicked(){
+                        println!("clicked");
+                    }
                     /*.was_clicked() {
                         println!("clicked");
                      //   server_lookup_tx.send(gamedata.server_lookup.clone()).unwrap();

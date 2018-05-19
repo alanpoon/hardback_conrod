@@ -5,7 +5,8 @@ addons:
       - libasound2-dev
 before_deploy: 
   - "mv target/release/hardback ."
-  - "tar -zcvf $zipname hardback assets"
+  #- "tar -zcvf $zipname hardback assets"
+  - "tar -zcvf $zipname hardback"
 cache: cargo
 deploy: 
   skip_cleanup: true

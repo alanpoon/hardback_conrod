@@ -42,7 +42,7 @@ pub fn textedit(k: &mut String,
                 limited_to_chars:Option<usize>,
                 keypad_on_: &mut bool,
                 left_of: widget::Id,
-                right_margin: f64,
+                right_margin: [f64;2],
                 parent_of: widget::Id,
                 ui: &mut conrod::UiCell) {
     use conrod_chat::chat::{english, sprite};
@@ -54,7 +54,7 @@ pub fn textedit(k: &mut String,
         let (editz, keypad_bool) = TextEdit::new(k,parent_of,&english_tuple)
                     .color(color::BLACK)
                     .wh(dim)
-                    .top_left_with_margin_on(left_of,right_margin)
+                    .top_left_with_margins_on(left_of,right_margin[1],right_margin[0])
                     .left_justify()
                     .line_spacing(2.5)
                     .restrict_to_height(true) // Let the height grow infinitely and scroll.

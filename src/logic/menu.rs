@@ -22,7 +22,7 @@ pub fn render(ui: &mut conrod::UiCell,
               appdata: &AppData,
               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
               result_map: &HashMap<ResourceEnum, SupportIdType>,
-              server_lookup_tx: Sender<String>) {
+              server_lookup_tx: Sender<Option<String>>) {
     animated_canvas::Canvas::new().color(color::LIGHT_ORANGE).frame_rate(30).set(ids.master, ui);
     if let (Some(&SupportIdType::ImageId(cloudy)),
             Some(&SupportIdType::ImageId(coin_info)),
@@ -77,14 +77,14 @@ pub fn render(ui: &mut conrod::UiCell,
             &ConnectionStatus::None => {
                 widget::Text::new("Server: ")
                 .color(color::WHITE)
-                .mid_left_with_margin(50.0)
+                .top_left_with_margins_on(ids.master,300.0,30.0)
                 .w_h(appdata.convert_w(100.0), appdata.convert_h(wh[1] * 0.06))
                 .set(ids.user_name, ui);
                 widget::Rectangle::fill_with([appdata.convert_w(200.0), wh[1] * 0.06],
                                             color::WHITE)
                     .right_from(ids.user_name, 0.0)
                     .set(ids.name_rect, ui);
-               /* support::textedit(&mut gamedata.server_lookup,
+                support::textedit(&mut gamedata.server_lookup,
                             ids.name_text_edit,
                             appdata,
                             result_map,
@@ -95,7 +95,7 @@ pub fn render(ui: &mut conrod::UiCell,
                             wh[0] * 0.025,
                             ids.master,
                             ui);
-                */
+                
                 let j= widget::Button::new()
                     .label(appdata.texts.connect)
                     .label_font_size(14)
@@ -103,49 +103,51 @@ pub fn render(ui: &mut conrod::UiCell,
                     .right_from(ids.name_rect, 2.0)
                     .w_h(wh[0] * 0.3, wh[1] * 0.06)
                     .set(ids.submit_but, ui);
-                    if j.was_clicked(){
-                        println!("clicked");
-                        server_lookup_tx.send(gamedata.server_lookup.clone()).unwrap();
-                        let now = Local::now();
-                        gamedata.connection_status=ConnectionStatus::Try(now);
-                        println!("connect to try");
-                    }
-                    /*.was_clicked() {
-                        println!("clicked");
-                     //   server_lookup_tx.send(gamedata.server_lookup.clone()).unwrap();
-                     //   let now = Local::now();
-                     //   gamedata.connection_status=ConnectionStatus::Try(now);
-                        println!("connect to try");
-                }*/
+                if j.was_clicked(){
+                    println!("clicked");
+                    server_lookup_tx.send(Some(gamedata.server_lookup.clone())).unwrap();
+                    let now = Local::now();
+                    gamedata.connection_status=ConnectionStatus::Try(now);
+                    println!("connect to try");
+                }
             }
             &ConnectionStatus::Try(try_time) => {
                 let mut txt = "Connecting to ".to_owned();
                 txt.push_str(&gamedata.server_lookup);
                 txt.push_str(" for ");
                 let current = Local::now();
-                let elapsed = current.signed_duration_since(try_time).num_seconds().to_string();
-                txt.push_str(&elapsed);
+                let elapsed = current.signed_duration_since(try_time).num_seconds();
+                let elapsed_str=elapsed.to_string();
+                txt.push_str(&elapsed_str);
                 txt.push_str("secs");
-                print!(" text: {:?}",txt);
                 
                 widget::Text::new(&txt)
                     .color(color::WHITE)
-                    .mid_left_with_margin(50.0)
+                    .top_left_with_margins_on(ids.master,300.0,30.0)
                     .w_h(appdata.convert_w(100.0), appdata.convert_h(wh[1] * 0.06))
                     .set(ids.user_name, ui);
-                
-                widget::Text::new(appdata.texts.waiting_for_connection)
-                    .font_size(15)
-                    .bottom_left_with_margins_on(ids.master, 100.0, 30.0)
-                    .w_h(appdata.convert_w(300.0), appdata.convert_h(wh[1] * 0.08))
+                if elapsed<8 {
+                    widget::Text::new(appdata.texts.waiting_for_connection)
+                    .font_size(25)
+                    .bottom_left_with_margins_on(ids.master, 130.0, 30.0)
+                    .w_h(appdata.convert_w(400.0), appdata.convert_h(wh[1] * 0.08))
                     .color(color::LIGHT_GREEN)
                     .set(ids.menu_waiting_connection, ui);
-                
+                } else if elapsed<10 {
+                    widget::Text::new("Closing the connection ..")
+                    .font_size(25)
+                    .bottom_left_with_margins_on(ids.master, 130.0, 30.0)
+                    .w_h(appdata.convert_w(400.0), appdata.convert_h(wh[1] * 0.08))
+                    .color(color::LIGHT_GREEN)
+                    .set(ids.menu_waiting_connection, ui);
+                } else {
+                    server_lookup_tx.send(None).unwrap();
+                    gamedata.connection_status=ConnectionStatus::None;
+                }
             }
             &ConnectionStatus::Error(_)=>{
                 gamedata.connection_status = ConnectionStatus::None;
             }
-            _=>{}
         }
         for _ in widget::Button::image(icon_image)
                 .source_rectangle(graphics_match::gameicons_rect(10.0))

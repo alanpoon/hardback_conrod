@@ -49,7 +49,7 @@ impl<'a, T> GameProcess<'a, T>
                                       Option<image::RgbaImage>,
                                       Option<text::Font>)>,
                action_tx: mpsc::Sender<OwnedMessage>,
-               server_lookup_tx:Sender<String>) {
+               server_lookup_tx:Sender<Option<String>>) {
         let ids = &self.ids;
         // remove last_send if elasped 2 second
         if let Some(_last_send) = gamedata.last_send {

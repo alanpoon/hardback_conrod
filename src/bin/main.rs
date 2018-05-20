@@ -26,10 +26,6 @@ use std::time::Instant;
 use std::sync::{Arc, Mutex};
 use rodio::{Source, Sink};
 
-#[cfg(target_os="android")]
-const CONNECTION: &'static str = "ws://13.229.94.195:8080";
-#[cfg(not(target_os="android"))]
-const CONNECTION: &'static str = "ws://0.0.0.0:8080";
 #[derive(Clone)]
 pub enum ConrodMessage {
     Event(Instant, conrod::event::Input),
@@ -74,7 +70,7 @@ impl GameApp {
 
         if let Some(SupportIdType::MusicId(background_music)) =
             result_map.remove(&ResourceEnum::Music(MusicEnum::BACKGROUND)) {}
-        let (server_lookup_tx, server_lookup_rx) = std::sync::mpsc::channel::<String>();
+        let (server_lookup_tx, server_lookup_rx) = std::sync::mpsc::channel::<Option<String>>();
         let (proxy_tx, proxy_rx) = std::sync::mpsc::channel();
         let (proxy_action_tx, proxy_action_rx) = mpsc::channel(2);
         let s_tx = Arc::new(Mutex::new(proxy_action_tx));
@@ -91,34 +87,34 @@ impl GameApp {
             let mut connected = false;
             let mut count =0;
             while !connected {
-                println!("not connected {}",count);
                 count= count+1;
-                let sixteen_ms = std::time::Duration::from_millis(5000);
+                let sixteen_ms = std::time::Duration::from_millis(1000);
                 let now = std::time::Instant::now();
                 let duration_since_last_update = now.duration_since(last_update);
                 last_update = now;
-                if (duration_since_last_update < sixteen_ms) {
+                if duration_since_last_update < sixteen_ms {
                     std::thread::sleep(sixteen_ms - duration_since_last_update);
                 }
-                while let Ok(server_lookup_text) = server_lookup_rx.try_recv() {
-   
-                let (tx, rx) = mpsc::channel(3);
-                let mut ss_tx = ss_tx.lock().unwrap();
-                *ss_tx = tx;
-                drop(ss_tx);
-                let mut server_lookup_t = "ws://".to_owned();
-                server_lookup_t.push_str(&server_lookup_text);
-                match client::run_owned_message(server_lookup_t, proxy_tx.clone(), rx) {
-                    Ok(_) => {
-                        connected = true;
-                        print!("Success");
-                    }
-                    Err(_err) => {
-                        connected = false;
-                        print!("Failure");
-                    }
-                }
-                last_update = std::time::Instant::now();
+                while let Ok(server_lookup_text_z) = server_lookup_rx.try_recv() {
+                    if let Some(server_lookup_text) = server_lookup_text_z{
+                        let (tx, rx) = mpsc::channel(3);
+                        let mut ss_tx = ss_tx.lock().unwrap();
+                        *ss_tx = tx;
+                        drop(ss_tx);
+                        let mut server_lookup_t = "ws://".to_owned();
+                        server_lookup_t.push_str(&server_lookup_text);
+                        match client::run_owned_message(server_lookup_t, proxy_tx.clone(), rx) {
+                            Ok(_) => {
+                                connected = true;
+                                print!("Connection Success");
+                            }
+                            Err(_err) => {
+                                connected = false;
+                                print!("Connection Failure");
+                            }
+                        }
+                        last_update = std::time::Instant::now();
+                    }      
             }
           }
         });
@@ -155,12 +151,10 @@ impl GameApp {
             }));
         let mut old_captured_event: Option<ConrodMessage> = None;
         let mut captured_event: Option<ConrodMessage> = None;
-        let sixteen_ms = std::time::Duration::from_millis(800);
         let mut last_update = std::time::Instant::now();
         let mut gui_count=0;
         'render: loop {
-            //println!("gui_count {:?}",gui_count);
-            let sixteen_ms = std::time::Duration::from_millis(16);
+            let sixteen_ms = std::time::Duration::from_millis(32);
             let now = std::time::Instant::now();
             let duration_since_last_update = now.duration_since(last_update);
             if duration_since_last_update < sixteen_ms {
@@ -174,7 +168,6 @@ impl GameApp {
             events_loop.poll_events(|event| {
                 match event.clone() {
                     glium::glutin::Event::WindowEvent { event, .. } => {
-                        println!("event {:?}",event.clone());
                         match event {
                             glium::glutin::WindowEvent::Closed |
                             glium::glutin::WindowEvent::KeyboardInput {
@@ -224,7 +217,6 @@ impl GameApp {
                     }
                     old_captured_event = Some(ConrodMessage::Event(d, input.clone()));
                     // Set the widgets.
-                    //println!("update game_proc first");
                     game_proc.run(&mut ui,
                                   &cardmeta,
                                   &mut (gamedata),
@@ -252,7 +244,6 @@ impl GameApp {
                     let now = std::time::Instant::now();
                     let duration_since_last_update = now.duration_since(last_update);
                     if duration_since_last_update < sixteen_ms {
-                        println!("gui sleeping {:?}",now);
                         std::thread::sleep(sixteen_ms - duration_since_last_update);
                     }
                     let t = std::time::Instant::now();
@@ -290,7 +281,6 @@ impl GameApp {
             }
             // Draw the `Ui` if it has changed.
             if action_instant.elapsed() <= time_to_sleep {
-                //println!("redrawing {}",gui_count);
                 let primitives = ui.draw();
                 renderer.fill(&display, primitives, &image_map);
                 let mut target = display.draw();

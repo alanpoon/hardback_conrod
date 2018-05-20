@@ -91,8 +91,8 @@ pub fn render(ui: &mut conrod::UiCell,
                             [appdata.convert_w(195.0), wh[1] * 0.06],
                             None,
                             &mut gamedata.keypad_on,
-                            ids.user_name,
-                            wh[0] * 0.025,
+                            ids.name_rect,
+                            [10.0,8.0],
                             ids.master,
                             ui);
                 

@@ -41,7 +41,7 @@ pub fn textedit(k: &mut String,
                 dim: [f64; 2],
                 limited_to_chars:Option<usize>,
                 keypad_on_: &mut bool,
-                right_of: widget::Id,
+                left_of: widget::Id,
                 right_margin: f64,
                 parent_of: widget::Id,
                 ui: &mut conrod::UiCell) {
@@ -54,7 +54,7 @@ pub fn textedit(k: &mut String,
         let (editz, keypad_bool) = TextEdit::new(k,parent_of,&english_tuple)
                     .color(color::BLACK)
                     .wh(dim)
-                    .right_from(right_of,right_margin)
+                    .top_left_with_margin_on(left_of,right_margin)
                     .left_justify()
                     .line_spacing(2.5)
                     .restrict_to_height(true) // Let the height grow infinitely and scroll.
@@ -78,14 +78,14 @@ pub fn textedit(k: &mut String,
                 dim: [f64; 2],
                 limited_to_chars:Option<usize>,
                 _keypad_on_: &mut bool,
-                right_of: widget::Id,
-                right_margin: f64,
+                left_of: widget::Id,
+                right_margin: [f64;2],
                 _parent_of: widget::Id,
                 ui: &mut conrod::UiCell) {
     for edit in widget::TextEdit::new(k)
             .color(color::BLACK)
             .wh(dim)
-            .right_from(right_of,right_margin)
+            .top_left_with_margins_on(left_of,right_margin[1],right_margin[0])
             .left_justify()
             .line_spacing(2.5)
             .restrict_to_height(true) // Let the height grow infinitely and scroll.

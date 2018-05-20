@@ -268,7 +268,6 @@ impl<'a,S> Widget for ItemWidget<'a,S>
                            rect,
                            self.style.color(&ui.theme),
                            ui);
-
             support::textedit(_str,
                                 state.ids.textedit_at_toggle,
                                 appdata,
@@ -277,7 +276,7 @@ impl<'a,S> Widget for ItemWidget<'a,S>
                                 Some(1),
                                 &mut gamedata_keypad_on,
                                 state.ids.textedit_background,
-                                15.0,
+                                [10.0,10.0],
                                 id_master,
                                 ui);
             

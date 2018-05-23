@@ -19,7 +19,7 @@ jobs:
       - 
         run: "git clone --depth=1 https://github.com/alanpoon/cargo-edit cargo-edit"
       - 
-        run: "git clone https://github.com/tomaka/android-rs-glue.git && cd android-rs-glue && git reset --hard d726f1e1b13ae54674edc4843b7bb8e7d3499279 && cargo install --path cargo-apk"
+        run: "git clone https://github.com/tomaka/android-rs-glue.git && cd android-rs-glue && git reset --hard 8ad069e3bcad7523b95ed12946725f4bbbb2572e && cargo install --path cargo-apk --force"
       - 
         run: "cd .."
       - 

@@ -8,6 +8,8 @@ jobs:
         image: tomaka/cargo-apk
     steps: 
       - checkout
+      - run: echo 'export KEYSTORE=${HOME}/repo/my-release-key.keystore' >> $BASH_ENV
+      - run: ./circleci/download_keystore.sh
       - 
         run: "rustup show"
       - 
@@ -50,7 +52,10 @@ jobs:
             OPENSSL_LIB_DIR: /usr/local/ssl/android-18/armeabi-v7a/lib
           name: "apk build"
       - 
-        run: "ls target/android-artifacts/app/build/outputs/apk" 
+        run: "ls target/android-artifacts/app/build/outputs/apk"
+      - run: "pwd"
+      - run: "jarsigner -verbose -sigalg SHA1withRSA -keypass ${KEYPHRASE} -digestalg SHA1 -keystore my-release-key.keystore ${HOME}/repo/target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk rustropy"
+      - run: "zipalign -f 4 ${HOME}/repo/target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk ${HOME}/repo/target/android-artifacts/app/build/outputs/apk/outfile.apk"
       -
         run: "chmod +x .circleci/upload_github_release.sh"
       - 

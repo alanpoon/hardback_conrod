@@ -9,7 +9,8 @@ jobs:
     steps: 
       - checkout
       - run: echo 'export KEYSTORE=${HOME}/repo/my-release-key.keystore' >> $BASH_ENV
-      - run: ./circleci/download_keystore.sh
+      - run: "chmod +x ./circleci/download_keystore.sh"
+      - run: "./.circleci/download_keystore.sh"
       - 
         run: "rustup show"
       - 

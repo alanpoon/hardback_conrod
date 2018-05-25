@@ -8,6 +8,7 @@ jobs:
         image: tomaka/cargo-apk
     steps: 
       - checkout
+      - run: "chmod +x  .circleci/setupandroid.sh"
       - run: "./.circleci/setupandroid.sh && getAndroidSDK"
       - run: echo 'export KEYSTORE=${HOME}/project/my-release-key.keystore' >> $BASH_ENV
       - run: "ls .circleci"

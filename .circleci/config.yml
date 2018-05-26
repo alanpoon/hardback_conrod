@@ -13,7 +13,6 @@ jobs:
       - run: "ls .circleci"
       - run: "ls ${ANDROID_HOME}/build-tools"
       - run: "./.circleci/setupandroid.sh"      
-      - run: "jasdk"
       - run: "pwd"
       - run: "chmod +x .circleci/download_keystore.sh"
       - run: "./.circleci/download_keystore.sh"

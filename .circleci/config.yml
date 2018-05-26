@@ -9,12 +9,10 @@ jobs:
     steps: 
       - checkout
       - run: "chmod +x  .circleci/setupandroid.sh"
-      - run: "./.circleci/setupandroid.sh"
       - run: echo 'export KEYSTORE=${HOME}/project/my-release-key.keystore' >> $BASH_ENV
       - run: "ls .circleci"
-      - run: "ls ${ANDROID_HOME}"
-      - run: "ls ${ANDROID_HOME}/platform-tools"
-      - run: "ls ${ANDROID_HOME}/tools"
+      - run: "ls ${ANDROID_HOME}/build-tools"
+      - run: "./.circleci/setupandroid.sh"      
       - run: "jasdk"
       - run: "pwd"
       - run: "chmod +x .circleci/download_keystore.sh"

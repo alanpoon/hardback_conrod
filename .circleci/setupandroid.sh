@@ -1,1 +1,1 @@
-export PATH="${ANDROID_HOME}/platform-tools:{$ANDROID_HOME}/tools:$PATH"
+export PATH="${ANDROID_HOME}/build-tools/24.4.1:$PATH"

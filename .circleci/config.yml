@@ -13,7 +13,6 @@ jobs:
       - run: "ls .circleci"
       - run: "ls ${ANDROID_HOME}/build-tools"
       - run: echo 'export PATH=${ANDROID_HOME}/build-tools/26.0.1' >> $BASH_ENV
-      - run: "zipalign"
       - run: "chmod +x .circleci/download_keystore.sh"
       - run: "./.circleci/download_keystore.sh"
       - 

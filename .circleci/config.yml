@@ -17,8 +17,11 @@ jobs:
       - run: "./.circleci/download_keystore.sh"
       - 
         run: "rustup show"
+      - run: rustup self update
+      - run: rustup default stable
       - 
         run: "rustup target add armv7-linux-androideabi"
+      - run: rustup update
       - 
         run: "apt-get install libssl-dev"
       - 

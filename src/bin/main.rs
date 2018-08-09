@@ -169,7 +169,7 @@ impl GameApp {
                 match event.clone() {
                     glium::glutin::Event::WindowEvent { event, .. } => {
                         match event {
-                            glium::glutin::WindowEvent::Closed |
+                            glium::glutin::WindowEvent::CloseRequested |
                             glium::glutin::WindowEvent::KeyboardInput {
                                 input: glium::glutin::KeyboardInput {
                                     virtual_keycode: Some(glium::glutin::VirtualKeyCode::Escape),

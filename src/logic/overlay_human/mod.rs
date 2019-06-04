@@ -1,4 +1,4 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,
              Borderable, Rect};
 use cardgame_widgets::custom_widget::animated_canvas;
 use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
@@ -12,7 +12,7 @@ use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use logic;
-pub fn render(ui: &mut conrod::UiCell,
+pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
               appdata: &AppData,
@@ -45,7 +45,7 @@ pub fn render(ui: &mut conrod::UiCell,
             }
 
             let item_h = 40.0;
-            let font_size = item_h as conrod::FontSize / 2;
+            let font_size = item_h as conrod_core::FontSize / 2;
             let (mut events, _scrollbar) = widget::ListSelect::single(gamedata.player_size)
                 .flow_down()
                 .item_size(item_h)
@@ -58,12 +58,12 @@ pub fn render(ui: &mut conrod::UiCell,
             } else {
                 false
             }) {
-                use conrod::widget::list_select::Event;
+                use conrod_core::widget::list_select::Event;
                 match event {
                     // For the `Item` events we instantiate the `List`'s items.
                     Event::Item(item) => {
-                        let (color, label_color) = (conrod::color::LIGHT_GREY,
-                                                    conrod::color::BLACK);
+                        let (color, label_color) = (conrod_core::color::LIGHT_GREY,
+                                                    conrod_core::color::BLACK);
                         let button = widget::Button::new()
                             .border(0.0)
                             .color(color)

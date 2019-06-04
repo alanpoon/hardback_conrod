@@ -1,4 +1,4 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
 use cardgame_widgets::custom_widget::animated_canvas;
 use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
 use backend::codec_lib::codec::*;
@@ -13,7 +13,7 @@ use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use logic;
 use cardgame_widgets::custom_widget::promptview::PromptSendable;
 use app::PromptSender;
-pub fn render(ui: &mut conrod::UiCell,
+pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
               appdata: &AppData,

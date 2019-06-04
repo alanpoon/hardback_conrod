@@ -1,4 +1,4 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
 
 use cardgame_widgets::custom_widget::animated_canvas;
 use cardgame_widgets::custom_widget::tabview;
@@ -14,7 +14,7 @@ use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use logic;
-pub fn render(ui: &mut conrod::UiCell,
+pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
               appdata: &AppData,
@@ -75,7 +75,7 @@ fn render_closure()
                   &AppData,
                   &HashMap<ResourceEnum, SupportIdType>,
                   mpsc::Sender<OwnedMessage>,
-                  &mut conrod::UiCell)>>
+                  &mut conrod_core::UiCell)>>
 {
     vec![Box::new(|w_id, ids, mut gamedata, _appdata, result_map, action_tx, ui| {
                       //Chat
@@ -88,7 +88,7 @@ fn draw_game_chat(w_id: tabview::Item,
                   gamedata: &mut GameData,
                   result_map: &HashMap<ResourceEnum, SupportIdType>,
                   action_tx: mpsc::Sender<OwnedMessage>,
-                  mut ui: &mut conrod::UiCell) {
+                  mut ui: &mut conrod_core::UiCell) {
     use conrod_chat::chat::{english, sprite};
     if let (Some(&SupportIdType::ImageId(rust_img)), Some(&SupportIdType::ImageId(key_pad))) =
         (result_map.get(&ResourceEnum::Sprite(Sprite::RUST)),
@@ -113,7 +113,7 @@ fn draw_game_chat(w_id: tabview::Item,
                   gamedata: &mut GameData,
                   result_map: &HashMap<ResourceEnum, SupportIdType>,
                   action_tx: mpsc::Sender<OwnedMessage>,
-                  mut ui: &mut conrod::UiCell) {
+                  mut ui: &mut conrod_core::UiCell) {
     if let Some(&SupportIdType::ImageId(rust_img)) =
         result_map.get(&ResourceEnum::Sprite(Sprite::RUST)) {
         let k = chatview_futures::ChatView::new(&mut gamedata.game_history,

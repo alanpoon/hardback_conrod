@@ -5,31 +5,31 @@ pub use support::assets_android as assets;
 #[cfg(feature="default")]
 pub mod assets;
 use backend::meta::app::AppData;
-use conrod;
+use conrod_core;
 use std;
-pub fn theme(appdata: &AppData) -> conrod::Theme {
-    use conrod::position::{Align, Direction, Padding, Position, Relative};
-    use conrod::FontSize;
-    conrod::Theme {
+pub fn theme(appdata: &AppData) -> conrod_core::Theme {
+    use conrod_core::position::{Align, Direction, Padding, Position, Relative};
+    use conrod_core::FontSize;
+    conrod_core::Theme {
         name: "Demo Theme".to_string(),
         padding: Padding::none(),
         x_position: Position::Relative(Relative::Align(Align::Start), None),
         y_position: Position::Relative(Relative::Direction(Direction::Backwards, 20.0), None),
-        background_color: conrod::color::DARK_CHARCOAL,
-        shape_color: conrod::color::WHITE,
-        border_color: conrod::color::BLACK,
+        background_color: conrod_core::color::DARK_CHARCOAL,
+        shape_color: conrod_core::color::WHITE,
+        border_color: conrod_core::color::BLACK,
         border_width: 2.0,
-        label_color: conrod::color::BLACK,
+        label_color: conrod_core::color::BLACK,
         font_id: None,
         font_size_large: appdata.convert_h(30.0).floor() as FontSize,
         font_size_medium: appdata.convert_h(22.0).floor() as FontSize,
         font_size_small: appdata.convert_h(16.0).floor() as FontSize,
-        widget_styling: conrod::theme::StyleMap::default(),
+        widget_styling: conrod_core::theme::StyleMap::default(),
         mouse_drag_threshold: 0.0,
         double_click_threshold: std::time::Duration::from_millis(500),
     }
 }
-use conrod::{color, widget, Colorable, Sizeable, Positionable, Widget};
+use conrod_core::{color, widget, Colorable, Sizeable, Positionable, Widget};
 use std::collections::HashMap;
 use backend::SupportIdType;
 use backend::meta::app::ResourceEnum;
@@ -44,7 +44,7 @@ pub fn textedit(k: &mut String,
                 left_of: widget::Id,
                 right_margin: [f64;2],
                 parent_of: widget::Id,
-                ui: &mut conrod::UiCell) {
+                ui: &mut conrod_core::UiCell) {
     use conrod_chat::chat::{english, sprite};
     use backend::meta::app::{AppData, ResourceEnum, Sprite};
     use conrod_chat::backend::custom_widget::text_edit::TextEdit;
@@ -81,7 +81,7 @@ pub fn textedit(k: &mut String,
                 left_of: widget::Id,
                 right_margin: [f64;2],
                 _parent_of: widget::Id,
-                ui: &mut conrod::UiCell) {
+                ui: &mut conrod_core::UiCell) {
     for edit in widget::TextEdit::new(k)
             .color(color::BLACK)
             .wh(dim)

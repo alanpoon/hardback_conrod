@@ -1,5 +1,5 @@
 use image::{self, DynamicImage};
-use conrod::text::{font, Font};
+use conrod_core::text::{font, Font};
 use find_folder;
 use std;
 use std::io::BufReader;

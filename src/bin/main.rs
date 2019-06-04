@@ -1,5 +1,5 @@
 extern crate hardback_conrod;
-extern crate conrod;
+extern crate conrod_core;
 extern crate conrod_chat;
 extern crate futures;
 extern crate rodio;
@@ -12,14 +12,14 @@ use game_conrod::backend::{OwnedMessage, SupportIdType};
 use game_conrod::backend::meta::app::{Font, ResourceEnum, AppData, MusicEnum};
 use game_conrod::backend::codec_lib::codec;
 use game_conrod::page_curl::{self, page, render};
-use game_conrod::opengl;
+//use game_conrod::opengl;
 use game_conrod::on_request;
 use game_conrod::support;
 use game_conrod::backend::codec_lib;
 use game_conrod::backend::codec_lib::cards;
 use game_conrod::app::BoardStruct;
 use conrod_chat::backend::websocket::client;
-use conrod::event;
+use conrod_core::event;
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use std::time::Instant;
@@ -28,7 +28,7 @@ use rodio::{Source, Sink};
 
 #[derive(Clone)]
 pub enum ConrodMessage {
-    Event(Instant, conrod::event::Input),
+    Event(Instant, conrod_core::event::Input),
     Thread(Instant),
 }
 pub struct GameApp {}
@@ -48,16 +48,16 @@ impl GameApp {
                 .with_gl(glium::glutin::GlRequest::Specific(glium::glutin::Api::OpenGlEs, (3, 0)));
         let mut events_loop = glutin::EventsLoop::new();
         let display = glium::Display::new(window_z, context, &events_loop).unwrap();
-        let mut renderer = conrod::backend::glium::Renderer::new(&display).unwrap();
+        let mut renderer = conrod_core::backend::glium::Renderer::new(&display).unwrap();
         // construct our `Ui`.
         let (screen_w, screen_h) = display.get_framebuffer_dimensions();
         let appdata = AppData::new(screen_w as f64, screen_h as f64, "Hardback");
-        let mut ui = conrod::UiBuilder::new([screen_w as f64, screen_h as f64])
+        let mut ui = conrod_core::UiBuilder::new([screen_w as f64, screen_h as f64])
             .theme(support::theme(&appdata))
             .build();
 
         let mut result_map = HashMap::<ResourceEnum, SupportIdType>::new();
-        let mut image_map = conrod::image::Map::new();
+        let mut image_map = conrod_core::image::Map::new();
         game_conrod::ui::init_load_resources_to_result_map(&mut result_map,
                                                            &mut image_map,
                                                            &display,
@@ -182,7 +182,7 @@ impl GameApp {
                     }
                     _ => {}
                 }
-                match conrod::backend::winit::convert_event(event.clone(), &display) {
+                match conrod_core::backend::winit::convert_event(event.clone(), &display) {
                     None => {
                         to_continue = true;
                     }
@@ -285,12 +285,14 @@ impl GameApp {
                 renderer.fill(&display, primitives, &image_map);
                 let mut target = display.draw();
                 target.clear_color(0.0, 0.0, 0.0, 1.0);
+                /*
                 opengl::draw_mutliple(&mut target,
                                       &vertex_buffer,
                                       &indices,
                                       &program,
                                       &mut gamedata.page_vec,
                                       &result_map);
+                */
                 renderer.draw(&display, &mut target, &image_map).unwrap();
                 target.finish().unwrap();
             }

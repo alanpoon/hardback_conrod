@@ -1,4 +1,4 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
 use cardgame_widgets::custom_widget::animated_canvas;
 use cardgame_widgets::sprite::spriteable_rect;
 use cardgame_widgets::text::get_font_size_hn;
@@ -14,7 +14,7 @@ use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use backend::meta::{cards, local};
 use logic::in_game;
-pub fn render(ui: &mut conrod::UiCell,
+pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
               gamedata: &mut GameData,

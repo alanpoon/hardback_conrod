@@ -1,9 +1,9 @@
 use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
-use conrod::{Rect, image};
-use conrod::widget::primitive::image::Image;
+use conrod_core::{Rect, image};
+use conrod_core::widget::primitive::image::Image;
 use cardgame_widgets::custom_widget::image_hover::Hoverable;
 use cardgame_widgets::custom_widget::player_info::item::IconStruct;
-use conrod::widget::envelope_editor::EnvelopePoint;
+use conrod_core::widget::envelope_editor::EnvelopePoint;
 #[derive(Clone)]
 pub struct ImageHoverable(pub Image, pub Option<Image>, pub Option<Image>);
 impl Hoverable for ImageHoverable {

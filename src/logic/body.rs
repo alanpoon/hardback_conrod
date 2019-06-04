@@ -1,8 +1,8 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,
              Borderable, Rect, text, Color};
 use cardgame_widgets::custom_widget::bordered_image::Bordered;
-use conrod::widget::primitive::image::Image;
-use conrod::widget::envelope_editor::EnvelopePoint;
+use conrod_core::widget::primitive::image::Image;
+use conrod_core::widget::envelope_editor::EnvelopePoint;
 use cardgame_widgets::custom_widget::image_hover::{Hoverable, ImageHover};
 use cardgame_widgets::custom_widget::arrange_list::{ArrangeList, ExitBy};
 use custom_widget::arrange_list_tile::{ArrangeTuple,ItemWidget};
@@ -31,7 +31,7 @@ use graphics_match::ImageHoverable;
 use app::{BoardStruct, PromptSender};
 use backend::codec_lib;
 //
-pub fn render(ui: &mut conrod::UiCell,
+pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
               appdata: &AppData,
@@ -170,7 +170,7 @@ pub fn render(ui: &mut conrod::UiCell,
 
     //  draw_hand(ui, ids, gamedata, appdata, result_map);
 }
-fn turn_to_submit_but(ui: &mut conrod::UiCell,
+fn turn_to_submit_but(ui: &mut conrod_core::UiCell,
                       ids: &Ids,
                       appdata: &AppData,
                       overlay_blowup: &mut Option<usize>,
@@ -209,7 +209,7 @@ fn turn_to_submit_but(ui: &mut conrod::UiCell,
     }
 
 }
-fn show_draft(ui: &mut conrod::UiCell,
+fn show_draft(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               player: &mut Player,
               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
@@ -283,7 +283,7 @@ fn show_draft(ui: &mut conrod::UiCell,
         }
     }
 }
-fn shuffle(ui: &mut conrod::UiCell,
+fn shuffle(ui: &mut conrod_core::UiCell,
            ids: &Ids,
            player: &Player,
            cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
@@ -371,7 +371,7 @@ fn cache_personal(player: &Player, personal: &mut Option<Personal>) {
     }
 }
 
-fn spell(ui: &mut conrod::UiCell,
+fn spell(ui: &mut conrod_core::UiCell,
          ids: &Ids,
          cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
          personal: &mut Option<Personal>,
@@ -499,7 +499,7 @@ fn spell(ui: &mut conrod::UiCell,
     }
 
 }
-fn view_others(ui: &mut conrod::UiCell,
+fn view_others(ui: &mut conrod_core::UiCell,
                ids: &Ids,
                cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
                player: Player,
@@ -567,7 +567,7 @@ fn view_others(ui: &mut conrod::UiCell,
             }
             y
         }) {
-            use conrod::widget::list_select::Event;
+            use conrod_core::widget::list_select::Event;
             match event {
                 // For the `Item` events we instantiate the `List`'s items.
                 Event::Item(item) => {
@@ -636,7 +636,7 @@ fn view_others(ui: &mut conrod::UiCell,
     }
 
 }
-fn buy(ui: &mut conrod::UiCell,
+fn buy(ui: &mut conrod_core::UiCell,
        ids: &Ids,
        cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
        offer_row: &Vec<usize>,
@@ -693,7 +693,7 @@ fn buy(ui: &mut conrod::UiCell,
             }
             y
         }) {
-            use conrod::widget::list_select::Event;
+            use conrod_core::widget::list_select::Event;
             match event {
                 // For the `Item` events we instantiate the `List`'s items.
                 Event::Item(item) => {
@@ -760,7 +760,7 @@ fn buy(ui: &mut conrod::UiCell,
         }
     }
 }
-fn trash_other(ui: &mut conrod::UiCell,
+fn trash_other(ui: &mut conrod_core::UiCell,
                ids: &Ids,
                player: &Player,
                otherthanthis: usize,
@@ -828,7 +828,7 @@ fn trash_other(ui: &mut conrod::UiCell,
             }
             y
         }) {
-            use conrod::widget::list_select::Event;
+            use conrod_core::widget::list_select::Event;
             match event {
                 // For the `Item` events we instantiate the `List`'s items.
                 Event::Item(item) => {
@@ -870,7 +870,7 @@ fn trash_other(ui: &mut conrod::UiCell,
         }
     }
 }
-fn show_result(ui: &mut conrod::UiCell,
+fn show_result(ui: &mut conrod_core::UiCell,
                ids: &Ids,
                players: &Vec<Player>,
                winner: usize,

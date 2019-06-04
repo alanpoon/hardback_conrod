@@ -1,4 +1,4 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, Labelable};
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, Labelable};
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use app::{GameData, Ids, GuiState};
@@ -10,7 +10,7 @@ use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum};
 use backend::codec_lib::codec::GameState;
 #[allow(unused_mut)]
-pub fn render(ui: &mut conrod::UiCell,
+pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
               appdata: &AppData,

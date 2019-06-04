@@ -1,4 +1,4 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,
              Borderable};
 use cardgame_widgets::custom_widget::tabview;
 use cardgame_widgets::custom_widget::full_cycle_sprite::FullCycleSprite;
@@ -27,7 +27,7 @@ pub fn render(w_id: tabview::Item,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
               action_tx: mpsc::Sender<OwnedMessage>,
-              ui: &mut conrod::UiCell) {
+              ui: &mut conrod_core::UiCell) {
     let GameData { ref mut boardcodec,
                    ref player_index,
                    ref mut overlay_receivedimage,
@@ -69,7 +69,7 @@ pub fn render(w_id: tabview::Item,
                  result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS))) {
                 // Handle the `ListSelect`s events.
                 while let Some(event) = events.next(ui, |i| overlay_remover_selected.contains(&i)) {
-                    use conrod::widget::list_select::Event;
+                    use conrod_core::widget::list_select::Event;
                     match event {
                         // For the `Item` events we instantiate the `List`'s items.
                         Event::Item(item) => {

@@ -1,6 +1,8 @@
-#[derive(Copy, Clone,Debug)]
-pub struct Vertex {
-    pub position: (f32, f32, f32),
-    pub tex_coords: (f32, f32),
+use crayon::impl_vertex;
+use crayon::prelude::*;
+impl_vertex! {
+    Vertex {
+        pos => [Position; Float; 3; false],
+        uv =>[Texcoord0; Float; 2; false],
+    }
 }
-implement_vertex!(Vertex, position, tex_coords);

@@ -1,5 +1,5 @@
 use hardback_meta::app::{AppData, ResourceEnum};
-use conrod::{self, color, widget, Colorable, Widget, text, Borderable};
+use conrod_core::{self, color, widget, Colorable, Widget, text, Borderable};
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use backend::codec_lib::cards::*;
@@ -10,6 +10,9 @@ use ui::{Vala, load_resources_iter, iter_resource_enum_vala_next, RESULTMAPLEN};
 use backend::OwnedMessage;
 use backend::SupportIdType;
 use cardgame_widgets::custom_widget::animated_canvas;
+use crayon::prelude::*;
+use crayon_audio::prelude::*;
+use crayon_bytes::prelude::*;
 use std::sync::mpsc::Sender;
 use std;
 use image;
@@ -27,7 +30,7 @@ pub struct GameProcess<'a, T>
 impl<'a, T> GameProcess<'a, T>
     where T: Clone
 {
-    pub fn new(ui: &mut conrod::Ui,
+    pub fn new(ui: &mut conrod_core::Ui,
                appdata: AppData,
                y: Box<Fn(&mut GameData,
                          &AppData,
@@ -41,12 +44,12 @@ impl<'a, T> GameProcess<'a, T>
         }
     }
     pub fn run(&mut self,
-               ui: &mut conrod::Ui,
+               ui: &mut conrod_core::Ui,
                cardmeta: &[cards::ListCard<BoardStruct>; 180],
                mut gamedata: &mut GameData,
                result_map: &HashMap<ResourceEnum, SupportIdType>,
                load_asset_tx: Sender<(ResourceEnum,
-                                      Option<image::RgbaImage>,
+                                      Option<TextureHandle>,
                                       Option<text::Font>)>,
                action_tx: mpsc::Sender<OwnedMessage>,
                server_lookup_tx:Sender<Option<String>>) {
@@ -110,7 +113,7 @@ impl<'a, T> GameProcess<'a, T>
         //  logic::notification::render(&mut ui.set_widgets(), &ids, gamedata.notification.clone());
     }
     fn set_game_ui(&self,
-                   ui: &mut conrod::UiCell,
+                   ui: &mut conrod_core::UiCell,
                    ids: &Ids,
                    mut gamedata: &mut GameData,
                    appdata: &AppData,

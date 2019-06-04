@@ -58,10 +58,7 @@ impl Page {
                 // let tx = (cx - ix) as f32 / (COLUMNS as f32);
                 let tx = ix as f32 / (COLUMNS as f32);
                 let ty = iy as f32 / (ROWS as f32);
-                self.in_mesh.push(Vertex {
-                                      position: (px, py, 0.0),
-                                      tex_coords: (tx, ty),
-                                  });
+                self.in_mesh.push(Vertex::new([px,py,0.0],[tx,ty]));
                 _i += 1;
             }
         }

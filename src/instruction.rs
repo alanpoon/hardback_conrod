@@ -1,8 +1,8 @@
 use cardgame_widgets::custom_widget::instructionset::Instructable;
-use conrod::{Sizeable, Positionable, widget, color};
-use conrod::widget::primitive::shape::oval::Full;
-use conrod::widget::button::{Button, Flat};
-use conrod::widget::{Oval, Rectangle};
+use conrod_core::{Sizeable, Positionable, widget, color};
+use conrod_core::widget::primitive::shape::oval::Full;
+use conrod_core::widget::button::{Button, Flat};
+use conrod_core::widget::{Oval, Rectangle};
 pub struct Instruction<'a>(pub &'a str, pub &'a [f64; 4], pub &'a Option<[f64; 4]>, pub widget::Id);
 impl<'a> Instructable<'a> for Instruction<'a> {
     fn label(&self) -> &'a str {

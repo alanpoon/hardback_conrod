@@ -1,4 +1,4 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
 use cardgame_widgets::custom_widget::{tabview, table_list};
 use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
 use cardgame_widgets::custom_widget::animated_canvas;
@@ -34,7 +34,7 @@ impl<'a> table_list::TableListTexts for TableListTex<'a> {
     }
 }
 #[allow(unused_mut)]
-pub fn render(ui: &mut conrod::UiCell,
+pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
               appdata: &AppData,
@@ -98,7 +98,7 @@ pub fn render(ui: &mut conrod::UiCell,
                       &AppData,
                       &HashMap<ResourceEnum, SupportIdType>,
                       mpsc::Sender<OwnedMessage>,
-                      &mut conrod::UiCell)>>
+                      &mut conrod_core::UiCell)>>
     {
         vec![Box::new(|w_id, ids, mut gamedata, appdata, result_map, action_tx, ui| {
             //draw lobby
@@ -117,7 +117,7 @@ pub fn render(ui: &mut conrod::UiCell,
     }
 
     #[allow(unused_mut)]
-    fn draw_lobby(ui: &mut conrod::UiCell,
+    fn draw_lobby(ui: &mut conrod_core::UiCell,
                   w_id: tabview::Item,
                   ids: &Ids,
                   mut gamedata: &mut GameData,

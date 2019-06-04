@@ -3,15 +3,17 @@
 #[macro_use]
 extern crate serde_json;
 #[macro_use]
-extern crate conrod;
+extern crate conrod_core;
 #[macro_use]
 extern crate conrod_derive;
 #[macro_use]
-pub extern crate glium;
-#[macro_use]
 extern crate cardgame_macros;
+extern crate conrod_crayon;
 extern crate conrod_chat;
 extern crate cardgame_widgets;
+extern crate crayon;
+extern crate crayon_audio;
+extern crate crayon_bytes;
 pub extern crate hardback_meta;
 pub extern crate hardback_codec;
 extern crate futures;
@@ -27,7 +29,7 @@ extern crate find_folder;
 pub mod backend;
 pub mod page_curl;
 pub mod logic;
-pub mod opengl;
+//pub mod opengl;
 pub mod app;
 pub mod ui;
 pub mod graphics_match;

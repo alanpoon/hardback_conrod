@@ -1,4 +1,4 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
 use cardgame_widgets::custom_widget::full_cycle_sprite::FullCycleSprite;
 use cardgame_widgets::custom_widget::tabview;
 use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
@@ -23,7 +23,7 @@ pub fn render(w_id: tabview::Item,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
               action_tx: mpsc::Sender<OwnedMessage>,
-              ui: &mut conrod::UiCell) {
+              ui: &mut conrod_core::UiCell) {
     let GameData { ref mut boardcodec, ref player_index, ref mut overlay_receivedimage, .. } =
         *gamedata;
     widget::Text::new(&appdata.texts.use_ink)

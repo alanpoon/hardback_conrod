@@ -1,4 +1,4 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, Labelable};
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, Labelable};
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use std::sync::mpsc::Sender;
@@ -16,7 +16,7 @@ use support;
 use backend::codec_lib;
 use backend::codec_lib::codec::{ConnectionStatus, ConnectionError};
 #[allow(unused_mut)]
-pub fn render(ui: &mut conrod::UiCell,
+pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               mut gamedata: &mut GameData,
               appdata: &AppData,

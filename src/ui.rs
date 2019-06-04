@@ -1,26 +1,28 @@
-use conrod;
-use conrod::backend::glium::glium::{self, Surface};
+use conrod_core;
+use conrod_crayon;
 use backend::SupportIdType;
 use backend::meta::app::{self, Font, ResourceEnum, Sprite, Texture, ChunkEnum, MusicEnum};
 use support;
 use image;
 use rodio;
 use std::collections::HashMap;
+use crayon::prelude::*;
+use crayon_audio::prelude::*;
+use crayon_bytes::prelude::*;
+use crayon::window::device_pixel_ratio;
 #[derive(Clone)]
 pub struct Vala {
     source_type: &'static str,
     path: &'static str,
 }
 CGM_iter_resource_enum_vala_pump!{}
-pub fn draw(display: &glium::Display,
-            renderer: &mut conrod::backend::glium::Renderer,
-            image_map: &conrod::image::Map<glium::Texture2d>,
-            primitives: &conrod::render::OwnedPrimitives) {
-    renderer.fill(display, primitives.walk(), &image_map);
-    let mut target = display.draw();
-    target.clear_color(0.0, 0.0, 0.0, 1.0);
-    renderer.draw(display, &mut target, &image_map).unwrap();
-    target.finish().unwrap();
+pub fn draw(dim:[f64;2],batch:&mut CommandBuffer,renderer: &mut conrod_crayon::Renderer,
+            image_map: &conrod_core::image::Map<TextureHandle>,
+            primitives: &conrod_core::render::OwnedPrimitives) {
+    let dpi_factor = device_pixel_ratio() as f64;
+    //let dims = (dim[0] * dpi_factor, dim[1] * dpi_factor);
+    renderer.fill((dim[0],dim[1]),dpi_factor, primitives.walk(), &image_map);
+    renderer.draw(batch,image_map);
 }
 
 pub fn load_resources_iter(map: &mut HashMap<ResourceEnum, Vala>) {
@@ -39,15 +41,14 @@ pub fn load_resources_iter(map: &mut HashMap<ResourceEnum, Vala>) {
 }
 
 pub fn init_load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, SupportIdType>,
-                                         image_map: &mut conrod::image::Map<glium::Texture2d>,
-                                         display: &glium::Display,
-                                         ui: &mut conrod::Ui) {
+                                         image_map: &mut conrod_core::image::Map<TextureHandle>,
+                                         ui: &mut conrod_core::Ui) {
     CGM_image_map!{
     (ResourceEnum::Sprite(Sprite::RUST),"image","images/rust.png"),
     (ResourceEnum::Sprite(Sprite::UNOFFICIAL),"image","images/unofficial.png"),        
     (ResourceEnum::Sprite(Sprite::CLOUDY),"image","images/cards/cloudy.png"),
     (ResourceEnum::Sprite(Sprite::COININFO),"image","images/allcoin_info.png"),
-    (ResourceEnum::Sprite(Sprite::COININFO270),"image270","images/allcoin_info.png"),
+    (ResourceEnum::Sprite(Sprite::COININFO270),"image","images/allcoin_info (270).png"),
     (ResourceEnum::Sprite(Sprite::GAMEICONS),"image","images/gameicon.png"),
     (ResourceEnum::Font(Font::REGULAR),"font","fonts/NotoSans/NotoSans-Regular.ttf"),
     (ResourceEnum::Font(Font::BOLD),"font","fonts/NotoSans/NotoSans-Bold.ttf"),
@@ -57,12 +58,12 @@ pub fn init_load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, 
     (ResourceEnum::Font(Font::HORROR),"font","fonts/Mortified.ttf"),
     (ResourceEnum::Font(Font::ADVENTURE),"font","fonts/TradeWinds-Regular.ttf"),
     (ResourceEnum::Font(Font::ROMANCE),"font","fonts/Babylove.ttf"),
-   // (ResourceEnum::Music(MusicEnum::BACKGROUND),"music","audio/doki1.ogg"),
+    //(ResourceEnum::Music(MusicEnum::BACKGROUND),"music","audio/doki1.ogg"),
     //(ResourceEnum::Chunk(ChunkEnum::PAGEFLIP),"chunk","audio/Page_urn_sound_effect.ogg")
     
   }
     let g = ImageIds::new();
-    g.pump(result_map, display, ui, image_map);
+    g.pump(result_map, ui, image_map);
 }
 pub const RESULTMAPLEN: usize = 21;
 //don't count music

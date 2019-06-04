@@ -1,8 +1,8 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
 use cardgame_widgets::custom_widget::animated_canvas;
 use cardgame_widgets::custom_widget::tabview;
 use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
-use conrod::widget::primitive::image::Image;
+use conrod_core::widget::primitive::image::Image;
 use cardgame_widgets::custom_widget::player_info::list::List;
 use cardgame_widgets::custom_widget::player_info::item::IconStruct;
 use cardgame_widgets::text::get_font_size_hn;
@@ -22,7 +22,7 @@ use instruction::Instruction;
 pub mod use_ink;
 pub mod use_remover;
 pub mod use_timelessclassic;
-pub fn render(ui: &mut conrod::UiCell,
+pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
               gamedata: &mut GameData,
@@ -137,7 +137,7 @@ fn render_closure()
                   &AppData,
                   &HashMap<ResourceEnum, SupportIdType>,
                   mpsc::Sender<OwnedMessage>,
-                  &mut conrod::UiCell)>>
+                  &mut conrod_core::UiCell)>>
 {
     vec![Box::new(|w_id, ids, cardmeta, mut gamedata, appdata, result_map, action_tx, ui| {
         //draw use ink

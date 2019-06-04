@@ -1,5 +1,5 @@
-use conrod;
-use conrod::{Sizeable, Positionable};
+use conrod_core;
+use conrod_core::{Sizeable, Positionable};
 use cardgame_widgets::custom_widget::tabview;
 use conrod_chat::custom_widget::chatview_futures;
 use std::collections::HashMap;
@@ -8,7 +8,7 @@ use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use app::{GameData, Ids};
-pub fn render(_ui: &mut conrod::UiCell,
+pub fn render(_ui: &mut conrod_core::UiCell,
               _ids: &Ids,
               mut _gamedata: &mut GameData,
               _appdata: &AppData,
@@ -23,7 +23,7 @@ pub fn draw_lobby_chat(w_id: tabview::Item,
                        gamedata: &mut GameData,
                        result_map: &HashMap<ResourceEnum, SupportIdType>,
                        action_tx: mpsc::Sender<OwnedMessage>,
-                       mut ui: &mut conrod::UiCell) {
+                       mut ui: &mut conrod_core::UiCell) {
     use conrod_chat::chat::{english, sprite};
     if let (Some(&SupportIdType::ImageId(rust_img)), Some(&SupportIdType::ImageId(key_pad))) =
         (result_map.get(&ResourceEnum::Sprite(Sprite::RUST)),
@@ -47,7 +47,7 @@ pub fn draw_lobby_chat(w_id: tabview::Item,
                        gamedata: &mut GameData,
                        result_map: &HashMap<ResourceEnum, SupportIdType>,
                        action_tx: mpsc::Sender<OwnedMessage>,
-                       mut ui: &mut conrod::UiCell) {
+                       mut ui: &mut conrod_core::UiCell) {
     if let Some(&SupportIdType::ImageId(rust_img)) =
         result_map.get(&ResourceEnum::Sprite(Sprite::RUST)) {
         let k = chatview_futures::ChatView::new(&mut gamedata.lobby_history,

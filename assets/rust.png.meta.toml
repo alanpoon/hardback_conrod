@@ -1,0 +1,15 @@
+name = 'rust.png'
+uuid = '5c62d190-d67a-427b-8579-941c09c7ce89'
+
+[[resources]]
+type = 'Texture'
+name = 'rust.png'
+uuid = '79ceaa33-21ac-4fac-aeac-258f9f0401e2'
+
+[params]
+type = 'Texture'
+mipmap = true
+alpha_premultiply = false
+wrap = 'Clamp'
+filter = 'Linear'
+compression = 'HighQuality'

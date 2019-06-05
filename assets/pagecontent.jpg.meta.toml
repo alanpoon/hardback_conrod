@@ -1,0 +1,15 @@
+name = 'pagecontent.jpg'
+uuid = 'b6ac2c20-c3b9-4ae1-9126-cba30d9d2e57'
+
+[[resources]]
+type = 'Texture'
+name = 'pagecontent.jpg'
+uuid = 'a81708e3-8c93-45f2-91a9-fd78078e81c7'
+
+[params]
+type = 'Texture'
+mipmap = true
+alpha_premultiply = false
+wrap = 'Clamp'
+filter = 'Linear'
+compression = 'HighQuality'

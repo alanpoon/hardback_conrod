@@ -7,7 +7,6 @@ use backend::codec_lib::cards;
 use logic;
 use app::{GameData, Ids, GuiState, BoardStruct};
 use ui::{Vala, load_resources_iter, iter_resource_enum_vala_next, RESULTMAPLEN};
-use backend::OwnedMessage;
 use backend::SupportIdType;
 use cardgame_widgets::custom_widget::animated_canvas;
 use crayon::prelude::*;
@@ -16,43 +15,38 @@ use crayon_bytes::prelude::*;
 use std::sync::mpsc::Sender;
 use std;
 use image;
-pub struct GameProcess<'a, T>
+pub struct GameProcess<T>
     where T: Clone
 {
     pub update_closure: Box<Fn(&mut GameData,
                                &AppData,
                                &HashMap<ResourceEnum, SupportIdType>,
-                               T) + 'a>,
+                               T)>,
     pub appdata: AppData,
     pub ids: Ids,
 }
 
-impl<'a, T> GameProcess<'a, T>
+impl<T> GameProcess<T>
     where T: Clone
 {
-    pub fn new(ui: &mut conrod_core::Ui,
+    pub fn new(ids: Ids,
                appdata: AppData,
                y: Box<Fn(&mut GameData,
                          &AppData,
                          &HashMap<ResourceEnum, SupportIdType>,
-                         T) + 'a>)
-               -> GameProcess<'a, T> {
+                         T)>)
+               -> GameProcess<T> {
         GameProcess {
             update_closure: y,
             appdata: appdata,
-            ids: Ids::new(ui.widget_id_generator()),
+            ids: ids,//Ids::new(ui.widget_id_generator()),
         }
     }
     pub fn run(&mut self,
                ui: &mut conrod_core::Ui,
                cardmeta: &[cards::ListCard<BoardStruct>; 180],
                mut gamedata: &mut GameData,
-               result_map: &HashMap<ResourceEnum, SupportIdType>,
-               load_asset_tx: Sender<(ResourceEnum,
-                                      Option<TextureHandle>,
-                                      Option<text::Font>)>,
-               action_tx: mpsc::Sender<OwnedMessage>,
-               server_lookup_tx:Sender<Option<String>>) {
+               result_map: &HashMap<ResourceEnum, SupportIdType>) {
         let ids = &self.ids;
         // remove last_send if elasped 2 second
         if let Some(_last_send) = gamedata.last_send {
@@ -64,6 +58,7 @@ impl<'a, T> GameProcess<'a, T>
             &GuiState::Game(_) => {
                 if result_map.len() < RESULTMAPLEN {
                     gamedata.guistate = GuiState::Loading;
+                    /*
                     std::thread::spawn(move || {
                         let mut map: HashMap<ResourceEnum, Vala> = HashMap::new();
                         load_resources_iter(&mut map);
@@ -73,15 +68,15 @@ impl<'a, T> GameProcess<'a, T>
                                 iter_resource_enum_vala_next((*k).clone(), (*v).clone());
                             load_asset_tx.send((_resource_enum, _image_buffer, _font)).unwrap();
                         }
-                    });
+                    });*/
                 } else {
+                    /*
                     self.set_game_ui(&mut ui.set_widgets(),
                                      &ids,
                                      &mut gamedata,
                                      &self.appdata,
                                      &cardmeta,
-                                     result_map,
-                                     action_tx);
+                                     result_map);*/
                 }
             }
             &GuiState::Menu => {
@@ -90,23 +85,23 @@ impl<'a, T> GameProcess<'a, T>
                                     &mut gamedata,
                                     &self.appdata,
                                     &cardmeta,
-                                    result_map,
-                                    server_lookup_tx);
+                                    result_map);
             }
             &GuiState::Lobby => {
+                /*
                 logic::lobby::render(&mut ui.set_widgets(),
                                      &ids,
                                      &mut gamedata,
                                      &self.appdata,
                                      result_map,
-                                     action_tx);
+                                     action_tx);*/
             }
             &GuiState::Loading => {
-                logic::loading::render(&mut ui.set_widgets(),
+                /*logic::loading::render(&mut ui.set_widgets(),
                                        &ids,
                                        &mut gamedata,
                                        &self.appdata,
-                                       result_map);
+                                       result_map);*/
             }
             _ => {}
         }
@@ -118,8 +113,7 @@ impl<'a, T> GameProcess<'a, T>
                    mut gamedata: &mut GameData,
                    appdata: &AppData,
                    cardmeta: &[cards::ListCard<BoardStruct>; 180],
-                   result_map: &HashMap<ResourceEnum, SupportIdType>,
-                   action_tx: mpsc::Sender<OwnedMessage>) {
+                   result_map: &HashMap<ResourceEnum, SupportIdType>) {
 
         animated_canvas::Canvas::new()
             .pad_top(appdata.convert_h(40.0))
@@ -132,14 +126,14 @@ impl<'a, T> GameProcess<'a, T>
             .frame_rate(30)
             .border(0.0)
             .set(ids.master, ui);
+        /*   
         logic::body::render(ui,
                             ids,
                             &mut gamedata,
                             &appdata,
                             &cardmeta,
-                            result_map,
-                            action_tx.clone());
-                            
+                            result_map);
+                         
         logic::footer::render(ui,
                               ids,
                               &mut gamedata,
@@ -169,6 +163,7 @@ impl<'a, T> GameProcess<'a, T>
                                     action_tx.clone());
         logic::overlay_human::render(ui, ids, &mut gamedata, &appdata, result_map);
         logic::overlay_prompt::render(ui, ids, &mut gamedata, action_tx.clone());
+        */
     }
     #[allow(unused_mut)]
     pub fn update_state(&self,

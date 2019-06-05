@@ -1,0 +1,10 @@
+name = 'Mortified.ttf'
+uuid = '09dd9af6-c8ac-4e5f-a238-00a54d58715b'
+
+[[resources]]
+type = 'Bytes'
+name = 'Mortified.ttf'
+uuid = '58cc03c8-4c91-4cbb-8595-0119c4a439e2'
+
+[params]
+type = 'Bytes'

@@ -1,0 +1,10 @@
+name = 'Babylove.ttf'
+uuid = 'df9fac1a-1432-4959-b50e-bfc9da26cadf'
+
+[[resources]]
+type = 'Bytes'
+name = 'Babylove.ttf'
+uuid = 'd1bb4923-e5ad-4831-b21b-b1aa580f5dea'
+
+[params]
+type = 'Bytes'

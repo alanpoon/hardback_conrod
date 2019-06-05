@@ -1,0 +1,15 @@
+name = 'allcoin_info (270).png'
+uuid = '29b58384-c16c-4229-9a69-786ecb70cd16'
+
+[[resources]]
+type = 'Texture'
+name = 'allcoin_info (270).png'
+uuid = '3dcf3b02-ea8e-4ede-8cd9-a4148253ae7e'
+
+[params]
+type = 'Texture'
+mipmap = true
+alpha_premultiply = false
+wrap = 'Clamp'
+filter = 'Linear'
+compression = 'HighQuality'

@@ -1,0 +1,15 @@
+name = 'unofficial.png'
+uuid = 'fc0f6067-c505-438c-9f8d-d147f57983f8'
+
+[[resources]]
+type = 'Texture'
+name = 'unofficial.png'
+uuid = '5859dd0d-6aef-4767-baba-c52cf31e7783'
+
+[params]
+type = 'Texture'
+mipmap = true
+alpha_premultiply = false
+wrap = 'Clamp'
+filter = 'Linear'
+compression = 'HighQuality'

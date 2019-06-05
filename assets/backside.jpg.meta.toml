@@ -1,0 +1,15 @@
+name = 'backside.jpg'
+uuid = '009f16c5-16bd-42e6-a8fb-5cdcebadbe35'
+
+[[resources]]
+type = 'Texture'
+name = 'backside.jpg'
+uuid = '6b0d4db8-12c9-4795-aa16-103005f5a546'
+
+[params]
+type = 'Texture'
+mipmap = true
+alpha_premultiply = false
+wrap = 'Clamp'
+filter = 'Linear'
+compression = 'HighQuality'

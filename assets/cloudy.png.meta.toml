@@ -1,0 +1,15 @@
+name = 'cloudy.png'
+uuid = '8f726bca-3863-4400-8ac9-096408330465'
+
+[[resources]]
+type = 'Texture'
+name = 'cloudy.png'
+uuid = '4800fcc4-24a3-4db2-b618-a12aa72a0267'
+
+[params]
+type = 'Texture'
+mipmap = true
+alpha_premultiply = false
+wrap = 'Clamp'
+filter = 'Linear'
+compression = 'HighQuality'

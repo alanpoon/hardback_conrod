@@ -15,14 +15,14 @@ use logic;
 use support;
 use backend::codec_lib;
 use backend::codec_lib::codec::{ConnectionStatus, ConnectionError};
+use crayon::network;
 #[allow(unused_mut)]
 pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               mut gamedata: &mut GameData,
               appdata: &AppData,
               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
-              result_map: &HashMap<ResourceEnum, SupportIdType>,
-              server_lookup_tx: Sender<Option<String>>) {
+              result_map: &HashMap<ResourceEnum, SupportIdType>) {
     animated_canvas::Canvas::new().color(color::LIGHT_ORANGE).frame_rate(30).set(ids.master, ui);
     if let (Some(&SupportIdType::ImageId(cloudy)),
             Some(&SupportIdType::ImageId(coin_info)),
@@ -105,7 +105,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
                     .set(ids.submit_but, ui);
                 if j.was_clicked(){
                     println!("clicked");
-                    server_lookup_tx.send(Some(gamedata.server_lookup.clone())).unwrap();
+                    network::create_connection(gamedata.server_lookup.clone()).unwrap();
                     let now = Local::now();
                     gamedata.connection_status=ConnectionStatus::Try(now);
                     println!("connect to try");
@@ -141,7 +141,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
                     .color(color::LIGHT_GREEN)
                     .set(ids.menu_waiting_connection, ui);
                 } else {
-                    server_lookup_tx.send(None).unwrap();
+                    network::create_connection("".to_owned()).unwrap();
                     gamedata.connection_status=ConnectionStatus::None;
                 }
             }

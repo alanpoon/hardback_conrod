@@ -1,0 +1,15 @@
+name = 'arrows_but.png'
+uuid = 'cff49b0d-5957-496c-abba-807834e9e344'
+
+[[resources]]
+type = 'Texture'
+name = 'arrows_but.png'
+uuid = '4c5f8bc5-fe2f-4a62-9b7a-28afa3147e34'
+
+[params]
+type = 'Texture'
+mipmap = true
+alpha_premultiply = false
+wrap = 'Clamp'
+filter = 'Linear'
+compression = 'HighQuality'

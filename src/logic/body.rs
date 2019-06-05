@@ -381,7 +381,7 @@ fn spell(ui: &mut conrod_core::UiCell,
          keypad_bool:&mut bool,
          appdata: &AppData,
          result_map: &HashMap<ResourceEnum, SupportIdType>,
-         _action_tx: mpsc::Sender<OwnedMessage>) {
+         action_tx: mpsc::Sender<OwnedMessage>) {
     if let &mut Some(ref mut _personal) = personal {
         let temp = (*_personal).clone();
         let mut arrangedvec = _personal.arranged
@@ -488,12 +488,12 @@ fn spell(ui: &mut conrod_core::UiCell,
                 println!("diff");
                 let now = Instant::now();
                 *last_send = Some(now);
-                let promptsender = PromptSender(_action_tx);
+                //let promptsender = PromptSender(_action_tx);
                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                 let mut g = GameCommand::new();
                 g.personal = Some(_personal.clone());
                 h.set_gamecommand(g);
-                promptsender.send(ServerReceivedMsg::serialize_send(h).unwrap());
+                //promptsender.send(ServerReceivedMsg::serialize_send(h).unwrap());
             }
         }
     }

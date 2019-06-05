@@ -27,14 +27,14 @@ pub fn draw(dim:[f64;2],batch:&mut CommandBuffer,renderer: &mut conrod_crayon::R
 
 pub fn load_resources_iter(map: &mut HashMap<ResourceEnum, Vala>) {
     CGM_iter_resource_enum_vala!{
-    (ResourceEnum::Texture(Texture::PAGE1F),"texture","images/characters/player1.jpg"),     
-    (ResourceEnum::Texture(Texture::PAGE2F),"texture","images/characters/player2.jpg"),
-    (ResourceEnum::Texture(Texture::PAGE3F),"texture","images/characters/player3.jpg"),
-    (ResourceEnum::Texture(Texture::PAGE4F),"texture","images/characters/player4.jpg"),
-    (ResourceEnum::Sprite(Sprite::KEYPAD),"image","images/keypad.png"),   
-    (ResourceEnum::Sprite(Sprite::DOWNLOAD),"image","images/download.png"), //10
-    (ResourceEnum::Sprite(Sprite::BACKCARD),"image","images/cards/backside.jpg"),
-    (ResourceEnum::Sprite(Sprite::ARROWS),"image","images/arrows_but.png")
+    (ResourceEnum::Texture(Texture::PAGE1F),"texture","res:player1.jpg"),     
+    (ResourceEnum::Texture(Texture::PAGE2F),"texture","res:player2.jpg"),
+    (ResourceEnum::Texture(Texture::PAGE3F),"texture","res:player3.jpg"),
+    (ResourceEnum::Texture(Texture::PAGE4F),"texture","res:player4.jpg"),
+    (ResourceEnum::Sprite(Sprite::KEYPAD),"image","res:keypad.png"),   
+    (ResourceEnum::Sprite(Sprite::DOWNLOAD),"image","res:download.png"), //10
+    (ResourceEnum::Sprite(Sprite::BACKCARD),"image","res:backside.jpg"),
+    (ResourceEnum::Sprite(Sprite::ARROWS),"image","res:arrows_but.png")
     
   }
     iter_resource_enum_vala_new(map)
@@ -44,20 +44,20 @@ pub fn init_load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, 
                                          image_map: &mut conrod_core::image::Map<TextureHandle>,
                                          ui: &mut conrod_core::Ui) {
     CGM_image_map!{
-    (ResourceEnum::Sprite(Sprite::RUST),"image","images/rust.png"),
-    (ResourceEnum::Sprite(Sprite::UNOFFICIAL),"image","images/unofficial.png"),        
-    (ResourceEnum::Sprite(Sprite::CLOUDY),"image","images/cards/cloudy.png"),
-    (ResourceEnum::Sprite(Sprite::COININFO),"image","images/allcoin_info.png"),
-    (ResourceEnum::Sprite(Sprite::COININFO270),"image","images/allcoin_info (270).png"),
-    (ResourceEnum::Sprite(Sprite::GAMEICONS),"image","images/gameicon.png"),
-    (ResourceEnum::Font(Font::REGULAR),"font","fonts/NotoSans/NotoSans-Regular.ttf"),
-    (ResourceEnum::Font(Font::BOLD),"font","fonts/NotoSans/NotoSans-Bold.ttf"),
-    (ResourceEnum::Font(Font::BOLDITALIC),"font","fonts/NotoSans/NotoSans-BoldItalic.ttf"),
-    (ResourceEnum::Font(Font::ITALIC),"font","fonts/NotoSans/NotoSans-Italic.ttf"),
-    (ResourceEnum::Font(Font::MYSTERY),"font","fonts/MysteryQuest-Regular.ttf"),
-    (ResourceEnum::Font(Font::HORROR),"font","fonts/Mortified.ttf"),
-    (ResourceEnum::Font(Font::ADVENTURE),"font","fonts/TradeWinds-Regular.ttf"),
-    (ResourceEnum::Font(Font::ROMANCE),"font","fonts/Babylove.ttf"),
+    (ResourceEnum::Sprite(Sprite::RUST),"image","res:rust.png"),
+    (ResourceEnum::Sprite(Sprite::UNOFFICIAL),"image","res:unofficial.png"),        
+    (ResourceEnum::Sprite(Sprite::CLOUDY),"image","res:cloudy.png"),
+    (ResourceEnum::Sprite(Sprite::COININFO),"image","res:allcoin_info.png"),
+    (ResourceEnum::Sprite(Sprite::COININFO270),"image","res:allcoin_info (270).png"),
+    (ResourceEnum::Sprite(Sprite::GAMEICONS),"image","res:gameicon.png"),
+    (ResourceEnum::Font(Font::REGULAR),"font","res:NotoSans-Regular.ttf"),
+    (ResourceEnum::Font(Font::BOLD),"font","res:NotoSans-Bold.ttf"),
+    (ResourceEnum::Font(Font::BOLDITALIC),"font","res:NotoSans-BoldItalic.ttf"),
+    (ResourceEnum::Font(Font::ITALIC),"font","res:NotoSans-Italic.ttf"),
+    (ResourceEnum::Font(Font::MYSTERY),"font","res:MysteryQuest-Regular.ttf"),
+    (ResourceEnum::Font(Font::HORROR),"font","res:Mortified.ttf"),
+    (ResourceEnum::Font(Font::ADVENTURE),"font","res:TradeWinds-Regular.ttf"),
+    (ResourceEnum::Font(Font::ROMANCE),"font","res:Babylove.ttf"),
     //(ResourceEnum::Music(MusicEnum::BACKGROUND),"music","audio/doki1.ogg"),
     //(ResourceEnum::Chunk(ChunkEnum::PAGEFLIP),"chunk","audio/Page_urn_sound_effect.ogg")
     

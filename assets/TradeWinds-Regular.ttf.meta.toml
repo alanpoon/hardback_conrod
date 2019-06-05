@@ -1,0 +1,10 @@
+name = 'TradeWinds-Regular.ttf'
+uuid = '72492b43-7e8e-459d-adfe-58bd2e9ef022'
+
+[[resources]]
+type = 'Bytes'
+name = 'TradeWinds-Regular.ttf'
+uuid = '03518a3b-9cbb-493c-9b5c-75c9ead527e9'
+
+[params]
+type = 'Bytes'

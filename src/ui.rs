@@ -15,7 +15,7 @@ pub struct Vala {
     source_type: &'static str,
     path: &'static str,
 }
-CGM_iter_resource_enum_vala_pump!{}
+
 pub fn draw(dim:[f64;2],batch:&mut CommandBuffer,renderer: &mut conrod_crayon::Renderer,
             image_map: &conrod_core::image::Map<TextureHandle>,
             primitives: &conrod_core::render::OwnedPrimitives) {
@@ -24,7 +24,7 @@ pub fn draw(dim:[f64;2],batch:&mut CommandBuffer,renderer: &mut conrod_crayon::R
     renderer.fill((dim[0],dim[1]),dpi_factor, primitives.walk(), &image_map);
     renderer.draw(batch,image_map);
 }
-
+/*
 pub fn load_resources_iter(map: &mut HashMap<ResourceEnum, Vala>) {
     CGM_iter_resource_enum_vala!{
     (ResourceEnum::Texture(Texture::PAGE1F),"texture","res:player1.jpg"),     
@@ -40,7 +40,7 @@ pub fn load_resources_iter(map: &mut HashMap<ResourceEnum, Vala>) {
     iter_resource_enum_vala_new(map)
 }
 
-pub fn init_load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, SupportIdType>,
+pub fn init_load_resources_to_result_map<T>(result_map: &mut HashMap<ResourceEnum, SupportIdType>,
                                          image_map: &mut conrod_core::image::Map<TextureHandle>,
                                          ui: &mut conrod_core::Ui) {
     CGM_image_map!{
@@ -65,5 +65,6 @@ pub fn init_load_resources_to_result_map(result_map: &mut HashMap<ResourceEnum, 
     let g = ImageIds::new();
     g.pump(result_map, ui, image_map);
 }
+*/
 pub const RESULTMAPLEN: usize = 21;
 //don't count music

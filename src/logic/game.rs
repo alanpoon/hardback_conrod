@@ -6,7 +6,7 @@ use backend::codec_lib::cards::*;
 use backend::codec_lib::cards;
 use logic;
 use app::{GameData, Ids, GuiState, BoardStruct};
-use ui::{Vala, load_resources_iter, iter_resource_enum_vala_next, RESULTMAPLEN};
+use ui::{Vala, RESULTMAPLEN};
 use backend::SupportIdType;
 use cardgame_widgets::custom_widget::animated_canvas;
 use crayon::prelude::*;

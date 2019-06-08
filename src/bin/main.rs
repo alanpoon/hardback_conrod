@@ -21,6 +21,7 @@ use game_conrod::on_request;
 use game_conrod::support;
 use game_conrod::backend::codec_lib;
 use game_conrod::backend::codec_lib::cards;
+use game_conrod::backend::WindowResources;
 use game_conrod::app::BoardStruct;
 use conrod_chat::backend::websocket::client;
 use conrod_crayon::Renderer;
@@ -38,23 +39,6 @@ pub enum ConrodMessage {
 const WIN_W: u32 = 600;
 const WIN_H: u32 = 420;
 
-#[derive(Debug, Clone, Copy)]
-struct WindowResources {
-    b: BytesHandle,
-}
-impl WindowResources {
-    pub fn new() -> CrResult<Self> {
-        crayon_bytes::setup()?;
-        Ok(WindowResources {
-            b: crayon_bytes::create_bytes_from("res:Oswald-Heavy.ttf")?,
-        })
-    }
-}
-impl LatchProbe for WindowResources {
-    fn is_set(&self) -> bool {
-        crayon_bytes::state(self.b) != ResourceState::NotReady
-    }
-}
 struct Window {
     action_instant:Instant,
     cardmeta: [codec_lib::cards::ListCard<BoardStruct>; 180],
@@ -80,9 +64,6 @@ impl Window {
             .build();
         let mut result_map = HashMap::<ResourceEnum, SupportIdType>::new();
         let mut image_map = conrod_core::image::Map::new();
-        game_conrod::ui::init_load_resources_to_result_map(&mut result_map,
-                                                           &mut image_map,
-                                                           &mut ui);
 
         if let Some(&SupportIdType::FontId(regular)) =
             result_map.get(&ResourceEnum::Font(Font::REGULAR)) {
@@ -90,8 +71,6 @@ impl Window {
         }
         let dpi_factor = crayon::window::device_pixel_ratio();
         let renderer = Renderer::new((WIN_W as f64,WIN_H as f64),  dpi_factor as f64);
-        let f = ui.fonts.insert(load_bold(resources.b));
-        ui.theme.font_id = Some(f);
         let gamedata = app::GameData::new();
         let cardmeta: [codec_lib::cards::ListCard<BoardStruct>; 180] =
             cards::populate::<BoardStruct>();
@@ -174,12 +153,7 @@ impl LifecycleListener for Window {
         Ok(())
     }
 }
-fn load_rust_logo() -> TextureHandle {
-    video::create_texture_from("res:crate.bmp").unwrap()
-}
-fn load_bold(handle:BytesHandle) ->conrod_core::text::Font{
-    FontCollection::from_bytes(crayon_bytes::create_bytes(handle).unwrap()).unwrap().into_font().unwrap()
-}
+
 main!({
     #[cfg(not(target_arch = "wasm32"))]
     let res = format!("file://{}/resources/", env!("CARGO_MANIFEST_DIR").replace("\\","/"));

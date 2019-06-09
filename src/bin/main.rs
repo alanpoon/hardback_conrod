@@ -58,19 +58,23 @@ struct Window {
 
 impl Window {
     pub fn build(resources: &WindowResources) -> CrResult<Self> {
-        let appdata = AppData::new(WIN_W as f64, WIN_H as f64, "Hardback");
-        let mut ui = conrod_core::UiBuilder::new([WIN_H as f64, WIN_H as f64])
-            .theme(support::theme(&appdata))
+        let screen_dim = crayon::window::dimensions();
+        let (screen_w,screen_h) = (screen_dim.x,screen_dim.y);
+        let appdata = AppData::new(screen_w as f64, screen_h as f64, "Hardback");
+        let mut ui = conrod_core::UiBuilder::new([screen_w as f64, screen_h as f64])
+         //   .theme(support::theme(&appdata))
             .build();
         let mut result_map = HashMap::<ResourceEnum, SupportIdType>::new();
         let mut image_map = conrod_core::image::Map::new();
-
+        resources.pump(&mut result_map,&mut image_map,&mut ui);
+        println!("result_map {:?}",result_map.len());
         if let Some(&SupportIdType::FontId(regular)) =
             result_map.get(&ResourceEnum::Font(Font::REGULAR)) {
             ui.theme.font_id = Some(regular);
         }
         let dpi_factor = crayon::window::device_pixel_ratio();
-        let renderer = Renderer::new((WIN_W as f64,WIN_H as f64),  dpi_factor as f64);
+        println!("dpi_factor {:?}",dpi_factor);
+        let renderer = Renderer::new((screen_w as f64,screen_h as f64),  dpi_factor as f64);
         let gamedata = app::GameData::new();
         let cardmeta: [codec_lib::cards::ListCard<BoardStruct>; 180] =
             cards::populate::<BoardStruct>();
@@ -134,12 +138,13 @@ impl LifecycleListener for Window {
             }
             
         }
-
+        let screen_dim = crayon::window::dimensions();
+        let (screen_w,screen_h) = (screen_dim.x,screen_dim.y);
         let dpi_factor = crayon::window::device_pixel_ratio() as f64;
         //let dpi_factor  =1.16;
         if self.action_instant.elapsed() <= time_to_sleep {
             let primitives = self.ui.draw();
-            let dims = (WIN_W as f64 * dpi_factor, WIN_H as f64 * dpi_factor);
+            let dims = (screen_w as f64 * dpi_factor, screen_h as f64 * dpi_factor);
             self.renderer.fill(dims,dpi_factor as f64,primitives,&self.image_map);
             self.renderer.draw(&mut self.batch,&self.image_map);
             /*

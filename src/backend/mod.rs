@@ -9,13 +9,11 @@ use support;
 use crayon::prelude::*;
 use crayon_audio::prelude::*;
 use crayon_bytes::prelude::*;
-use hardback_meta::app::{Sprite,ResourceEnum};
+use hardback_meta::app::{Font,Sprite,ResourceEnum};
 SupportIdType!{}
 WindowResources!{
     (a1,ResourceEnum::Sprite(Sprite::RUST),"image","res:rust.png"),
-}
-/*
- (a2,ResourceEnum::Sprite(Sprite::UNOFFICIAL),"image","res:unofficial.png"),        
+    (a2,ResourceEnum::Sprite(Sprite::UNOFFICIAL),"image","res:unofficial.png"),        
     (a3,ResourceEnum::Sprite(Sprite::CLOUDY),"image","res:cloudy.png"),
     (a4,ResourceEnum::Sprite(Sprite::COININFO),"image","res:allcoin_info.png"),
     (a5,ResourceEnum::Sprite(Sprite::COININFO270),"image","res:allcoin_info (270).png"),
@@ -28,4 +26,4 @@ WindowResources!{
     (a12,ResourceEnum::Font(Font::HORROR),"font","res:Mortified.ttf"),
     (a13,ResourceEnum::Font(Font::ADVENTURE),"font","res:TradeWinds-Regular.ttf"),
     (a14,ResourceEnum::Font(Font::ROMANCE),"font","res:Babylove.ttf"),
-*/
+}

@@ -8,12 +8,12 @@ use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use app::{GameData, Ids};
+use crayon::network;
 pub fn render(_ui: &mut conrod_core::UiCell,
               _ids: &Ids,
               mut _gamedata: &mut GameData,
               _appdata: &AppData,
-              _result_map: &HashMap<ResourceEnum, SupportIdType>,
-              _action_tx: mpsc::Sender<OwnedMessage>) {
+              _result_map: &HashMap<ResourceEnum, SupportIdType>) {
 
 
 }
@@ -22,7 +22,6 @@ pub fn draw_lobby_chat(w_id: tabview::Item,
                        ids: &Ids,
                        gamedata: &mut GameData,
                        result_map: &HashMap<ResourceEnum, SupportIdType>,
-                       action_tx: mpsc::Sender<OwnedMessage>,
                        mut ui: &mut conrod_core::UiCell) {
     use conrod_chat::chat::{english, sprite};
     if let (Some(&SupportIdType::ImageId(rust_img)), Some(&SupportIdType::ImageId(key_pad))) =
@@ -35,7 +34,6 @@ pub fn draw_lobby_chat(w_id: tabview::Item,
                                                 &english_tuple,
                                                 Some(rust_img),
                                                 &gamedata.name,
-                                                action_tx,
                                                 Box::new(process));
 
         gamedata.keypad_on = w_id.set(k, &mut ui);
@@ -46,7 +44,6 @@ pub fn draw_lobby_chat(w_id: tabview::Item,
                        _ids: &Ids,
                        gamedata: &mut GameData,
                        result_map: &HashMap<ResourceEnum, SupportIdType>,
-                       action_tx: mpsc::Sender<OwnedMessage>,
                        mut ui: &mut conrod_core::UiCell) {
     if let Some(&SupportIdType::ImageId(rust_img)) =
         result_map.get(&ResourceEnum::Sprite(Sprite::RUST)) {
@@ -54,17 +51,16 @@ pub fn draw_lobby_chat(w_id: tabview::Item,
                                                 &mut gamedata.lobby_textedit,
                                                 Some(rust_img),
                                                 &gamedata.name,
-                                                action_tx,
                                                 Box::new(process));
 
         w_id.set(k, &mut ui);
     }
 }
-fn process(_name: &String, text: &String) -> OwnedMessage {
+fn process(_name: &String, text: &String){
     let g = json!({
-    "type":"chat",
-  "message": text,
-  "location":"lobby"
-});
-    OwnedMessage::Text(g.to_string())
+        "type":"chat",
+    "message": text,
+    "location":"lobby"
+    });
+    network::send(g.to_string());
 }

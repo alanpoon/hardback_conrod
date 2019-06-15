@@ -88,20 +88,19 @@ impl<T> GameProcess<T>
                                     result_map);
             }
             &GuiState::Lobby => {
-                /*
+                
                 logic::lobby::render(&mut ui.set_widgets(),
                                      &ids,
                                      &mut gamedata,
                                      &self.appdata,
-                                     result_map,
-                                     action_tx);*/
+                                     result_map);
             }
             &GuiState::Loading => {
-                /*logic::loading::render(&mut ui.set_widgets(),
+                logic::loading::render(&mut ui.set_widgets(),
                                        &ids,
                                        &mut gamedata,
                                        &self.appdata,
-                                       result_map);*/
+                                       result_map);
             }
             _ => {}
         }

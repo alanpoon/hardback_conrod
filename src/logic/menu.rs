@@ -105,7 +105,9 @@ pub fn render(ui: &mut conrod_core::UiCell,
                     .set(ids.submit_but, ui);
                 if j.was_clicked(){
                     println!("clicked");
-                    network::create_connection(gamedata.server_lookup.clone()).unwrap();
+                    let mut k = "ws://".to_owned();
+                    k.push_str(&gamedata.server_lookup);
+                    network::create_connection(k).unwrap();
                     let now = Local::now();
                     gamedata.connection_status=ConnectionStatus::Try(now);
                     println!("connect to try");
@@ -150,8 +152,8 @@ pub fn render(ui: &mut conrod_core::UiCell,
             }
         }
         for _ in widget::Button::image(icon_image)
-                .source_rectangle(graphics_match::gameicons_rect(10.0))
-                .w_h(80.0, 80.0)
+                .source_rectangle(graphics_match::gameicons_rect(10.0)) //exit
+                .w_h(60.0, 60.0)
                 .bottom_left_with_margin_on(ids.master, 20.0)
                 .set(ids.footer_overlay_but3, ui) {
             gamedata.overlay_exit = true;

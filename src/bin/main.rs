@@ -13,7 +13,7 @@ use conrod_core::text::{FontCollection};
 use hardback_conrod as game_conrod;
 use game_conrod::{app, logic};
 use game_conrod::backend::{SupportIdType};
-use game_conrod::backend::meta::app::{Font, ResourceEnum, AppData, MusicEnum};
+use game_conrod::backend::meta::app::{Font, ResourceEnum, AppData, MusicEnum,Sprite};
 use game_conrod::backend::codec_lib::codec;
 use game_conrod::page_curl::{self, page, render};
 //use game_conrod::opengl;
@@ -59,10 +59,12 @@ struct Window {
 impl Window {
     pub fn build(resources: &WindowResources) -> CrResult<Self> {
         let screen_dim = crayon::window::dimensions();
+        println!("screen_dim {:?}",screen_dim);
         let (screen_w,screen_h) = (screen_dim.x,screen_dim.y);
+        let dpi_factor = crayon::window::device_pixel_ratio();
         let appdata = AppData::new(screen_w as f64, screen_h as f64, "Hardback");
-        let mut ui = conrod_core::UiBuilder::new([screen_w as f64, screen_h as f64])
-         //   .theme(support::theme(&appdata))
+        let mut ui = conrod_core::UiBuilder::new([screen_w as f64 , screen_h as f64 ])
+            .theme(support::theme(&appdata))
             .build();
         let mut result_map = HashMap::<ResourceEnum, SupportIdType>::new();
         let mut image_map = conrod_core::image::Map::new();
@@ -72,7 +74,10 @@ impl Window {
             result_map.get(&ResourceEnum::Font(Font::REGULAR)) {
             ui.theme.font_id = Some(regular);
         }
-        let dpi_factor = crayon::window::device_pixel_ratio();
+        if let Some(&SupportIdType::ImageId(th)) =
+            result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS)) {
+            
+        }
         println!("dpi_factor {:?}",dpi_factor);
         let renderer = Renderer::new((screen_w as f64,screen_h as f64),  dpi_factor as f64);
         let gamedata = app::GameData::new();
@@ -126,7 +131,6 @@ impl LifecycleListener for Window {
             self.action_instant = at;
         }
         {
-            //let mut ui = self.ui.set_widgets();
             
             const LOGO_SIDE: conrod_core::Scalar = 306.0;
             self.game_process.run(&mut self.ui,
@@ -141,10 +145,11 @@ impl LifecycleListener for Window {
         let screen_dim = crayon::window::dimensions();
         let (screen_w,screen_h) = (screen_dim.x,screen_dim.y);
         let dpi_factor = crayon::window::device_pixel_ratio() as f64;
-        //let dpi_factor  =1.16;
+
         if self.action_instant.elapsed() <= time_to_sleep {
             let primitives = self.ui.draw();
             let dims = (screen_w as f64 * dpi_factor, screen_h as f64 * dpi_factor);
+            //let dims = (screen_w as f64, screen_h as f64);
             self.renderer.fill(dims,dpi_factor as f64,primitives,&self.image_map);
             self.renderer.draw(&mut self.batch,&self.image_map);
             /*

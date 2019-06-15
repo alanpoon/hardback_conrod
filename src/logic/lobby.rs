@@ -13,6 +13,7 @@ use graphics_match;
 use logic::in_game;
 use logic;
 use support;
+use crayon::network;
 pub struct TableListTex<'a> {
     appdata: &'a AppData,
 }
@@ -38,8 +39,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
               appdata: &AppData,
-              result_map: &HashMap<ResourceEnum, SupportIdType>,
-              action_tx: mpsc::Sender<OwnedMessage>) {
+              result_map: &HashMap<ResourceEnum, SupportIdType>) {
     let keypadlength = if gamedata.keypad_on {
         appdata.convert_h(250.0)
     } else {
@@ -77,14 +77,12 @@ pub fn render(ui: &mut conrod_core::UiCell,
         */
         let mut c = 0;
         while let Some(item) = items.next(ui) {
-            let action_tx_clone = action_tx.clone();
             let u = vec_closure.get(c).unwrap();
             (*u)(item,
                  ids,
                  gamedata,
                  appdata,
                  result_map,
-                 action_tx_clone,
                  ui);
             c += 1;
         }
@@ -97,22 +95,20 @@ pub fn render(ui: &mut conrod_core::UiCell,
                       &mut GameData,
                       &AppData,
                       &HashMap<ResourceEnum, SupportIdType>,
-                      mpsc::Sender<OwnedMessage>,
                       &mut conrod_core::UiCell)>>
     {
-        vec![Box::new(|w_id, ids, mut gamedata, appdata, result_map, action_tx, ui| {
+        vec![Box::new(|w_id, ids, mut gamedata, appdata, result_map, ui| {
             //draw lobby
             draw_lobby(ui,
                        w_id,
                        ids,
                        &mut gamedata,
                        &appdata,
-                       result_map,
-                       action_tx);
+                       result_map);
         }),
-             Box::new(|w_id, ids, mut gamedata, _appdata, result_map, action_tx, ui| {
+             Box::new(|w_id, ids, mut gamedata, _appdata, result_map, ui| {
             //Chat
-            logic::top_left::draw_lobby_chat(w_id, ids, &mut gamedata, result_map, action_tx, ui);
+            logic::top_left::draw_lobby_chat(w_id, ids, &mut gamedata, result_map, ui);
         })]
     }
 
@@ -122,8 +118,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
                   ids: &Ids,
                   mut gamedata: &mut GameData,
                   appdata: &AppData,
-                  result_map: &HashMap<ResourceEnum, SupportIdType>,
-                  action_tx: mpsc::Sender<OwnedMessage>) {
+                  result_map: &HashMap<ResourceEnum, SupportIdType>) {
         let _table_list_texts = TableListTex { appdata: &appdata };
         if let (Some(&SupportIdType::FontId(bold_font)),
                 Some(&SupportIdType::FontId(italic_font))) =
@@ -141,10 +136,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
                     let g = json!({
                             "newTable": true
                             });
-                    action_tx.clone()
-                        .send(OwnedMessage::Text(g.to_string()))
-                        .wait()
-                        .unwrap();
+                    network::send(g.to_string());
                 };
                 let _button_panel = ui.rect_of(ids.new_table_but).unwrap();
                 widget::Text::new(appdata.texts.playername)
@@ -188,10 +180,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
                     let g = json!({
                             "namechange": gamedata.name_text_edit.clone()
                             });
-                    action_tx.clone()
-                        .send(OwnedMessage::Text(g.to_string()))
-                        .wait()
-                        .unwrap();
+                    network::send(g.to_string());
                 }
 
             } else {
@@ -221,32 +210,28 @@ pub fn render(ui: &mut conrod_core::UiCell,
                     let g = json!({
                             "ready":true,
                             });
-                    let action_tx_c = action_tx.clone();
-                    action_tx_c.send(OwnedMessage::Text(g.to_string())).wait().unwrap();
+                    network::send(g.to_string());
                 }),
                                                    //join
                                                    Box::new(|| {
                     let g = json!({
                             "joinTable":c_c,
                             });
-                    let action_tx_c = action_tx.clone();
-                    action_tx_c.send(OwnedMessage::Text(g.to_string())).wait().unwrap();
+                    network::send(g.to_string());
                 }),
                                                    //leave
                                                    Box::new(|| {
                     let g = json!({
                             "leavetable":false,
                             });
-                    let action_tx_c = action_tx.clone();
-                    action_tx_c.send(OwnedMessage::Text(g.to_string())).wait().unwrap();
+                    network::send(g.to_string());
                 }),
                                                    //change_player_number
                                                    Box::new(|x| {
-                    let action_tx_c = action_tx.clone();
                     let g = json!({
                             "changePlayers":x,
                             });
-                    action_tx_c.send(OwnedMessage::Text(g.to_string())).wait().unwrap();
+                    network::send(g.to_string());
                 }),
                                                    &tableinfo.players,//players
                                                    tableinfo.numberOfPlayers.clone(),//table_space

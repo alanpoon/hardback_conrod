@@ -15,14 +15,14 @@ use logic;
 use app::PromptSender;
 pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
-              gamedata: &mut GameData,
-              action_tx: mpsc::Sender<OwnedMessage>) {
+              gamedata: &mut GameData) {
     if let &Some(_) = &gamedata.overlay_prompt {
-        let promptsender = PromptSender(action_tx);
+        /*let promptsender = PromptSender(action_tx);
         let prompt_j = PromptView::new(&mut gamedata.overlay_prompt, promptsender)
             .color(color::LIGHT_GREY)
             .wh_of(ids.master)
             .middle_of(ids.master);
         prompt_j.set(ids.promptview, ui);
+        */
     }
 }

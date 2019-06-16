@@ -20,7 +20,6 @@ use backend::meta::{cards, local};
 use graphics_match;
 use logic::in_game;
 use instruction::Instruction;
-
 pub struct PanelInfo<'a> {
     text: Option<String>,
     display_pic: Option<ImageRectType>,
@@ -67,7 +66,6 @@ pub fn render(w_id: tabview::Item,
               gamedata: &mut GameData,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
-              _action_tx: mpsc::Sender<OwnedMessage>,
               ui: &mut conrod_core::UiCell) {
     let GameData { ref mut boardcodec,
                    ref player_index,

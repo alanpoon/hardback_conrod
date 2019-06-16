@@ -19,8 +19,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
               appdata: &AppData,
-              result_map: &HashMap<ResourceEnum, SupportIdType>,
-              action_tx: mpsc::Sender<OwnedMessage>) {
+              result_map: &HashMap<ResourceEnum, SupportIdType>) {
     if gamedata.overlay_chat {
         if let Some(&SupportIdType::ImageId(keypad_image)) =
             result_map.get(&ResourceEnum::Sprite(Sprite::KEYPAD)) {

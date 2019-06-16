@@ -34,8 +34,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
               gamedata: &mut GameData,
               appdata: &AppData,
               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
-              result_map: &HashMap<ResourceEnum, SupportIdType>,
-              _action_tx: mpsc::Sender<OwnedMessage>) {
+              result_map: &HashMap<ResourceEnum, SupportIdType>) {
     let GameData { ref page_index,
                    ref mut boardcodec,
                    ref mut print_instruction_set,
@@ -91,8 +90,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
                               overlay_exit,
                               overlay_human,
                               last_send,
-                              result_map,
-                              _action_tx);
+                              result_map);
                     }
                 }
                 app::GuiState::Game(GameState::TurnToSubmit) => {
@@ -108,8 +106,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
                           overlay_exit,
                           overlay_human,
                           last_send,
-                          result_map,
-                          _action_tx);
+                          result_map);
                 }
                 app::GuiState::Game(GameState::Buy) => {
                     buy(ui,
@@ -118,8 +115,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
                         overlay2,
                         buy_selected,
                         appdata,
-                        result_map,
-                        _action_tx.clone());
+                        result_map);
                 }
                 app::GuiState::Game(GameState::TrashOther(_)) => {
                     trash_other(ui,
@@ -128,8 +124,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
                                 overlay2,
                                 buy_selected,
                                 appdata,
-                                result_map,
-                                _action_tx.clone());
+                                result_map);
                 }
                 app::GuiState::Game(GameState::WaitForReply) => {
                     buy(ui,
@@ -138,8 +133,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
                         overlay2,
                         buy_selected,
                         appdata,
-                        result_map,
-                        _action_tx.clone());
+                        result_map);
                 }
                 _ => {}
             }
@@ -319,8 +313,7 @@ fn spell(ui: &mut conrod_core::UiCell,
          overlay_exit: &mut bool,
          overlay_human: &mut bool,
          last_send: &mut Option<Instant>,
-         result_map: &HashMap<ResourceEnum, SupportIdType>,
-         _action_tx: mpsc::Sender<OwnedMessage>) {
+         result_map: &HashMap<ResourceEnum, SupportIdType>) {
     if let &mut Some(ref mut _personal) = personal {
         let temp = (*_personal).clone();
         let mut handvec =
@@ -406,12 +399,12 @@ fn spell(ui: &mut conrod_core::UiCell,
                 println!("diff in hand");
                 let now = Instant::now();
                 *last_send = Some(now);
-                let promptsender = PromptSender(_action_tx);
+                //let promptsender = PromptSender(_action_tx);
                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                 let mut g = GameCommand::new();
                 g.personal = Some(_personal.clone());
                 h.set_gamecommand(g);
-                promptsender.send(ServerReceivedMsg::serialize_send(h).unwrap());
+                //promptsender.send(ServerReceivedMsg::serialize_send(h).unwrap());
             }
             let exit_door = if *overlay { 9.0 } else { 8.0 };
             for _ in widget::Button::image(icon_image)
@@ -483,8 +476,7 @@ fn buy(ui: &mut conrod_core::UiCell,
        overlay2: &mut bool,
        buyselected: &mut Option<usize>,
        appdata: &AppData,
-       result_map: &HashMap<ResourceEnum, SupportIdType>,
-       _action_tx: mpsc::Sender<OwnedMessage>) {
+       result_map: &HashMap<ResourceEnum, SupportIdType>) {
     let text = if buyselected.is_some() {
         appdata.texts.buy
     } else {
@@ -496,12 +488,12 @@ fn buy(ui: &mut conrod_core::UiCell,
            .w_h(200.0, 80.0)
            .set(ids.submit_but, ui)
            .next() {
-        let promptsender = PromptSender(_action_tx.clone());
+        //let promptsender = PromptSender(_action_tx.clone());
         let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
         let mut g = GameCommand::new();
         g.buy_offer = Some((buyselected.is_some(), buyselected.unwrap_or(0)));
         h.set_gamecommand(g);
-        promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
+        //promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
     }
     if let Some(&SupportIdType::ImageId(icon_image)) =
         result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS)) {
@@ -557,8 +549,7 @@ fn trash_other(ui: &mut conrod_core::UiCell,
                overlay2: &mut bool,
                buyselected: &mut Option<usize>,
                appdata: &AppData,
-               result_map: &HashMap<ResourceEnum, SupportIdType>,
-               _action_tx: mpsc::Sender<OwnedMessage>) {
+               result_map: &HashMap<ResourceEnum, SupportIdType>) {
     let text = if buyselected.is_some() {
         appdata.texts.trash_other
     } else {
@@ -570,12 +561,12 @@ fn trash_other(ui: &mut conrod_core::UiCell,
            .w_h(200.0, 80.0)
            .set(ids.submit_but, ui)
            .next() {
-        let promptsender = PromptSender(_action_tx.clone());
+        //let promptsender = PromptSender(_action_tx.clone());
         let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
         let mut g = GameCommand::new();
         g.buy_offer = Some((buyselected.is_some(), buyselected.unwrap_or(0)));
         h.set_gamecommand(g);
-        promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
+        //promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
     }
     if let Some(&SupportIdType::ImageId(icon_image)) =
         result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS)) {

@@ -134,9 +134,11 @@ impl LifecycleListener for Window {
             
             const LOGO_SIDE: conrod_core::Scalar = 306.0;
             self.game_process.run(&mut self.ui,
+                                  &mut self.image_map,
                                   &self.cardmeta,
                                   &mut self.game_data,
-                                  &self.result_map);
+                                  &mut self.result_map
+                                 );
             for s in network::receive(){
                 self.game_process.update_state(&mut self.game_data, &self.result_map, s);
             }

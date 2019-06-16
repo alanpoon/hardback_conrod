@@ -18,8 +18,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
               appdata: &AppData,
-              result_map: &HashMap<ResourceEnum, SupportIdType>,
-              action_tx: mpsc::Sender<OwnedMessage>) {
+              result_map: &HashMap<ResourceEnum, SupportIdType>) {
     if gamedata.overlay_exit {
         if let Some(&SupportIdType::ImageId(keypad_image)) =
             result_map.get(&ResourceEnum::Sprite(Sprite::KEYPAD)) {
@@ -55,12 +54,12 @@ pub fn render(ui: &mut conrod_core::UiCell,
                     .wh(appdata.convert_dim([120.0, 100.0]))
                     .bottom_left_with_margin_on(ids.overlaybody_exit, 20.0)
                     .set(ids.overlayyes_exit, ui) {
-                let promptsender = PromptSender(action_tx.clone());
+                //let promptsender = PromptSender(action_tx.clone());
                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                 let mut g = GameCommand::new();
                 g.exit_game = Some(true);
                 h.set_gamecommand(g);
-                promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
+                //promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
                 gamedata.guistate = GuiState::Menu;
                 gamedata.reset();
             }

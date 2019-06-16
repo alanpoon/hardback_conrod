@@ -36,8 +36,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
               gamedata: &mut GameData,
               appdata: &AppData,
               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
-              result_map: &HashMap<ResourceEnum, SupportIdType>,
-              _action_tx: mpsc::Sender<OwnedMessage>) {
+              result_map: &HashMap<ResourceEnum, SupportIdType>) {
     let GameData { ref page_index,
                    ref mut boardcodec,
                    ref mut print_instruction_set,
@@ -65,8 +64,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
                                &appdata,
                                print_instruction_set,
                                initial_draft,
-                               result_map,
-                               _action_tx.clone());
+                               result_map);
                 }
                 &mut app::GuiState::Game(GameState::Shuffle) => {
                     shuffle(ui,
@@ -101,8 +99,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
                               last_send,
                               keypad_on,
                               appdata,
-                              result_map,
-                              _action_tx.clone());
+                              result_map);
                     }
                 }
                 &mut app::GuiState::Game(GameState::TurnToSubmit) => {
@@ -115,8 +112,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
                           last_send,
                           keypad_on,
                           appdata,
-                          result_map,
-                          _action_tx.clone());
+                          result_map);
                     if let Some(&SupportIdType::ImageId(spinner_image)) =
                         result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)) {
                         turn_to_submit_but(ui,
@@ -124,8 +120,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
                                            &appdata,
                                            overlay_blowup,
                                            last_send.clone(),
-                                           spinner_image,
-                                           _action_tx.clone());
+                                           spinner_image);
                     }
                 }
                 &mut app::GuiState::Game(GameState::Buy) => {
@@ -175,10 +170,9 @@ fn turn_to_submit_but(ui: &mut conrod_core::UiCell,
                       appdata: &AppData,
                       overlay_blowup: &mut Option<usize>,
                       last_send: Option<Instant>,
-                      spinner_image: image::Id,
-                      _action_tx: mpsc::Sender<OwnedMessage>) {
+                      spinner_image: image::Id) {
     let spinner_rect = graphics_match::spinner_sprite();
-    let promptsender = PromptSender(_action_tx);
+    //let promptsender = PromptSender(_action_tx);
     if let Some(_last_send) = last_send {
         let ratio = _last_send.elapsed()
             .checked_div(30_000_000)
@@ -204,7 +198,7 @@ fn turn_to_submit_but(ui: &mut conrod_core::UiCell,
             let mut g = GameCommand::new();
             g.submit_word = Some(true);
             h.set_gamecommand(g);
-            promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
+            //promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
         }
     }
 
@@ -216,8 +210,7 @@ fn show_draft(ui: &mut conrod_core::UiCell,
               appdata: &AppData,
               print_instruction_set: &mut Vec<bool>,
               initial_draft: &mut Vec<usize>,
-              result_map: &HashMap<ResourceEnum, SupportIdType>,
-              action_tx: mpsc::Sender<OwnedMessage>) {
+              result_map: &HashMap<ResourceEnum, SupportIdType>) {
     let body_w = ui.w_of(ids.body).unwrap();
     let item_h = body_w / 10.0;
     *initial_draft = player.draft.clone();
@@ -263,7 +256,7 @@ fn show_draft(ui: &mut conrod_core::UiCell,
             }
         } else {
 
-            let promptsender = PromptSender(action_tx);
+            //let promptsender = PromptSender(action_tx);
             let instructions: Vec<(String, Box<Fn(PromptSender)>)> = vec![("Continue".to_owned(),
                                                                            Box::new(move |ps| {
                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
@@ -272,7 +265,7 @@ fn show_draft(ui: &mut conrod_core::UiCell,
                 h.set_gamecommand(g);
                 ps.send(ServerReceivedMsg::serialize_send(h).unwrap());
             }))];
-
+            /*
             let mut prompt =
                 Some((0.5f64, "Lets' start to Shuffle the cards".to_owned(), instructions));
             let prompt_j = PromptView::new(&mut prompt, promptsender)
@@ -280,6 +273,7 @@ fn show_draft(ui: &mut conrod_core::UiCell,
                 .color(color::LIGHT_GREY)
                 .middle_of(ids.master);
             prompt_j.set(ids.promptview, ui);
+            */
         }
     }
 }
@@ -380,8 +374,7 @@ fn spell(ui: &mut conrod_core::UiCell,
          last_send: &mut Option<Instant>,
          keypad_bool:&mut bool,
          appdata: &AppData,
-         result_map: &HashMap<ResourceEnum, SupportIdType>,
-         action_tx: mpsc::Sender<OwnedMessage>) {
+         result_map: &HashMap<ResourceEnum, SupportIdType>) {
     if let &mut Some(ref mut _personal) = personal {
         let temp = (*_personal).clone();
         let mut arrangedvec = _personal.arranged

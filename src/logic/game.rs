@@ -1,13 +1,13 @@
-use hardback_meta::app::{AppData, ResourceEnum};
+use hardback_meta::app::{AppData, ResourceEnum,Texture,Sprite};
 use conrod_core::{self, color, widget, Colorable, Widget, text, Borderable};
 use std::collections::HashMap;
 use futures::sync::mpsc;
 use backend::codec_lib::cards::*;
 use backend::codec_lib::cards;
+use backend::SupportIdType;
 use logic;
 use app::{GameData, Ids, GuiState, BoardStruct};
 use ui::{Vala, RESULTMAPLEN};
-use backend::SupportIdType;
 use cardgame_widgets::custom_widget::animated_canvas;
 use crayon::prelude::*;
 use crayon_audio::prelude::*;
@@ -44,9 +44,10 @@ impl<T> GameProcess<T>
     }
     pub fn run(&mut self,
                ui: &mut conrod_core::Ui,
+               image_map: &mut conrod_core::image::Map<TextureHandle>,
                cardmeta: &[cards::ListCard<BoardStruct>; 180],
                mut gamedata: &mut GameData,
-               result_map: &HashMap<ResourceEnum, SupportIdType>) {
+               result_map: &mut HashMap<ResourceEnum, SupportIdType>) {
         let ids = &self.ids;
         // remove last_send if elasped 2 second
         if let Some(_last_send) = gamedata.last_send {
@@ -58,25 +59,35 @@ impl<T> GameProcess<T>
             &GuiState::Game(_) => {
                 if result_map.len() < RESULTMAPLEN {
                     gamedata.guistate = GuiState::Loading;
-                    /*
-                    std::thread::spawn(move || {
-                        let mut map: HashMap<ResourceEnum, Vala> = HashMap::new();
-                        load_resources_iter(&mut map);
-                        let mut _iter_resource_enum_vala = map.iter();
-                        while let Some((k, v)) = _iter_resource_enum_vala.next() {
-                            let (_resource_enum, _image_buffer, _font, _music) =
-                                iter_resource_enum_vala_next((*k).clone(), (*v).clone());
-                            load_asset_tx.send((_resource_enum, _image_buffer, _font)).unwrap();
-                        }
-                    });*/
+                    result_map.insert(ResourceEnum::Texture(Texture::PAGE1F),SupportIdType::TextureId(impl_value!{
+                        "texture","res:player1.jpg"
+                    }));
+                    result_map.insert(ResourceEnum::Texture(Texture::PAGE2F),SupportIdType::TextureId(impl_value!{
+                        "texture","res:player2.jpg"
+                    }));
+                    result_map.insert(ResourceEnum::Texture(Texture::PAGE3F),SupportIdType::TextureId(impl_value!{
+                        "texture","res:player3.jpg"
+                    }));
+                    result_map.insert(ResourceEnum::Texture(Texture::PAGE4F),SupportIdType::TextureId(impl_value!{
+                        "texture","res:player4.jpg"
+                    }));
+                    result_map.insert(ResourceEnum::Sprite(Sprite::DOWNLOAD),SupportIdType::TextureId(impl_value!{
+                        "texture","res:download.png"
+                    }));
+                    result_map.insert(ResourceEnum::Sprite(Sprite::BACKCARD),SupportIdType::TextureId(impl_value!{
+                        "texture","res:backside.jpg"
+                    }));
+                    result_map.insert(ResourceEnum::Sprite(Sprite::ARROWS),SupportIdType::TextureId(impl_value!{
+                        "texture","res:arrows_but.png"
+                    }));
                 } else {
-                    /*
+                    
                     self.set_game_ui(&mut ui.set_widgets(),
                                      &ids,
                                      &mut gamedata,
                                      &self.appdata,
                                      &cardmeta,
-                                     result_map);*/
+                                     result_map);
                 }
             }
             &GuiState::Menu => {
@@ -100,7 +111,8 @@ impl<T> GameProcess<T>
                                        &ids,
                                        &mut gamedata,
                                        &self.appdata,
-                                       result_map);
+                                       result_map,
+                                       image_map);
             }
             _ => {}
         }
@@ -125,7 +137,7 @@ impl<T> GameProcess<T>
             .frame_rate(30)
             .border(0.0)
             .set(ids.master, ui);
-        /*   
+           
         logic::body::render(ui,
                             ids,
                             &mut gamedata,
@@ -138,31 +150,28 @@ impl<T> GameProcess<T>
                               &mut gamedata,
                               &appdata,
                               &cardmeta,
-                              result_map,
-                              action_tx.clone());
+                              result_map);
+        
         logic::overlay_blowup::render(ui, ids, &cardmeta, &mut gamedata, &appdata, result_map);
         logic::overlay::render(ui,
                                ids,
                                &cardmeta,
                                &mut gamedata,
                                &appdata,
-                               result_map,
-                               action_tx.clone());
+                               result_map);
         logic::overlay_chat::render(ui,
                                     ids,
                                     &mut gamedata,
                                     &appdata,
-                                    result_map,
-                                    action_tx.clone());
+                                    result_map);
         logic::overlay_exit::render(ui,
                                     ids,
                                     &mut gamedata,
                                     &appdata,
-                                    result_map,
-                                    action_tx.clone());
+                                    result_map);
         logic::overlay_human::render(ui, ids, &mut gamedata, &appdata, result_map);
-        logic::overlay_prompt::render(ui, ids, &mut gamedata, action_tx.clone());
-        */
+        logic::overlay_prompt::render(ui, ids, &mut gamedata);
+        
     }
     #[allow(unused_mut)]
     pub fn update_state(&self,

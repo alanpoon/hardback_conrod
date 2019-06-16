@@ -20,13 +20,13 @@ use backend::meta::{cards, local};
 use graphics_match;
 use logic::in_game;
 use instruction::Instruction;
+use crayon::network;
 pub fn render(w_id: tabview::Item,
               ids: &Ids,
               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
               gamedata: &mut GameData,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
-              action_tx: mpsc::Sender<OwnedMessage>,
               ui: &mut conrod_core::UiCell) {
     let GameData { ref mut boardcodec,
                    ref player_index,
@@ -155,7 +155,6 @@ pub fn render(w_id: tabview::Item,
                                     .mid_bottom_with_margin_on(w_id.parent_id, 20.0)
                                     .set(ids.overlay_okbut, ui) {
                                 overlay_receivedimage[0] = OverlayStatus::Loading;
-                                let action_tx_c = action_tx.clone();
                                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                                 let mut g = GameCommand::new();
                                 let selected_vec = overlay_remover_selected.iter()
@@ -163,9 +162,7 @@ pub fn render(w_id: tabview::Item,
                                     .collect::<Vec<usize>>();
                                 g.use_remover = Some(selected_vec);
                                 h.set_gamecommand(g);
-                                action_tx_c.send(OwnedMessage::Text(ServerReceivedMsg::serialize_send(h).unwrap()))
-                            .wait()
-                            .unwrap();
+                                network::send(ServerReceivedMsg::serialize_send(h).unwrap());
                             }
                         }
                     }

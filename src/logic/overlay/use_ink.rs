@@ -16,13 +16,13 @@ use graphics_match;
 use logic::in_game;
 use instruction::Instruction;
 use custom_widget::show_draft_item;
+use crayon::network;
 pub fn render(w_id: tabview::Item,
               ids: &Ids,
               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
               gamedata: &mut GameData,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
-              action_tx: mpsc::Sender<OwnedMessage>,
               ui: &mut conrod_core::UiCell) {
     let GameData { ref mut boardcodec, ref player_index, ref mut overlay_receivedimage, .. } =
         *gamedata;
@@ -84,14 +84,11 @@ pub fn render(w_id: tabview::Item,
                                                            appdata.convert_h(20.0))
                                 .set(ids.overlay_okbut, ui) {
                             overlay_receivedimage[0] = OverlayStatus::Loading;
-                            let action_tx_c = action_tx.clone();
                             let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                             let mut g = GameCommand::new();
                             g.take_card_use_ink = Some(true);
                             h.set_gamecommand(g);
-                            action_tx_c.send(OwnedMessage::Text(ServerReceivedMsg::serialize_send(h).unwrap()))
-                            .wait()
-                            .unwrap();
+                            network::send(ServerReceivedMsg::serialize_send(h).unwrap());
                         }
                     } else {
                         widget::Text::new(&appdata.texts.use_ink_insufficent)

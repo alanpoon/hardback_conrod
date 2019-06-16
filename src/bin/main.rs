@@ -36,8 +36,9 @@ pub enum ConrodMessage {
     Event(Instant, conrod_core::event::Input),
     Thread(Instant),
 }
-const WIN_W: u32 = 600;
-const WIN_H: u32 = 420;
+
+const WIN_W: u32 = 1040;
+const WIN_H: u32 = 542;
 
 struct Window {
     action_instant:Instant,
@@ -59,7 +60,6 @@ struct Window {
 impl Window {
     pub fn build(resources: &WindowResources) -> CrResult<Self> {
         let screen_dim = crayon::window::dimensions();
-        println!("screen_dim {:?}",screen_dim);
         let (screen_w,screen_h) = (screen_dim.x,screen_dim.y);
         let dpi_factor = crayon::window::device_pixel_ratio();
         let appdata = AppData::new(screen_w as f64, screen_h as f64, "Hardback");
@@ -78,7 +78,6 @@ impl Window {
             result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS)) {
             
         }
-        println!("dpi_factor {:?}",dpi_factor);
         let renderer = Renderer::new((screen_w as f64,screen_h as f64),  dpi_factor as f64);
         let gamedata = app::GameData::new();
         let cardmeta: [codec_lib::cards::ListCard<BoardStruct>; 180] =
@@ -125,6 +124,10 @@ impl Drop for Window {
 
 impl LifecycleListener for Window {
     fn on_update(&mut self) -> CrResult<()> {
+        let screen_dim = crayon::window::dimensions();
+        let (screen_w,screen_h) = (screen_dim.x,screen_dim.y);
+        self.ui.win_w = screen_w as f64;
+        self.ui.win_h = screen_h as f64;
         let action_time  = conrod_crayon::events::convert_event(&mut self.ui);
         let time_to_sleep:std::time::Duration = std::time::Duration::new(15, 0);
         if let Some(at) = action_time{
@@ -144,24 +147,21 @@ impl LifecycleListener for Window {
             }
             
         }
-        let screen_dim = crayon::window::dimensions();
-        let (screen_w,screen_h) = (screen_dim.x,screen_dim.y);
+        
         let dpi_factor = crayon::window::device_pixel_ratio() as f64;
-
-        if self.action_instant.elapsed() <= time_to_sleep {
-            let primitives = self.ui.draw();
-            let dims = (screen_w as f64 * dpi_factor, screen_h as f64 * dpi_factor);
-            //let dims = (screen_w as f64, screen_h as f64);
-            self.renderer.fill(dims,dpi_factor as f64,primitives,&self.image_map);
-            self.renderer.draw(&mut self.batch,&self.image_map);
-            /*
-            opengl::draw_mutliple(self.batch,
-                                &vertex_buffer,
-                                &indices,
-                                &program,
-                                self.gamedata.page_vec,
-                                self.result_map);*/
-        }
+        let primitives = self.ui.draw();
+        let dims = (screen_w as f64 * dpi_factor, screen_h as f64 * dpi_factor);
+        //let dims = (screen_w as f64, screen_h as f64);
+        self.renderer.fill(dims,dpi_factor as f64,primitives,&self.image_map);
+        self.renderer.draw(&mut self.batch,&self.image_map);
+        /*
+        opengl::draw_mutliple(self.batch,
+                            &vertex_buffer,
+                            &indices,
+                            &program,
+                            self.gamedata.page_vec,
+                            self.result_map);*/
+        
         Ok(())
     }
 }

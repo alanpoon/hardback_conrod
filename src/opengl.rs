@@ -1,5 +1,3 @@
-use glium;
-use glium::Surface;
 use std::collections::HashMap;
 use page_curl;
 use backend::meta::app::{ResourceEnum, Sprite, Texture};

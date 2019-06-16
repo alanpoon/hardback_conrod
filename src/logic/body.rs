@@ -172,7 +172,7 @@ fn turn_to_submit_but(ui: &mut conrod_core::UiCell,
                       last_send: Option<Instant>,
                       spinner_image: image::Id) {
     let spinner_rect = graphics_match::spinner_sprite();
-    //let promptsender = PromptSender(_action_tx);
+    let promptsender = PromptSender();
     if let Some(_last_send) = last_send {
         let ratio = _last_send.elapsed()
             .checked_div(30_000_000)
@@ -198,7 +198,7 @@ fn turn_to_submit_but(ui: &mut conrod_core::UiCell,
             let mut g = GameCommand::new();
             g.submit_word = Some(true);
             h.set_gamecommand(g);
-            //promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
+            promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
         }
     }
 
@@ -256,7 +256,7 @@ fn show_draft(ui: &mut conrod_core::UiCell,
             }
         } else {
 
-            //let promptsender = PromptSender(action_tx);
+            let promptsender = PromptSender();
             let instructions: Vec<(String, Box<Fn(PromptSender)>)> = vec![("Continue".to_owned(),
                                                                            Box::new(move |ps| {
                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
@@ -265,7 +265,7 @@ fn show_draft(ui: &mut conrod_core::UiCell,
                 h.set_gamecommand(g);
                 ps.send(ServerReceivedMsg::serialize_send(h).unwrap());
             }))];
-            /*
+            
             let mut prompt =
                 Some((0.5f64, "Lets' start to Shuffle the cards".to_owned(), instructions));
             let prompt_j = PromptView::new(&mut prompt, promptsender)
@@ -273,7 +273,7 @@ fn show_draft(ui: &mut conrod_core::UiCell,
                 .color(color::LIGHT_GREY)
                 .middle_of(ids.master);
             prompt_j.set(ids.promptview, ui);
-            */
+            
         }
     }
 }
@@ -481,12 +481,12 @@ fn spell(ui: &mut conrod_core::UiCell,
                 println!("diff");
                 let now = Instant::now();
                 *last_send = Some(now);
-                //let promptsender = PromptSender(_action_tx);
+                let promptsender = PromptSender();
                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                 let mut g = GameCommand::new();
                 g.personal = Some(_personal.clone());
                 h.set_gamecommand(g);
-                //promptsender.send(ServerReceivedMsg::serialize_send(h).unwrap());
+                promptsender.send(ServerReceivedMsg::serialize_send(h).unwrap());
             }
         }
     }

@@ -399,12 +399,12 @@ fn spell(ui: &mut conrod_core::UiCell,
                 println!("diff in hand");
                 let now = Instant::now();
                 *last_send = Some(now);
-                //let promptsender = PromptSender(_action_tx);
+                let promptsender = PromptSender();
                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                 let mut g = GameCommand::new();
                 g.personal = Some(_personal.clone());
                 h.set_gamecommand(g);
-                //promptsender.send(ServerReceivedMsg::serialize_send(h).unwrap());
+                promptsender.send(ServerReceivedMsg::serialize_send(h).unwrap());
             }
             let exit_door = if *overlay { 9.0 } else { 8.0 };
             for _ in widget::Button::image(icon_image)
@@ -488,12 +488,12 @@ fn buy(ui: &mut conrod_core::UiCell,
            .w_h(200.0, 80.0)
            .set(ids.submit_but, ui)
            .next() {
-        //let promptsender = PromptSender(_action_tx.clone());
+        let promptsender = PromptSender();
         let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
         let mut g = GameCommand::new();
         g.buy_offer = Some((buyselected.is_some(), buyselected.unwrap_or(0)));
         h.set_gamecommand(g);
-        //promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
+        promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
     }
     if let Some(&SupportIdType::ImageId(icon_image)) =
         result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS)) {
@@ -561,12 +561,12 @@ fn trash_other(ui: &mut conrod_core::UiCell,
            .w_h(200.0, 80.0)
            .set(ids.submit_but, ui)
            .next() {
-        //let promptsender = PromptSender(_action_tx.clone());
+        let promptsender = PromptSender();
         let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
         let mut g = GameCommand::new();
         g.buy_offer = Some((buyselected.is_some(), buyselected.unwrap_or(0)));
         h.set_gamecommand(g);
-        //promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
+        promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
     }
     if let Some(&SupportIdType::ImageId(icon_image)) =
         result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS)) {

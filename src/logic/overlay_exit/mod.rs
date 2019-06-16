@@ -54,12 +54,12 @@ pub fn render(ui: &mut conrod_core::UiCell,
                     .wh(appdata.convert_dim([120.0, 100.0]))
                     .bottom_left_with_margin_on(ids.overlaybody_exit, 20.0)
                     .set(ids.overlayyes_exit, ui) {
-                //let promptsender = PromptSender(action_tx.clone());
+                let promptsender = PromptSender();
                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                 let mut g = GameCommand::new();
                 g.exit_game = Some(true);
                 h.set_gamecommand(g);
-                //promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
+                promptsender.clone().send(ServerReceivedMsg::serialize_send(h).unwrap());
                 gamedata.guistate = GuiState::Menu;
                 gamedata.reset();
             }

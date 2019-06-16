@@ -12,7 +12,7 @@ use futures::sync::mpsc;
 use futures::{Future, Sink};
 use cardgame_widgets::custom_widget::promptview::PromptSendable;
 use backend::OwnedMessage;
-//
+use crayon::network;
 widget_ids! {
     pub struct Ids {
          master,
@@ -121,14 +121,10 @@ pub enum OverlayStatus {
     None,
 }
 #[derive(Clone)]
-pub struct PromptSender(pub mpsc::Sender<OwnedMessage>);
+pub struct PromptSender();
 impl PromptSendable for PromptSender {
     fn send(&self, msg: String) {
-        self.0
-            .clone()
-            .send(OwnedMessage::Text(msg))
-            .wait()
-            .unwrap();
+       network::send(msg);
     }
 }
 pub struct GameData {

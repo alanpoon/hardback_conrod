@@ -2,6 +2,8 @@ use std::collections::HashMap;
 use page_curl;
 use backend::meta::app::{ResourceEnum, Sprite, Texture};
 use backend::SupportIdType;
+use crayon::prelude::*;
+/*
 pub fn draw(display: &glium::Display,
             vertex_buffer: &glium::VertexBuffer<page_curl::page::Vertex>,
             indices: &glium::IndexBuffer<u16>,
@@ -27,10 +29,11 @@ pub fn draw(display: &glium::Display,
     }
 
 }
-pub fn draw_mutliple(target: &mut glium::Frame,
-                     vertex_buffer: &glium::VertexBuffer<page_curl::page::Vertex>,
-                     indices: &glium::IndexBuffer<u16>,
-                     program: &glium::Program,
+*/
+pub fn draw_mutliple(batch: &mut CommandBuffer,
+                     vertex_buffer: &[page_curl::page::Vertex],
+                     indices: &Vec<u16>,
+                     surface: SurfaceHandler,
                      _page_vec: &mut Vec<(page_curl::page::Page, Texture)>,
                      result_map: &HashMap<ResourceEnum, SupportIdType>) {
 
@@ -39,15 +42,26 @@ pub fn draw_mutliple(target: &mut glium::Frame,
             _page.update_time();
             if let Some(&SupportIdType::TextureId(ref texture)) =
                 result_map.get(&ResourceEnum::Texture(_sprite.clone())) {
-                let uniforms = uniform! { scale: 1.0f32,tex:texture,rotation:_page.rotation,
-                translation:_page.translation,
-                theta:_page.theta };
-                target.draw(vertex_buffer,
-                            indices,
-                            program,
-                            &uniforms,
-                            &Default::default())
-                    .unwrap();
+                let mut p_params = MeshParams::default();
+                p_params.num_verts = 4;
+                p_params.num_idxes = 6;
+                p_params.primitive = MeshPrimitive::Triangles;
+                p_params.layout = Vertex::layout();
+
+                let data = MeshData {
+                    vptr: Vertex::encode(&vertex_buffer).into(),
+                    iptr: IndexFormat::encode(indices).into(),
+                };
+
+                let p_mesh = video::create_mesh(p_params, Some(data))?;
+                let dc = Draw::new(shader, mesh);
+                dc.set_uniform_variable("scale", 1.0f32);
+                dc.set_uniform_variable("tex", texture);
+                dc.set_uniform_variable("rotation", _page.rotation);
+                dc.set_uniform_variable("translation", _page.translation);
+                dc.set_uniform_variable("theta", _page.translation);
+                batch.draw(dc);
+                batch.submit(surface)?;
 
             }
         }

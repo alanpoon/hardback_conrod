@@ -53,6 +53,8 @@ struct Window {
     time: f32,
     page:page::Page,
     resources: WindowResources,
+    p_surface: SurfaceHandle,
+    p_shader: ShaderHandle
 }
 //crayon_bytes = { git = "https://github.com/alanpoon/crayon.git", branch ="textedit"}
 //crayon = { git = "https://github.com/alanpoon/crayon.git", branch ="textedit"}
@@ -69,7 +71,6 @@ impl Window {
         let mut result_map = HashMap::<ResourceEnum, SupportIdType>::new();
         let mut image_map = conrod_core::image::Map::new();
         resources.pump(&mut result_map,&mut image_map,&mut ui);
-        println!("result_map {:?}",result_map.len());
         if let Some(&SupportIdType::FontId(regular)) =
             result_map.get(&ResourceEnum::Font(Font::REGULAR)) {
             ui.theme.font_id = Some(regular);
@@ -99,6 +100,35 @@ impl Window {
         {
             render(&mut page);
         }
+        let vertex_buffer = glium::VertexBuffer::new(&display, &_page.in_mesh).unwrap();
+        let indices = glium::IndexBuffer::new(&display,
+                                              glium::index::PrimitiveType::TriangleStrip,
+                                              &_page.front_strip)
+                .unwrap();
+
+        let p_attributes = AttributeLayoutBuilder::new()
+            .with(Attribute::Position, 2)
+            .with(Attribute::Texcoord0, 2)
+            .with(Attribute::Color0, 4)
+            .with(Attribute::Weight,1)
+            .finish();
+        let p_uniforms = UniformVariableLayout::build()
+            .with("tex", UniformVariableType::Texture)
+            .finish();
+        let mut p_params = ShaderParams::default();
+        p_params.state.color_blend = Some((crayon::video::assets::shader::Equation::Add,
+        p_params.attributes = attributes;
+        p_params.uniforms = uniforms;
+        let p_vs = include_str!("page_curl/deform.vs").to_owned();;
+        let p_fs = include_str!("page_curl/deform.fs").to_owned();;
+        let p_shader = video::create_shader(p_params.clone(), p_vs, p_fs).unwrap();
+        let mut p_params = SurfaceParams::default();
+        p_params.set_clear(Color::gray(), None, None);
+        let p_vert:Vec<Vertex> = Vec::new();
+        let p_surface = video::create_surface(p_params).unwrap();
+        let program =
+            glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
+                .unwrap();
         let action_instant = Instant::now();
         Ok(Window {
             action_instant:action_instant,
@@ -112,7 +142,9 @@ impl Window {
             batch: CommandBuffer::new(),
             time: 0.0,
             page:page,
-            resources: *resources
+            resources: *resources,
+            p_surface: p_surface,
+            p_shader: p_shader
         })
     }
 }
@@ -147,21 +179,18 @@ impl LifecycleListener for Window {
             }
             
         }
-        
+        opengl::draw_mutliple(self.batch,
+                            &self.page.in_mesh,
+                            &self.page.front_strip,
+                            self.p_surface,
+                            self.gamedata.page_vec,
+                            self.result_map);
         let dpi_factor = crayon::window::device_pixel_ratio() as f64;
         let primitives = self.ui.draw();
         let dims = (screen_w as f64 * dpi_factor, screen_h as f64 * dpi_factor);
         //let dims = (screen_w as f64, screen_h as f64);
         self.renderer.fill(dims,dpi_factor as f64,primitives,&self.image_map);
         self.renderer.draw(&mut self.batch,&self.image_map);
-        /*
-        opengl::draw_mutliple(self.batch,
-                            &vertex_buffer,
-                            &indices,
-                            &program,
-                            self.gamedata.page_vec,
-                            self.result_map);*/
-        
         Ok(())
     }
 }

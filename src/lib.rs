@@ -29,7 +29,7 @@ extern crate find_folder;
 pub mod backend;
 pub mod page_curl;
 pub mod logic;
-//pub mod opengl;
+pub mod opengl;
 pub mod app;
 pub mod ui;
 pub mod graphics_match;

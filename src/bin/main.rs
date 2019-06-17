@@ -106,16 +106,17 @@ impl Window {
             .with(Attribute::Texcoord0, 2)
             .finish();
         let p_uniforms = UniformVariableLayout::build()
-            .with("tex", UniformVariableType::Texture)
             .with("scale", UniformVariableType::F32)
-            .with("theta", UniformVariableType::F32)
+            .with("tex", UniformVariableType::Texture)
             .with("rotation", UniformVariableType::F32)
+            .with("translation", UniformVariableType::F32)
+            .with("theta", UniformVariableType::F32)
             .finish();
         let mut p_params = ShaderParams::default();
-        p_params.state.color_blend = Some((crayon::video::assets::shader::Equation::Add,
-        crayon::video::assets::shader::BlendFactor::Value(crayon::video::assets::shader::BlendValue::SourceAlpha),
-        crayon::video::assets::shader::BlendFactor::OneMinusValue(crayon::video::assets::shader::BlendValue::SourceAlpha)));
-                p_params.attributes = p_attributes;
+        //p_params.state.color_blend = Some((crayon::video::assets::shader::Equation::Add,
+        //crayon::video::assets::shader::BlendFactor::Value(crayon::video::assets::shader::BlendValue::SourceAlpha),
+        //crayon::video::assets::shader::BlendFactor::OneMinusValue(crayon::video::assets::shader::BlendValue::SourceAlpha)));
+        p_params.attributes = p_attributes;
         p_params.uniforms = p_uniforms;
         let p_vs = include_str!("../page_curl/deform.vs").to_owned();;
         let p_fs = include_str!("../page_curl/deform.fs").to_owned();;
@@ -174,19 +175,21 @@ impl LifecycleListener for Window {
             }
             
         }
-        opengl::draw_mutliple(&mut self.batch,
+        opengl::draw_multiple(&mut self.batch,
                             &self.page.in_mesh,
                             &self.page.front_strip,
                             self.p_shader,
                             self.p_surface,
                             &mut self.game_data.page_vec,
                             &self.result_map);
+        /*                    
         let dpi_factor = crayon::window::device_pixel_ratio() as f64;
         let primitives = self.ui.draw();
         let dims = (screen_w as f64 * dpi_factor, screen_h as f64 * dpi_factor);
         //let dims = (screen_w as f64, screen_h as f64);
         self.renderer.fill(dims,dpi_factor as f64,primitives,&self.image_map);
         self.renderer.draw(&mut self.batch,&self.image_map);
+        */
         Ok(())
     }
 }

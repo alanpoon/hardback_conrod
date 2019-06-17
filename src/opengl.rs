@@ -34,7 +34,7 @@ pub fn draw(display: &glium::Display,
 
 }
 */
-pub fn draw_mutliple(batch: &mut CommandBuffer,
+pub fn draw_multiple(batch: &mut CommandBuffer,
                      vertex_buffer: &[page_curl::page::Vertex],
                      indices: &[u16;859],
                      shader: ShaderHandle,
@@ -44,12 +44,13 @@ pub fn draw_mutliple(batch: &mut CommandBuffer,
 
     for i in (0usize.._page_vec.len()).rev() {
         if let Some(&mut (ref mut _page, ref _sprite)) = _page_vec.get_mut(i) {
+            println!("there is page");
             _page.update_time();
             if let Some(&SupportIdType::TextureId(texture)) =
                 result_map.get(&ResourceEnum::Texture(_sprite.clone())) {
                 let mut p_params = MeshParams::default();
-                p_params.num_verts = 4;
-                p_params.num_idxes = 6;
+                p_params.num_verts = 859;
+                p_params.num_idxes = 859;
                 p_params.primitive = MeshPrimitive::Triangles;
                 p_params.layout = Vertex::layout();
 

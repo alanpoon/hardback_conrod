@@ -9,7 +9,7 @@ use support;
 use crayon::prelude::*;
 use crayon_audio::prelude::*;
 use crayon_bytes::prelude::*;
-use hardback_meta::app::{Font,Sprite,ResourceEnum};
+use hardback_meta::app::{Font,Sprite,ResourceEnum,Texture};
 SupportIdType!{}
 WindowResources!{
     (a1,ResourceEnum::Sprite(Sprite::RUST),"image","res:rust.png"),
@@ -26,4 +26,5 @@ WindowResources!{
     (a12,ResourceEnum::Font(Font::HORROR),"font","res:Mortified.ttf"),
     (a13,ResourceEnum::Font(Font::ADVENTURE),"font","res:TradeWinds-Regular.ttf"),
     (a14,ResourceEnum::Font(Font::ROMANCE),"font","res:Babylove.ttf"),
+    (a15,ResourceEnum::Texture(Texture::PAGE1F),"image","res:player1.jpg"),
 }

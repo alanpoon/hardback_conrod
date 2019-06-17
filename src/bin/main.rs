@@ -16,7 +16,7 @@ use game_conrod::backend::{SupportIdType};
 use game_conrod::backend::meta::app::{Font, ResourceEnum, AppData, MusicEnum,Sprite};
 use game_conrod::backend::codec_lib::codec;
 use game_conrod::page_curl::{self, page, render};
-//use game_conrod::opengl;
+use game_conrod::opengl;
 use game_conrod::on_request;
 use game_conrod::support;
 use game_conrod::backend::codec_lib;
@@ -100,35 +100,30 @@ impl Window {
         {
             render(&mut page);
         }
-        let vertex_buffer = glium::VertexBuffer::new(&display, &_page.in_mesh).unwrap();
-        let indices = glium::IndexBuffer::new(&display,
-                                              glium::index::PrimitiveType::TriangleStrip,
-                                              &_page.front_strip)
-                .unwrap();
 
         let p_attributes = AttributeLayoutBuilder::new()
             .with(Attribute::Position, 2)
             .with(Attribute::Texcoord0, 2)
-            .with(Attribute::Color0, 4)
-            .with(Attribute::Weight,1)
             .finish();
         let p_uniforms = UniformVariableLayout::build()
             .with("tex", UniformVariableType::Texture)
+            .with("scale", UniformVariableType::F32)
+            .with("theta", UniformVariableType::F32)
+            .with("rotation", UniformVariableType::F32)
             .finish();
         let mut p_params = ShaderParams::default();
         p_params.state.color_blend = Some((crayon::video::assets::shader::Equation::Add,
-        p_params.attributes = attributes;
-        p_params.uniforms = uniforms;
-        let p_vs = include_str!("page_curl/deform.vs").to_owned();;
-        let p_fs = include_str!("page_curl/deform.fs").to_owned();;
+        crayon::video::assets::shader::BlendFactor::Value(crayon::video::assets::shader::BlendValue::SourceAlpha),
+        crayon::video::assets::shader::BlendFactor::OneMinusValue(crayon::video::assets::shader::BlendValue::SourceAlpha)));
+                p_params.attributes = p_attributes;
+        p_params.uniforms = p_uniforms;
+        let p_vs = include_str!("../page_curl/deform.vs").to_owned();;
+        let p_fs = include_str!("../page_curl/deform.fs").to_owned();;
         let p_shader = video::create_shader(p_params.clone(), p_vs, p_fs).unwrap();
         let mut p_params = SurfaceParams::default();
         p_params.set_clear(Color::gray(), None, None);
-        let p_vert:Vec<Vertex> = Vec::new();
+        let p_vert:Vec<page_curl::vertex::Vertex> = Vec::new();
         let p_surface = video::create_surface(p_params).unwrap();
-        let program =
-            glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
-                .unwrap();
         let action_instant = Instant::now();
         Ok(Window {
             action_instant:action_instant,
@@ -179,12 +174,13 @@ impl LifecycleListener for Window {
             }
             
         }
-        opengl::draw_mutliple(self.batch,
+        opengl::draw_mutliple(&mut self.batch,
                             &self.page.in_mesh,
                             &self.page.front_strip,
+                            self.p_shader,
                             self.p_surface,
-                            self.gamedata.page_vec,
-                            self.result_map);
+                            &mut self.game_data.page_vec,
+                            &self.result_map);
         let dpi_factor = crayon::window::device_pixel_ratio() as f64;
         let primitives = self.ui.draw();
         let dims = (screen_w as f64 * dpi_factor, screen_h as f64 * dpi_factor);

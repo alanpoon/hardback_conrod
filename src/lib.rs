@@ -20,6 +20,7 @@ extern crate futures;
 extern crate image;
 extern crate rodio;
 extern crate chrono;
+extern crate instant;
 #[cfg(target_os="android")]
 extern crate rusttype;
 #[cfg(target_os="android")]

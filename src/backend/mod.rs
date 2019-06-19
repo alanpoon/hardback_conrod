@@ -26,5 +26,5 @@ WindowResources!{
     (a12,ResourceEnum::Font(Font::HORROR),"font","res:Mortified.ttf"),
     (a13,ResourceEnum::Font(Font::ADVENTURE),"font","res:TradeWinds-Regular.ttf"),
     (a14,ResourceEnum::Font(Font::ROMANCE),"font","res:Babylove.ttf"),
-    (a15,ResourceEnum::Texture(Texture::PAGE1F),"image","res:player1.jpg"),
+    (a15,ResourceEnum::Texture(Texture::PAGE1F),"texture","res:player1.jpg"),
 }

@@ -44,14 +44,15 @@ pub fn draw_multiple(batch: &mut CommandBuffer,
 
     for i in (0usize.._page_vec.len()).rev() {
         if let Some(&mut (ref mut _page, ref _sprite)) = _page_vec.get_mut(i) {
-            println!("there is page");
+            println!("there is page {:?}",_sprite);
             _page.update_time();
             if let Some(&SupportIdType::TextureId(texture)) =
                 result_map.get(&ResourceEnum::Texture(_sprite.clone())) {
+                println!("texture");
                 let mut p_params = MeshParams::default();
-                p_params.num_verts = 859;
+                p_params.num_verts = vertex_buffer.len();
                 p_params.num_idxes = 859;
-                p_params.primitive = MeshPrimitive::Triangles;
+                p_params.primitive = MeshPrimitive::TriangleStrip;
                 p_params.layout = Vertex::layout();
 
                 let data = MeshData {
@@ -65,7 +66,7 @@ pub fn draw_multiple(batch: &mut CommandBuffer,
                 dc.set_uniform_variable("tex", texture);
                 dc.set_uniform_variable("rotation", _page.rotation);
                 dc.set_uniform_variable("translation", _page.translation);
-                dc.set_uniform_variable("theta", _page.translation);
+                dc.set_uniform_variable("theta", _page.theta);
                 batch.draw(dc);
                 batch.submit(surface).unwrap();
 

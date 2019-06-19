@@ -6,6 +6,8 @@ extern crate futures;
 extern crate rodio;
 extern crate crayon;
 extern crate crayon_bytes;
+#[macro_use]
+extern crate cardgame_macros;
 #[allow(non_snake_case)]
 //
 use conrod_core::text::{FontCollection};
@@ -122,7 +124,7 @@ impl Window {
         let p_fs = include_str!("../page_curl/deform.fs").to_owned();;
         let p_shader = video::create_shader(p_params.clone(), p_vs, p_fs).unwrap();
         let mut p_params = SurfaceParams::default();
-        p_params.set_clear(Color::gray(), None, None);
+        //p_params.set_clear(Color::gray(), None, None);
         let p_vert:Vec<page_curl::vertex::Vertex> = Vec::new();
         let p_surface = video::create_surface(p_params).unwrap();
         let action_instant = Instant::now();
@@ -175,6 +177,8 @@ impl LifecycleListener for Window {
             }
             
         }
+        let mut loaded = 0;
+        
         opengl::draw_multiple(&mut self.batch,
                             &self.page.in_mesh,
                             &self.page.front_strip,
@@ -182,14 +186,14 @@ impl LifecycleListener for Window {
                             self.p_surface,
                             &mut self.game_data.page_vec,
                             &self.result_map);
-        /*                    
+                          
         let dpi_factor = crayon::window::device_pixel_ratio() as f64;
         let primitives = self.ui.draw();
         let dims = (screen_w as f64 * dpi_factor, screen_h as f64 * dpi_factor);
         //let dims = (screen_w as f64, screen_h as f64);
         self.renderer.fill(dims,dpi_factor as f64,primitives,&self.image_map);
-        self.renderer.draw(&mut self.batch,&self.image_map);
-        */
+        //self.renderer.draw(&mut self.batch,&self.image_map);
+        
         Ok(())
     }
 }

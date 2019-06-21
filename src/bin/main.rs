@@ -2,10 +2,10 @@ extern crate hardback_conrod;
 extern crate conrod_core;
 extern crate conrod_crayon;
 extern crate conrod_chat;
-extern crate futures;
 extern crate rodio;
 extern crate crayon;
 extern crate crayon_bytes;
+extern crate instant;
 #[macro_use]
 extern crate cardgame_macros;
 #[allow(non_snake_case)]
@@ -25,13 +25,12 @@ use game_conrod::backend::codec_lib;
 use game_conrod::backend::codec_lib::cards;
 use game_conrod::backend::WindowResources;
 use game_conrod::app::BoardStruct;
-use conrod_chat::backend::websocket::client;
 use conrod_crayon::Renderer;
 use crayon::prelude::*;
 use crayon_bytes::prelude::*;
 use crayon::network;
 use std::collections::HashMap;
-use std::time::Instant;
+use instant::Instant;
 
 #[derive(Clone)]
 pub enum ConrodMessage {
@@ -192,7 +191,7 @@ impl LifecycleListener for Window {
         let dims = (screen_w as f64 * dpi_factor, screen_h as f64 * dpi_factor);
         //let dims = (screen_w as f64, screen_h as f64);
         self.renderer.fill(dims,dpi_factor as f64,primitives,&self.image_map);
-        //self.renderer.draw(&mut self.batch,&self.image_map);
+        self.renderer.draw(&mut self.batch,&self.image_map);
         
         Ok(())
     }
@@ -202,7 +201,7 @@ main!({
     #[cfg(not(target_arch = "wasm32"))]
     let res = format!("file://{}/resources/", env!("CARGO_MANIFEST_DIR").replace("\\","/"));
     #[cfg(target_arch = "wasm32")]
-    let res = format!("http://localhost:8080/resources/");
+    let res = format!("http://localhost:3000/");
     let mut params = Params::default();
     params.window.title = "CR: RenderTexture".into();
     params.window.size = (WIN_W as u32, WIN_H as u32).into();

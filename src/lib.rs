@@ -16,7 +16,6 @@ extern crate crayon_audio;
 extern crate crayon_bytes;
 pub extern crate hardback_meta;
 pub extern crate hardback_codec;
-extern crate futures;
 extern crate image;
 extern crate rodio;
 extern crate chrono;
@@ -25,8 +24,6 @@ extern crate instant;
 extern crate rusttype;
 #[cfg(target_os="android")]
 extern crate android_glue;
-#[cfg(not(target_os="android"))]
-extern crate find_folder;
 pub mod backend;
 pub mod page_curl;
 pub mod logic;

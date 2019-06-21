@@ -3,8 +3,6 @@ use conrod_core::{Sizeable, Positionable};
 use cardgame_widgets::custom_widget::tabview;
 use conrod_chat::custom_widget::chatview_futures;
 use std::collections::HashMap;
-use futures::sync::mpsc;
-use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use app::{GameData, Ids};

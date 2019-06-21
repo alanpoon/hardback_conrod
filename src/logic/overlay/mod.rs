@@ -11,7 +11,6 @@ use backend::codec_lib;
 use std::collections::HashMap;
 use app::{self, GameData, Ids, BoardStruct};
 use graphics_match;
-use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use backend::meta::{cards, local};

@@ -1,16 +1,12 @@
 use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
-
 use cardgame_widgets::custom_widget::animated_canvas;
 use cardgame_widgets::custom_widget::tabview;
 use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
 use backend::codec_lib::codec::*;
 use std::collections::HashMap;
-use futures::sync::mpsc;
-use futures::{Future, Sink};
 use app::{self, GameData, Ids};
 use conrod_chat::custom_widget::chatview_futures;
 use graphics_match;
-use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use logic;

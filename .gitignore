@@ -12,3 +12,5 @@ README.md
 **/*.zip
 **/*.gz
 hardback-linux
+**/node_modules
+**/dist

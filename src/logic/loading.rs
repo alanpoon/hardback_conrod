@@ -1,11 +1,9 @@
 use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, Labelable};
 use std::collections::HashMap;
-use futures::sync::mpsc;
 use app::{GameData, Ids, GuiState};
 use ui::RESULTMAPLEN;
 use cardgame_widgets::custom_widget::animated_canvas;
 use cardgame_widgets::custom_widget::progress_bar;
-use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum};
 use backend::codec_lib::codec::GameState;

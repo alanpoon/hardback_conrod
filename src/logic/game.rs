@@ -1,7 +1,6 @@
 use hardback_meta::app::{AppData, ResourceEnum,Texture,Sprite};
 use conrod_core::{self, color, widget, Colorable, Widget, text, Borderable};
 use std::collections::HashMap;
-use futures::sync::mpsc;
 use backend::codec_lib::cards::*;
 use backend::codec_lib::cards;
 use backend::SupportIdType;

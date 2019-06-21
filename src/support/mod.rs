@@ -2,8 +2,6 @@
 pub mod assets_android;
 #[cfg(feature="android")]
 pub use support::assets_android as assets;
-#[cfg(feature="default")]
-pub mod assets;
 use backend::meta::app::AppData;
 use conrod_core;
 use std;

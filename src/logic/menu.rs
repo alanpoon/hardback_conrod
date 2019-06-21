@@ -1,12 +1,9 @@
 use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, Labelable};
 use std::collections::HashMap;
-use futures::sync::mpsc;
-use std::sync::mpsc::Sender;
 use chrono::{DateTime,Local};
 use app::{BoardStruct, GameData, Ids, GuiState};
 use cardgame_widgets::custom_widget::animated_canvas;
 use custom_widget::show_draft_item;
-use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use graphics_match;

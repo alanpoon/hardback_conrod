@@ -14,13 +14,10 @@ use cardgame_widgets::custom_widget::instructionset::InstructionSet;
 use cardgame_widgets::custom_widget::player_info; //player_info::list::List,//::item::IconStruct
 use cardgame_widgets::sprite::spriteable_rect;
 use backend::codec_lib::codec::*;
-use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use backend::meta;
 use std::collections::HashMap;
-use futures::sync::mpsc;
-use futures::{Future, Sink};
 use std;
 use std::time::Instant;
 use app::{self, GameData, Ids, GuiState};

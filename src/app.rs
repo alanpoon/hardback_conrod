@@ -8,10 +8,7 @@ use conrod_core::{image, Rect, widget};
 use std::collections::hash_map::RandomState;
 use std::collections::HashSet;
 use std::time::Instant;
-use futures::sync::mpsc;
-use futures::{Future, Sink};
 use cardgame_widgets::custom_widget::promptview::PromptSendable;
-use backend::OwnedMessage;
 use crayon::network;
 widget_ids! {
     pub struct Ids {

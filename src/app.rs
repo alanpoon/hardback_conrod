@@ -172,7 +172,7 @@ impl GameData {
             version: "v0.1.0",
             guistate: GuiState::Menu,
             footer: Footer::ShowHand,
-            server_lookup:"0.0.0.0:8080".to_owned(),
+            server_lookup:"127.0.0.1:8080".to_owned(),
             page_vec: vec![(Page::new(), Texture::PAGE1F),
                            (Page::new(), Texture::PAGE2F),
                            (Page::new(), Texture::PAGE3F),

@@ -1,6 +1,6 @@
 use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, Labelable};
 use std::collections::HashMap;
-use chrono::{DateTime,Local};
+use chrono::{DateTime,Utc};
 use app::{BoardStruct, GameData, Ids, GuiState};
 use cardgame_widgets::custom_widget::animated_canvas;
 use custom_widget::show_draft_item;
@@ -105,7 +105,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
                     let mut k = "ws://".to_owned();
                     k.push_str(&gamedata.server_lookup);
                     network::create_connection(k).unwrap();
-                    let now = Local::now();
+                    let now = Utc::now();
                     gamedata.connection_status=ConnectionStatus::Try(now);
                     println!("connect to try");
                 }
@@ -114,7 +114,7 @@ pub fn render(ui: &mut conrod_core::UiCell,
                 let mut txt = "Connecting to ".to_owned();
                 txt.push_str(&gamedata.server_lookup);
                 txt.push_str(" for ");
-                let current = Local::now();
+                let current = Utc::now();
                 let elapsed = current.signed_duration_since(try_time).num_seconds();
                 let elapsed_str=elapsed.to_string();
                 txt.push_str(&elapsed_str);

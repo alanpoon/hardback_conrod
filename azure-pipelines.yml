@@ -25,6 +25,7 @@ stages:
     displayName: Build
     pool:
       vmImage: $(vmImageName)
+    container: rustropy:crayon
       
     steps:
     - task: NodeTool@0

@@ -33,7 +33,7 @@ stages:
         versionSpec: '10.x'
       displayName: 'Install Node.js'
     - script: |
-        cd assets && crayon-cli build
+        crayon-cli build
       displayName: 'crayon-cli'
     - script: |
         cd tools/wasm-template && npm install

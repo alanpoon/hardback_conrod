@@ -1,0 +1,10 @@
+name = 'NotoSans-Italic.ttf'
+uuid = '950abd7f-fcd3-4822-acac-1cdcf3ea91d8'
+
+[[resources]]
+type = 'Bytes'
+name = 'NotoSans-Italic.ttf'
+uuid = '87f6eae1-de44-4c1d-a30a-0300f846849b'
+
+[params]
+type = 'Bytes'

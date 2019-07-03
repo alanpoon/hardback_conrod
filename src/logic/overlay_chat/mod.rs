@@ -1,25 +1,21 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
-
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
 use cardgame_widgets::custom_widget::animated_canvas;
 use cardgame_widgets::custom_widget::tabview;
 use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
 use backend::codec_lib::codec::*;
 use std::collections::HashMap;
-use futures::sync::mpsc;
-use futures::{Future, Sink};
 use app::{self, GameData, Ids};
 use conrod_chat::custom_widget::chatview_futures;
 use graphics_match;
-use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use logic;
-pub fn render(ui: &mut conrod::UiCell,
+use crayon::network;
+pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
               appdata: &AppData,
-              result_map: &HashMap<ResourceEnum, SupportIdType>,
-              action_tx: mpsc::Sender<OwnedMessage>) {
+              result_map: &HashMap<ResourceEnum, SupportIdType>) {
     if gamedata.overlay_chat {
         if let Some(&SupportIdType::ImageId(keypad_image)) =
             result_map.get(&ResourceEnum::Sprite(Sprite::KEYPAD)) {
@@ -56,13 +52,11 @@ pub fn render(ui: &mut conrod::UiCell,
             let vec_closure = render_closure();
             let mut it_j = vec_closure.iter();
             while let (Some(a), Some(item)) = (it_j.next(), items.next(ui)) {
-                let action_tx_clone = action_tx.clone();
                 (*a)(item,
                      ids,
                      gamedata,
                      appdata,
                      result_map,
-                     action_tx_clone,
                      ui);
             }
         }
@@ -74,12 +68,11 @@ fn render_closure()
                   &mut GameData,
                   &AppData,
                   &HashMap<ResourceEnum, SupportIdType>,
-                  mpsc::Sender<OwnedMessage>,
-                  &mut conrod::UiCell)>>
+                  &mut conrod_core::UiCell)>>
 {
-    vec![Box::new(|w_id, ids, mut gamedata, _appdata, result_map, action_tx, ui| {
+    vec![Box::new(|w_id, ids, mut gamedata, _appdata, result_map, ui| {
                       //Chat
-                      draw_game_chat(w_id, ids, &mut gamedata, result_map, action_tx, ui);
+                      draw_game_chat(w_id, ids, &mut gamedata, result_map, ui);
                   })]
 }
 #[cfg(any(feature = "android"))]
@@ -87,8 +80,7 @@ fn draw_game_chat(w_id: tabview::Item,
                   _ids: &Ids,
                   gamedata: &mut GameData,
                   result_map: &HashMap<ResourceEnum, SupportIdType>,
-                  action_tx: mpsc::Sender<OwnedMessage>,
-                  mut ui: &mut conrod::UiCell) {
+                  mut ui: &mut conrod_core::UiCell) {
     use conrod_chat::chat::{english, sprite};
     if let (Some(&SupportIdType::ImageId(rust_img)), Some(&SupportIdType::ImageId(key_pad))) =
         (result_map.get(&ResourceEnum::Sprite(Sprite::RUST)),
@@ -101,7 +93,6 @@ fn draw_game_chat(w_id: tabview::Item,
                                                 &english_tuple,
                                                 Some(rust_img),
                                                 &gamedata.name,
-                                                action_tx,
                                                 Box::new(process));
         gamedata.keypad_on = w_id.set(k, &mut ui);
     }
@@ -112,24 +103,22 @@ fn draw_game_chat(w_id: tabview::Item,
                   _ids: &Ids,
                   gamedata: &mut GameData,
                   result_map: &HashMap<ResourceEnum, SupportIdType>,
-                  action_tx: mpsc::Sender<OwnedMessage>,
-                  mut ui: &mut conrod::UiCell) {
+                  mut ui: &mut conrod_core::UiCell) {
     if let Some(&SupportIdType::ImageId(rust_img)) =
         result_map.get(&ResourceEnum::Sprite(Sprite::RUST)) {
         let k = chatview_futures::ChatView::new(&mut gamedata.game_history,
                                                 &mut gamedata.game_textedit,
                                                 Some(rust_img),
                                                 &gamedata.name,
-                                                action_tx,
                                                 Box::new(process));
         w_id.set(k, &mut ui);
     }
 }
-fn process(_name: &String, text: &String) -> OwnedMessage {
+fn process(_name: &String, text: &String) {
     let g = json!({
     "type":"chat",
   "message": text,
   "location":"game"
 });
-    OwnedMessage::Text(g.to_string())
+    network::send(g.to_string())
 }

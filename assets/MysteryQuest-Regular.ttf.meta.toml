@@ -1,0 +1,10 @@
+name = 'MysteryQuest-Regular.ttf'
+uuid = '9da8488b-65de-44bc-897c-40872c5d643c'
+
+[[resources]]
+type = 'Bytes'
+name = 'MysteryQuest-Regular.ttf'
+uuid = '0f6baec0-2942-4c46-bbc6-becda03045eb'
+
+[params]
+type = 'Bytes'

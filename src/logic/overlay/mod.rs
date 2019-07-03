@@ -1,19 +1,16 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
 use cardgame_widgets::custom_widget::animated_canvas;
 use cardgame_widgets::custom_widget::tabview;
 use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
-use conrod::widget::primitive::image::Image;
+use conrod_core::widget::primitive::image::Image;
 use cardgame_widgets::custom_widget::player_info::list::List;
 use cardgame_widgets::custom_widget::player_info::item::IconStruct;
 use cardgame_widgets::text::get_font_size_hn;
 use backend::codec_lib::codec::*;
 use backend::codec_lib;
 use std::collections::HashMap;
-use futures::sync::mpsc;
-use futures::{Future, Sink};
 use app::{self, GameData, Ids, BoardStruct};
 use graphics_match;
-use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use backend::meta::{cards, local};
@@ -22,13 +19,12 @@ use instruction::Instruction;
 pub mod use_ink;
 pub mod use_remover;
 pub mod use_timelessclassic;
-pub fn render(ui: &mut conrod::UiCell,
+pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
               gamedata: &mut GameData,
               appdata: &AppData,
-              result_map: &HashMap<ResourceEnum, SupportIdType>,
-              action_tx: mpsc::Sender<OwnedMessage>) {
+              result_map: &HashMap<ResourceEnum, SupportIdType>) {
     if let (Some(boardcodec), Some(player_index)) =
         (gamedata.boardcodec.clone(), gamedata.player_index) {
         if let (Some(_player), true) = (boardcodec.players.get(player_index), gamedata.overlay) {
@@ -112,14 +108,12 @@ pub fn render(ui: &mut conrod::UiCell,
                 let vec_closure = render_closure();
                 let mut it_j = vec_closure.iter();
                 while let (Some(a), Some(item)) = (it_j.next(), items.next(ui)) {
-                    let action_tx_clone = action_tx.clone();
                     (*a)(item,
                          ids,
                          cardmeta,
                          gamedata,
                          appdata,
                          result_map,
-                         action_tx_clone,
                          ui);
                 }
 
@@ -136,10 +130,9 @@ fn render_closure()
                   &mut GameData,
                   &AppData,
                   &HashMap<ResourceEnum, SupportIdType>,
-                  mpsc::Sender<OwnedMessage>,
-                  &mut conrod::UiCell)>>
+                  &mut conrod_core::UiCell)>>
 {
-    vec![Box::new(|w_id, ids, cardmeta, mut gamedata, appdata, result_map, action_tx, ui| {
+    vec![Box::new(|w_id, ids, cardmeta, mut gamedata, appdata, result_map, ui| {
         //draw use ink
         overlay::use_ink::render(w_id,
                                  ids,
@@ -147,10 +140,9 @@ fn render_closure()
                                  &mut gamedata,
                                  &appdata,
                                  result_map,
-                                 action_tx,
                                  ui);
     }),
-         Box::new(|w_id, ids, cardmeta, mut gamedata, _appdata, result_map, action_tx, ui| {
+         Box::new(|w_id, ids, cardmeta, mut gamedata, _appdata, result_map, ui| {
         //draw use remover
         overlay::use_remover::render(w_id,
                                      ids,
@@ -158,10 +150,9 @@ fn render_closure()
                                      &mut gamedata,
                                      _appdata,
                                      result_map,
-                                     action_tx,
                                      ui);
     }),
-         Box::new(|w_id, ids, cardmeta, mut gamedata, _appdata, result_map, action_tx, ui| {
+         Box::new(|w_id, ids, cardmeta, mut gamedata, _appdata, result_map, ui| {
         //draw use timeless classics
         overlay::use_timelessclassic::render(w_id,
                                              ids,
@@ -169,7 +160,6 @@ fn render_closure()
                                              &mut gamedata,
                                              _appdata,
                                              result_map,
-                                             action_tx,
                                              ui);
 
     })]

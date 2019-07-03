@@ -1,7 +1,7 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,
              Borderable, Rect, text, Color};
 //
-use conrod::widget::primitive::image::Image;
+use conrod_core::widget::primitive::image::Image;
 use cardgame_widgets::custom_widget::image_hover::{Hoverable, ImageHover};
 use cardgame_widgets::custom_widget::bordered_image::Bordered;
 use cardgame_widgets::custom_widget::arrange_list::{ArrangeList, ExitBy};
@@ -15,10 +15,7 @@ use cardgame_widgets::custom_widget::player_info::item::IconStruct;
 use backend::codec_lib::codec::*;
 use std::collections::HashMap;
 use std::time::Instant;
-use futures::sync::mpsc;
-use futures::{Future, Sink};
 use app::{self, GameData, Ids};
-use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use backend::meta::{self, local};
@@ -29,13 +26,12 @@ use instruction::Instruction;
 use cardgame_widgets::custom_widget::promptview::PromptSendable;
 use app::{BoardStruct, PromptSender};
 use backend::codec_lib;
-pub fn render(ui: &mut conrod::UiCell,
+pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
               appdata: &AppData,
               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
-              result_map: &HashMap<ResourceEnum, SupportIdType>,
-              _action_tx: mpsc::Sender<OwnedMessage>) {
+              result_map: &HashMap<ResourceEnum, SupportIdType>) {
     let GameData { ref page_index,
                    ref mut boardcodec,
                    ref mut print_instruction_set,
@@ -91,8 +87,7 @@ pub fn render(ui: &mut conrod::UiCell,
                               overlay_exit,
                               overlay_human,
                               last_send,
-                              result_map,
-                              _action_tx);
+                              result_map);
                     }
                 }
                 app::GuiState::Game(GameState::TurnToSubmit) => {
@@ -108,8 +103,7 @@ pub fn render(ui: &mut conrod::UiCell,
                           overlay_exit,
                           overlay_human,
                           last_send,
-                          result_map,
-                          _action_tx);
+                          result_map);
                 }
                 app::GuiState::Game(GameState::Buy) => {
                     buy(ui,
@@ -118,8 +112,7 @@ pub fn render(ui: &mut conrod::UiCell,
                         overlay2,
                         buy_selected,
                         appdata,
-                        result_map,
-                        _action_tx.clone());
+                        result_map);
                 }
                 app::GuiState::Game(GameState::TrashOther(_)) => {
                     trash_other(ui,
@@ -128,8 +121,7 @@ pub fn render(ui: &mut conrod::UiCell,
                                 overlay2,
                                 buy_selected,
                                 appdata,
-                                result_map,
-                                _action_tx.clone());
+                                result_map);
                 }
                 app::GuiState::Game(GameState::WaitForReply) => {
                     buy(ui,
@@ -138,8 +130,7 @@ pub fn render(ui: &mut conrod::UiCell,
                         overlay2,
                         buy_selected,
                         appdata,
-                        result_map,
-                        _action_tx.clone());
+                        result_map);
                 }
                 _ => {}
             }
@@ -148,7 +139,7 @@ pub fn render(ui: &mut conrod::UiCell,
 
     //  draw_hand(ui, ids, gamedata, appdata, result_map);
 }
-fn view_others(ui: &mut conrod::UiCell,
+fn view_others(ui: &mut conrod_core::UiCell,
                ids: &Ids,
                player: Player,
                appdata: &AppData,
@@ -207,7 +198,7 @@ fn view_others(ui: &mut conrod::UiCell,
             }
             y
         }) {
-            use conrod::widget::list_select::Event;
+            use conrod_core::widget::list_select::Event;
             match event {
                 // For the `Item` events we instantiate the `List`'s items.
                 Event::Item(item) => {
@@ -307,7 +298,7 @@ fn view_others(ui: &mut conrod::UiCell,
     }
 
 }
-fn spell(ui: &mut conrod::UiCell,
+fn spell(ui: &mut conrod_core::UiCell,
          ids: &Ids,
          personal: &mut Option<Personal>,
          appdata: &AppData,
@@ -319,8 +310,7 @@ fn spell(ui: &mut conrod::UiCell,
          overlay_exit: &mut bool,
          overlay_human: &mut bool,
          last_send: &mut Option<Instant>,
-         result_map: &HashMap<ResourceEnum, SupportIdType>,
-         _action_tx: mpsc::Sender<OwnedMessage>) {
+         result_map: &HashMap<ResourceEnum, SupportIdType>) {
     if let &mut Some(ref mut _personal) = personal {
         let temp = (*_personal).clone();
         let mut handvec =
@@ -406,7 +396,7 @@ fn spell(ui: &mut conrod::UiCell,
                 println!("diff in hand");
                 let now = Instant::now();
                 *last_send = Some(now);
-                let promptsender = PromptSender(_action_tx);
+                let promptsender = PromptSender();
                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                 let mut g = GameCommand::new();
                 g.personal = Some(_personal.clone());
@@ -450,7 +440,7 @@ fn spell(ui: &mut conrod::UiCell,
 
 
 }
-fn show_draft(ui: &mut conrod::UiCell,
+fn show_draft(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               print_instruction_set: &mut Vec<bool>,
               print_instruction_cache: &mut usize,
@@ -477,14 +467,13 @@ fn show_draft(ui: &mut conrod::UiCell,
 
 }
 
-fn buy(ui: &mut conrod::UiCell,
+fn buy(ui: &mut conrod_core::UiCell,
        ids: &Ids,
        _player: &mut Player,
        overlay2: &mut bool,
        buyselected: &mut Option<usize>,
        appdata: &AppData,
-       result_map: &HashMap<ResourceEnum, SupportIdType>,
-       _action_tx: mpsc::Sender<OwnedMessage>) {
+       result_map: &HashMap<ResourceEnum, SupportIdType>) {
     let text = if buyselected.is_some() {
         appdata.texts.buy
     } else {
@@ -496,7 +485,7 @@ fn buy(ui: &mut conrod::UiCell,
            .w_h(200.0, 80.0)
            .set(ids.submit_but, ui)
            .next() {
-        let promptsender = PromptSender(_action_tx.clone());
+        let promptsender = PromptSender();
         let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
         let mut g = GameCommand::new();
         g.buy_offer = Some((buyselected.is_some(), buyselected.unwrap_or(0)));
@@ -551,14 +540,13 @@ fn buy(ui: &mut conrod::UiCell,
 
 
 }
-fn trash_other(ui: &mut conrod::UiCell,
+fn trash_other(ui: &mut conrod_core::UiCell,
                ids: &Ids,
                _player: &mut Player,
                overlay2: &mut bool,
                buyselected: &mut Option<usize>,
                appdata: &AppData,
-               result_map: &HashMap<ResourceEnum, SupportIdType>,
-               _action_tx: mpsc::Sender<OwnedMessage>) {
+               result_map: &HashMap<ResourceEnum, SupportIdType>) {
     let text = if buyselected.is_some() {
         appdata.texts.trash_other
     } else {
@@ -570,7 +558,7 @@ fn trash_other(ui: &mut conrod::UiCell,
            .w_h(200.0, 80.0)
            .set(ids.submit_but, ui)
            .next() {
-        let promptsender = PromptSender(_action_tx.clone());
+        let promptsender = PromptSender();
         let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
         let mut g = GameCommand::new();
         g.buy_offer = Some((buyselected.is_some(), buyselected.unwrap_or(0)));

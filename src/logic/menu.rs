@@ -1,12 +1,9 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, Labelable};
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, Labelable};
 use std::collections::HashMap;
-use futures::sync::mpsc;
-use std::sync::mpsc::Sender;
-use chrono::{DateTime,Local};
+use chrono::{DateTime,Utc};
 use app::{BoardStruct, GameData, Ids, GuiState};
 use cardgame_widgets::custom_widget::animated_canvas;
 use custom_widget::show_draft_item;
-use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use graphics_match;
@@ -15,14 +12,14 @@ use logic;
 use support;
 use backend::codec_lib;
 use backend::codec_lib::codec::{ConnectionStatus, ConnectionError};
+use crayon::network;
 #[allow(unused_mut)]
-pub fn render(ui: &mut conrod::UiCell,
+pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               mut gamedata: &mut GameData,
               appdata: &AppData,
               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
-              result_map: &HashMap<ResourceEnum, SupportIdType>,
-              server_lookup_tx: Sender<Option<String>>) {
+              result_map: &HashMap<ResourceEnum, SupportIdType>) {
     animated_canvas::Canvas::new().color(color::LIGHT_ORANGE).frame_rate(30).set(ids.master, ui);
     if let (Some(&SupportIdType::ImageId(cloudy)),
             Some(&SupportIdType::ImageId(coin_info)),
@@ -105,8 +102,10 @@ pub fn render(ui: &mut conrod::UiCell,
                     .set(ids.submit_but, ui);
                 if j.was_clicked(){
                     println!("clicked");
-                    server_lookup_tx.send(Some(gamedata.server_lookup.clone())).unwrap();
-                    let now = Local::now();
+                    let mut k = "ws://".to_owned();
+                    k.push_str(&gamedata.server_lookup);
+                    network::create_connection(k).unwrap();
+                    let now = Utc::now();
                     gamedata.connection_status=ConnectionStatus::Try(now);
                     println!("connect to try");
                 }
@@ -115,7 +114,7 @@ pub fn render(ui: &mut conrod::UiCell,
                 let mut txt = "Connecting to ".to_owned();
                 txt.push_str(&gamedata.server_lookup);
                 txt.push_str(" for ");
-                let current = Local::now();
+                let current = Utc::now();
                 let elapsed = current.signed_duration_since(try_time).num_seconds();
                 let elapsed_str=elapsed.to_string();
                 txt.push_str(&elapsed_str);
@@ -141,7 +140,7 @@ pub fn render(ui: &mut conrod::UiCell,
                     .color(color::LIGHT_GREEN)
                     .set(ids.menu_waiting_connection, ui);
                 } else {
-                    server_lookup_tx.send(None).unwrap();
+                    network::create_connection("".to_owned()).unwrap();
                     gamedata.connection_status=ConnectionStatus::None;
                 }
             }
@@ -150,8 +149,8 @@ pub fn render(ui: &mut conrod::UiCell,
             }
         }
         for _ in widget::Button::image(icon_image)
-                .source_rectangle(graphics_match::gameicons_rect(10.0))
-                .w_h(80.0, 80.0)
+                .source_rectangle(graphics_match::gameicons_rect(10.0)) //exit
+                .w_h(60.0, 60.0)
                 .bottom_left_with_margin_on(ids.master, 20.0)
                 .set(ids.footer_overlay_but3, ui) {
             gamedata.overlay_exit = true;

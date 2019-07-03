@@ -14,3 +14,5 @@ README.md
 hardback-linux
 **/node_modules
 **/dist
+resources
+**.meta.toml

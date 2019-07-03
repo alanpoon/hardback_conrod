@@ -1,0 +1,15 @@
+name = 'pagehardcover.jpg'
+uuid = 'f8709cdf-4216-4fe7-8287-c849e8a2d496'
+
+[[resources]]
+type = 'Texture'
+name = 'pagehardcover.jpg'
+uuid = '02bcfc09-e42d-4657-b12d-6c3939fc625f'
+
+[params]
+type = 'Texture'
+mipmap = true
+alpha_premultiply = false
+wrap = 'Clamp'
+filter = 'Linear'
+compression = 'HighQuality'

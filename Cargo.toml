@@ -4,34 +4,32 @@ version = "0.1.0"
 authors = ["alanpoon"]
 
 [dependencies]
-conrod = { git ="https://github.com/PistonDevelopers/conrod.git", branch="master", features = ["glium","winit"]}
-conrod_derive = {git ="https://github.com/PistonDevelopers/conrod.git", branch="master"}
-futures ={ version = "0.1.14", features=["use_std"] }
-cardgame_widgets = {git ="https://github.com/alanpoon/cardgame_widgets.git"}
-cardgame_macros = {git="https://github.com/alanpoon/cardgame_macros.git"}
+conrod_core = { path ="../conrod/conrod_core"}
+conrod_derive = { path = "../conrod/conrod_derive"}
+conrod_keypad = {path="../Conrod_KeyPad",optional=true}
+conrod_crayon = {path ="../conrod/backends/conrod_crayon"}
+crayon  = {path = "../wasm/crayon"}
+crayon-audio  = {path = "../wasm/crayon/modules/audio"}
+crayon_bytes  = {path = "../wasm/crayon/modules/bytes"}
+cardgame_widgets = {path ="../cardgame_widgets"}
+cardgame_macros = {path ="../cardgame_macros"}
 hardback_meta = {git = "https://github.com/alanpoon/hardback_meta.git"}
-hardback_codec = {git = "https://github.com/alanpoon/hardback_codec.git"}
-websocket = { version ="0.20.2",optional = true}
-tokio-core ="0.1.9"
+hardback_codec = {path = "../hardback_codec"}
 serde_json = "1.0"
-glium = { version = "0.22"}
-shared_library = "0.1.7"
 image = "0.15.0"
 rodio = "0.5.2"
 android_glue = {version ="0.2.3",optional = true}
 rusttype = {version = "0.5.0", optional =true}
-find_folder = {version = "0.3.0",optional = true}
-conrod_chat = {git ="https://github.com/alanpoon/conrod_chat.git"}
-chrono = "0.4"
+conrod_chat = {path ="../conrod_chat"}
+instant =  {path="../wasm/instant", version="0.1.1", features = [ "wasm-bindgen","now" ]}
+chrono = {path="../wasm/chrono",features=["clock"]}
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2.47"
+
 
 [features]
-_ws = ["websocket"]
-android = ["_ws","android_glue","rusttype"]
-default = ["_ws","find_folder"]
-
-[dev-dependencies]
-image = "0.15.0"
-find_folder = "0.3.0"
+android = ["android_glue","rusttype"]
+default = []
 
 [lib]
 name = "hardback_conrod"

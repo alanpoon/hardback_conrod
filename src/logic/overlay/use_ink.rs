@@ -1,14 +1,11 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
 use cardgame_widgets::custom_widget::full_cycle_sprite::FullCycleSprite;
 use cardgame_widgets::custom_widget::tabview;
 use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
 use backend::codec_lib::codec::*;
 use backend::codec_lib;
 use std::collections::HashMap;
-use futures::sync::mpsc;
-use futures::{Future, Sink};
 use app::{GameData, Ids, OverlayStatus, BoardStruct};
-use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use backend::meta::{cards, local};
@@ -16,14 +13,14 @@ use graphics_match;
 use logic::in_game;
 use instruction::Instruction;
 use custom_widget::show_draft_item;
+use crayon::network;
 pub fn render(w_id: tabview::Item,
               ids: &Ids,
               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
               gamedata: &mut GameData,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
-              action_tx: mpsc::Sender<OwnedMessage>,
-              ui: &mut conrod::UiCell) {
+              ui: &mut conrod_core::UiCell) {
     let GameData { ref mut boardcodec, ref player_index, ref mut overlay_receivedimage, .. } =
         *gamedata;
     widget::Text::new(&appdata.texts.use_ink)
@@ -84,14 +81,11 @@ pub fn render(w_id: tabview::Item,
                                                            appdata.convert_h(20.0))
                                 .set(ids.overlay_okbut, ui) {
                             overlay_receivedimage[0] = OverlayStatus::Loading;
-                            let action_tx_c = action_tx.clone();
                             let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                             let mut g = GameCommand::new();
                             g.take_card_use_ink = Some(true);
                             h.set_gamecommand(g);
-                            action_tx_c.send(OwnedMessage::Text(ServerReceivedMsg::serialize_send(h).unwrap()))
-                            .wait()
-                            .unwrap();
+                            network::send(ServerReceivedMsg::serialize_send(h).unwrap());
                         }
                     } else {
                         widget::Text::new(&appdata.texts.use_ink_insufficent)

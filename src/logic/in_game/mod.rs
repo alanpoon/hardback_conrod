@@ -5,8 +5,8 @@ use backend::meta;
 use backend::meta::app::{AppData, ResourceEnum, Sprite, Font};
 use backend::codec_lib::{self, cards};
 use backend::codec_lib::cards::*;
-use conrod;
-use conrod::{Rect, image, color, Color, text};
+use conrod_core;
+use conrod_core::{Rect, image, color, Color, text};
 use app::BoardStruct;
 use graphics_match;
 

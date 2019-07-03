@@ -1,11 +1,11 @@
 use cardgame_widgets::custom_widget::arrange_list::{WidgetMut,Hoverable, Arrangeable, TimesClicked};
-use conrod::{widget, Color, Colorable, Borderable, Positionable, UiCell, Widget, event, input,
+use conrod_core::{widget, Color, Colorable, Borderable, Positionable, UiCell, Widget, event, input,
              image, Theme, Sizeable, text, FontSize, color};
-use conrod::position::{Rect, Scalar, Dimensions, Point};
-use conrod::widget::list::{Right,Fixed};
+use conrod_core::position::{Rect, Scalar, Dimensions, Point};
+use conrod_core::widget::list::{Right,Fixed};
 use cardgame_widgets::sprite::{Spriteable, spriteable_rect};
 use cardgame_widgets::text::get_font_size_hn;
-use conrod::widget::Rectangle;
+use conrod_core::widget::Rectangle;
 use backend::meta::app::{AppData,ResourceEnum};
 use backend::SupportIdType;
 use std::collections::HashMap;

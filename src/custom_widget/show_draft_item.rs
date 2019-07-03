@@ -1,9 +1,9 @@
 use cardgame_widgets::custom_widget::image_hover::TimesClicked;
-use conrod::{widget, Color, Colorable, Borderable, Positionable, UiCell, Widget, event, input,
+use conrod_core::{widget, Color, Colorable, Borderable, Positionable, UiCell, Widget, event, input,
              image, Theme, Sizeable, text, FontSize, color};
-use conrod::position::{Rect, Scalar, Dimensions, Point};
+use conrod_core::position::{Rect, Scalar, Dimensions, Point};
 use cardgame_widgets::text::get_font_size_hn;
-use conrod::widget::Rectangle;
+use conrod_core::widget::Rectangle;
 
 /// The type upon which we'll implement the `Widget` trait.
 #[derive(WidgetCommon)]

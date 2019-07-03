@@ -4,15 +4,12 @@ use backend::meta::cards;
 use conrod_chat::custom_widget::Message;
 use backend::codec_lib::codec::*;
 use backend::codec_lib::cards::{Board, WaitForInputType};
-use conrod::{image, Rect, widget};
+use conrod_core::{image, Rect, widget};
 use std::collections::hash_map::RandomState;
 use std::collections::HashSet;
 use std::time::Instant;
-use futures::sync::mpsc;
-use futures::{Future, Sink};
 use cardgame_widgets::custom_widget::promptview::PromptSendable;
-use backend::OwnedMessage;
-//
+use crayon::network;
 widget_ids! {
     pub struct Ids {
          master,
@@ -121,14 +118,10 @@ pub enum OverlayStatus {
     None,
 }
 #[derive(Clone)]
-pub struct PromptSender(pub mpsc::Sender<OwnedMessage>);
+pub struct PromptSender();
 impl PromptSendable for PromptSender {
     fn send(&self, msg: String) {
-        self.0
-            .clone()
-            .send(OwnedMessage::Text(msg))
-            .wait()
-            .unwrap();
+       network::send(msg);
     }
 }
 pub struct GameData {
@@ -179,7 +172,7 @@ impl GameData {
             version: "v0.1.0",
             guistate: GuiState::Menu,
             footer: Footer::ShowHand,
-            server_lookup:"0.0.0.0:8080".to_owned(),
+            server_lookup:"127.0.0.1:8080".to_owned(),
             page_vec: vec![(Page::new(), Texture::PAGE1F),
                            (Page::new(), Texture::PAGE2F),
                            (Page::new(), Texture::PAGE3F),

@@ -1,8 +1,8 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable};
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable};
 use cardgame_widgets::custom_widget::notification::Notification;
 use app::Ids;
 use std::time::Instant;
-pub fn render(ui: &mut conrod::UiCell,
+pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               top_right_of: widget::Id,
               notification: Option<(String, Instant)>) {

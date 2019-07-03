@@ -1,0 +1,11 @@
+name = 'Grigor_Iliev_-_Legend_Of_The_Crystal_Bird.ogg'
+uuid = '84b15be8-e6e7-4d33-8826-d884227213a2'
+
+[[resources]]
+type = 'AudioClip'
+name = 'Grigor_Iliev_-_Legend_Of_The_Crystal_Bird.ogg'
+uuid = '05eb5dd9-a1d8-4091-8a53-e0235e3aebba'
+
+[params]
+type = 'Audio'
+compression = 'HighQuality'

@@ -1,4 +1,4 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,
              Color, text, Rect};
 use cardgame_widgets::custom_widget::tabview;
 use cardgame_widgets::custom_widget::full_cycle_sprite::FullCycleSprite;
@@ -10,17 +10,13 @@ use backend::codec_lib;
 use std::collections::HashMap;
 use std::collections::hash_map::RandomState;
 use std::collections::HashSet;
-use futures::sync::mpsc;
-use futures::{Future, Sink};
 use app::{GameData, Ids, OverlayStatus, BoardStruct};
-use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use backend::meta::{cards, local};
 use graphics_match;
 use logic::in_game;
 use instruction::Instruction;
-
 pub struct PanelInfo<'a> {
     text: Option<String>,
     display_pic: Option<ImageRectType>,
@@ -67,8 +63,7 @@ pub fn render(w_id: tabview::Item,
               gamedata: &mut GameData,
               appdata: &AppData,
               result_map: &HashMap<ResourceEnum, SupportIdType>,
-              _action_tx: mpsc::Sender<OwnedMessage>,
-              ui: &mut conrod::UiCell) {
+              ui: &mut conrod_core::UiCell) {
     let GameData { ref mut boardcodec,
                    ref player_index,
                    ref mut personal,

@@ -1,0 +1,11 @@
+name = 'Page_urn_sound_effect.ogg'
+uuid = '572af20a-a919-4a1e-a804-f468bf68fbbc'
+
+[[resources]]
+type = 'AudioClip'
+name = 'Page_urn_sound_effect.ogg'
+uuid = '037d5f72-5db7-4d7d-b5f4-cefeb5697110'
+
+[params]
+type = 'Audio'
+compression = 'HighQuality'

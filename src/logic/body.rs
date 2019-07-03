@@ -1,8 +1,8 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable,
              Borderable, Rect, text, Color};
 use cardgame_widgets::custom_widget::bordered_image::Bordered;
-use conrod::widget::primitive::image::Image;
-use conrod::widget::envelope_editor::EnvelopePoint;
+use conrod_core::widget::primitive::image::Image;
+use conrod_core::widget::envelope_editor::EnvelopePoint;
 use cardgame_widgets::custom_widget::image_hover::{Hoverable, ImageHover};
 use cardgame_widgets::custom_widget::arrange_list::{ArrangeList, ExitBy};
 use custom_widget::arrange_list_tile::{ArrangeTuple,ItemWidget};
@@ -14,13 +14,10 @@ use cardgame_widgets::custom_widget::instructionset::InstructionSet;
 use cardgame_widgets::custom_widget::player_info; //player_info::list::List,//::item::IconStruct
 use cardgame_widgets::sprite::spriteable_rect;
 use backend::codec_lib::codec::*;
-use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use backend::meta;
 use std::collections::HashMap;
-use futures::sync::mpsc;
-use futures::{Future, Sink};
 use std;
 use std::time::Instant;
 use app::{self, GameData, Ids, GuiState};
@@ -31,13 +28,12 @@ use graphics_match::ImageHoverable;
 use app::{BoardStruct, PromptSender};
 use backend::codec_lib;
 //
-pub fn render(ui: &mut conrod::UiCell,
+pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
               appdata: &AppData,
               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
-              result_map: &HashMap<ResourceEnum, SupportIdType>,
-              _action_tx: mpsc::Sender<OwnedMessage>) {
+              result_map: &HashMap<ResourceEnum, SupportIdType>) {
     let GameData { ref page_index,
                    ref mut boardcodec,
                    ref mut print_instruction_set,
@@ -65,8 +61,7 @@ pub fn render(ui: &mut conrod::UiCell,
                                &appdata,
                                print_instruction_set,
                                initial_draft,
-                               result_map,
-                               _action_tx.clone());
+                               result_map);
                 }
                 &mut app::GuiState::Game(GameState::Shuffle) => {
                     shuffle(ui,
@@ -101,8 +96,7 @@ pub fn render(ui: &mut conrod::UiCell,
                               last_send,
                               keypad_on,
                               appdata,
-                              result_map,
-                              _action_tx.clone());
+                              result_map);
                     }
                 }
                 &mut app::GuiState::Game(GameState::TurnToSubmit) => {
@@ -115,8 +109,7 @@ pub fn render(ui: &mut conrod::UiCell,
                           last_send,
                           keypad_on,
                           appdata,
-                          result_map,
-                          _action_tx.clone());
+                          result_map);
                     if let Some(&SupportIdType::ImageId(spinner_image)) =
                         result_map.get(&ResourceEnum::Sprite(Sprite::DOWNLOAD)) {
                         turn_to_submit_but(ui,
@@ -124,8 +117,7 @@ pub fn render(ui: &mut conrod::UiCell,
                                            &appdata,
                                            overlay_blowup,
                                            last_send.clone(),
-                                           spinner_image,
-                                           _action_tx.clone());
+                                           spinner_image);
                     }
                 }
                 &mut app::GuiState::Game(GameState::Buy) => {
@@ -170,15 +162,14 @@ pub fn render(ui: &mut conrod::UiCell,
 
     //  draw_hand(ui, ids, gamedata, appdata, result_map);
 }
-fn turn_to_submit_but(ui: &mut conrod::UiCell,
+fn turn_to_submit_but(ui: &mut conrod_core::UiCell,
                       ids: &Ids,
                       appdata: &AppData,
                       overlay_blowup: &mut Option<usize>,
                       last_send: Option<Instant>,
-                      spinner_image: image::Id,
-                      _action_tx: mpsc::Sender<OwnedMessage>) {
+                      spinner_image: image::Id) {
     let spinner_rect = graphics_match::spinner_sprite();
-    let promptsender = PromptSender(_action_tx);
+    let promptsender = PromptSender();
     if let Some(_last_send) = last_send {
         let ratio = _last_send.elapsed()
             .checked_div(30_000_000)
@@ -209,15 +200,14 @@ fn turn_to_submit_but(ui: &mut conrod::UiCell,
     }
 
 }
-fn show_draft(ui: &mut conrod::UiCell,
+fn show_draft(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               player: &mut Player,
               cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
               appdata: &AppData,
               print_instruction_set: &mut Vec<bool>,
               initial_draft: &mut Vec<usize>,
-              result_map: &HashMap<ResourceEnum, SupportIdType>,
-              action_tx: mpsc::Sender<OwnedMessage>) {
+              result_map: &HashMap<ResourceEnum, SupportIdType>) {
     let body_w = ui.w_of(ids.body).unwrap();
     let item_h = body_w / 10.0;
     *initial_draft = player.draft.clone();
@@ -263,7 +253,7 @@ fn show_draft(ui: &mut conrod::UiCell,
             }
         } else {
 
-            let promptsender = PromptSender(action_tx);
+            let promptsender = PromptSender();
             let instructions: Vec<(String, Box<Fn(PromptSender)>)> = vec![("Continue".to_owned(),
                                                                            Box::new(move |ps| {
                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
@@ -272,7 +262,7 @@ fn show_draft(ui: &mut conrod::UiCell,
                 h.set_gamecommand(g);
                 ps.send(ServerReceivedMsg::serialize_send(h).unwrap());
             }))];
-
+            
             let mut prompt =
                 Some((0.5f64, "Lets' start to Shuffle the cards".to_owned(), instructions));
             let prompt_j = PromptView::new(&mut prompt, promptsender)
@@ -280,10 +270,11 @@ fn show_draft(ui: &mut conrod::UiCell,
                 .color(color::LIGHT_GREY)
                 .middle_of(ids.master);
             prompt_j.set(ids.promptview, ui);
+            
         }
     }
 }
-fn shuffle(ui: &mut conrod::UiCell,
+fn shuffle(ui: &mut conrod_core::UiCell,
            ids: &Ids,
            player: &Player,
            cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
@@ -371,7 +362,7 @@ fn cache_personal(player: &Player, personal: &mut Option<Personal>) {
     }
 }
 
-fn spell(ui: &mut conrod::UiCell,
+fn spell(ui: &mut conrod_core::UiCell,
          ids: &Ids,
          cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
          personal: &mut Option<Personal>,
@@ -380,8 +371,7 @@ fn spell(ui: &mut conrod::UiCell,
          last_send: &mut Option<Instant>,
          keypad_bool:&mut bool,
          appdata: &AppData,
-         result_map: &HashMap<ResourceEnum, SupportIdType>,
-         _action_tx: mpsc::Sender<OwnedMessage>) {
+         result_map: &HashMap<ResourceEnum, SupportIdType>) {
     if let &mut Some(ref mut _personal) = personal {
         let temp = (*_personal).clone();
         let mut arrangedvec = _personal.arranged
@@ -488,7 +478,7 @@ fn spell(ui: &mut conrod::UiCell,
                 println!("diff");
                 let now = Instant::now();
                 *last_send = Some(now);
-                let promptsender = PromptSender(_action_tx);
+                let promptsender = PromptSender();
                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                 let mut g = GameCommand::new();
                 g.personal = Some(_personal.clone());
@@ -499,7 +489,7 @@ fn spell(ui: &mut conrod::UiCell,
     }
 
 }
-fn view_others(ui: &mut conrod::UiCell,
+fn view_others(ui: &mut conrod_core::UiCell,
                ids: &Ids,
                cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
                player: Player,
@@ -567,7 +557,7 @@ fn view_others(ui: &mut conrod::UiCell,
             }
             y
         }) {
-            use conrod::widget::list_select::Event;
+            use conrod_core::widget::list_select::Event;
             match event {
                 // For the `Item` events we instantiate the `List`'s items.
                 Event::Item(item) => {
@@ -636,7 +626,7 @@ fn view_others(ui: &mut conrod::UiCell,
     }
 
 }
-fn buy(ui: &mut conrod::UiCell,
+fn buy(ui: &mut conrod_core::UiCell,
        ids: &Ids,
        cardmeta: &[codec_lib::cards::ListCard<BoardStruct>; 180],
        offer_row: &Vec<usize>,
@@ -693,7 +683,7 @@ fn buy(ui: &mut conrod::UiCell,
             }
             y
         }) {
-            use conrod::widget::list_select::Event;
+            use conrod_core::widget::list_select::Event;
             match event {
                 // For the `Item` events we instantiate the `List`'s items.
                 Event::Item(item) => {
@@ -760,7 +750,7 @@ fn buy(ui: &mut conrod::UiCell,
         }
     }
 }
-fn trash_other(ui: &mut conrod::UiCell,
+fn trash_other(ui: &mut conrod_core::UiCell,
                ids: &Ids,
                player: &Player,
                otherthanthis: usize,
@@ -828,7 +818,7 @@ fn trash_other(ui: &mut conrod::UiCell,
             }
             y
         }) {
-            use conrod::widget::list_select::Event;
+            use conrod_core::widget::list_select::Event;
             match event {
                 // For the `Item` events we instantiate the `List`'s items.
                 Event::Item(item) => {
@@ -870,7 +860,7 @@ fn trash_other(ui: &mut conrod::UiCell,
         }
     }
 }
-fn show_result(ui: &mut conrod::UiCell,
+fn show_result(ui: &mut conrod_core::UiCell,
                ids: &Ids,
                players: &Vec<Player>,
                winner: usize,

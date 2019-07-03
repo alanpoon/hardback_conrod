@@ -1,0 +1,11 @@
+name = 'doki1.ogg'
+uuid = '6bcbc6bf-1337-4c55-8f80-1d7dada68052'
+
+[[resources]]
+type = 'AudioClip'
+name = 'doki1.ogg'
+uuid = '96cdf25e-6419-426d-a0fc-33310134de00'
+
+[params]
+type = 'Audio'
+compression = 'HighQuality'

@@ -1,0 +1,15 @@
+name = 'player4.jpg'
+uuid = '7f9090f5-5960-458d-b1ac-42732c12254c'
+
+[[resources]]
+type = 'Texture'
+name = 'player4.jpg'
+uuid = '3c327de5-6f3b-4e65-a39f-2eeb6d81cb61'
+
+[params]
+type = 'Texture'
+mipmap = true
+alpha_premultiply = false
+wrap = 'Clamp'
+filter = 'Linear'
+compression = 'HighQuality'

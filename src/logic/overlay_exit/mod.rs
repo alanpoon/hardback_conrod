@@ -1,24 +1,21 @@
-use conrod::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
+use conrod_core::{self, color, widget, Colorable, Positionable, Widget, Sizeable, image, Labelable, Rect};
 use cardgame_widgets::custom_widget::animated_canvas;
 use cardgame_widgets::sprite::{SpriteInfo, spriteable_rect};
 use backend::codec_lib::codec::*;
 use std::collections::HashMap;
-use futures::sync::mpsc;
-use futures::{Future, Sink};
 use app::{self, GameData, Ids, GuiState};
 use graphics_match;
-use backend::OwnedMessage;
 use backend::SupportIdType;
 use backend::meta::app::{AppData, ResourceEnum, Sprite};
 use logic;
 use cardgame_widgets::custom_widget::promptview::PromptSendable;
 use app::PromptSender;
-pub fn render(ui: &mut conrod::UiCell,
+use crayon::network;
+pub fn render(ui: &mut conrod_core::UiCell,
               ids: &Ids,
               gamedata: &mut GameData,
               appdata: &AppData,
-              result_map: &HashMap<ResourceEnum, SupportIdType>,
-              action_tx: mpsc::Sender<OwnedMessage>) {
+              result_map: &HashMap<ResourceEnum, SupportIdType>) {
     if gamedata.overlay_exit {
         if let Some(&SupportIdType::ImageId(keypad_image)) =
             result_map.get(&ResourceEnum::Sprite(Sprite::KEYPAD)) {
@@ -54,7 +51,7 @@ pub fn render(ui: &mut conrod::UiCell,
                     .wh(appdata.convert_dim([120.0, 100.0]))
                     .bottom_left_with_margin_on(ids.overlaybody_exit, 20.0)
                     .set(ids.overlayyes_exit, ui) {
-                let promptsender = PromptSender(action_tx.clone());
+                let promptsender = PromptSender();
                 let mut h = ServerReceivedMsg::deserialize_receive("{}").unwrap();
                 let mut g = GameCommand::new();
                 g.exit_game = Some(true);

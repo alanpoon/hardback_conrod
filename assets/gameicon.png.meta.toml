@@ -1,0 +1,15 @@
+name = 'gameicon.png'
+uuid = '6460fc27-7363-44c8-8055-c1a845c85183'
+
+[[resources]]
+type = 'Texture'
+name = 'gameicon.png'
+uuid = 'ff746c0d-a39c-4608-a9f2-6e6cd7101d67'
+
+[params]
+type = 'Texture'
+mipmap = true
+alpha_premultiply = false
+wrap = 'Clamp'
+filter = 'Linear'
+compression = 'HighQuality'

@@ -1,0 +1,15 @@
+name = 'download.png'
+uuid = 'b05c7d70-f79c-4e76-84e2-6695bd0464a8'
+
+[[resources]]
+type = 'Texture'
+name = 'download.png'
+uuid = '55a260da-1062-41f7-83eb-d57db214af07'
+
+[params]
+type = 'Texture'
+mipmap = true
+alpha_premultiply = false
+wrap = 'Clamp'
+filter = 'Linear'
+compression = 'HighQuality'

@@ -136,8 +136,6 @@ pub fn update(s: ClientReceivedMsg,
         }
     }
 
-
-
 }
 fn recache_personal(hand: Vec<usize>, personal: &mut Option<Personal>) {
     *personal = Some(Personal {

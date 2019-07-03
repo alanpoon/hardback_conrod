@@ -1,15 +1,21 @@
 extern crate hardback_conrod;
-extern crate conrod;
+extern crate conrod_core;
+extern crate conrod_crayon;
 extern crate conrod_chat;
-extern crate futures;
 extern crate rodio;
+extern crate crayon;
+extern crate crayon_bytes;
+extern crate instant;
+#[macro_use]
+extern crate cardgame_macros;
 #[allow(non_snake_case)]
 //
+use conrod_core::text::{FontCollection};
+
 use hardback_conrod as game_conrod;
-use game_conrod::backend::glium::{self, glutin, Surface};
 use game_conrod::{app, logic};
-use game_conrod::backend::{OwnedMessage, SupportIdType};
-use game_conrod::backend::meta::app::{Font, ResourceEnum, AppData, MusicEnum};
+use game_conrod::backend::{SupportIdType};
+use game_conrod::backend::meta::app::{Font, ResourceEnum, AppData, MusicEnum,Sprite};
 use game_conrod::backend::codec_lib::codec;
 use game_conrod::page_curl::{self, page, render};
 use game_conrod::opengl;
@@ -17,293 +23,192 @@ use game_conrod::on_request;
 use game_conrod::support;
 use game_conrod::backend::codec_lib;
 use game_conrod::backend::codec_lib::cards;
+use game_conrod::backend::WindowResources;
 use game_conrod::app::BoardStruct;
-use conrod_chat::backend::websocket::client;
-use conrod::event;
+use conrod_crayon::Renderer;
+use crayon::prelude::*;
+use crayon_bytes::prelude::*;
+use crayon::network;
 use std::collections::HashMap;
-use futures::sync::mpsc;
-use std::time::Instant;
-use std::sync::{Arc, Mutex};
-use rodio::{Source, Sink};
+use instant::Instant;
 
 #[derive(Clone)]
 pub enum ConrodMessage {
-    Event(Instant, conrod::event::Input),
+    Event(Instant, conrod_core::event::Input),
     Thread(Instant),
 }
-pub struct GameApp {}
-#[cfg(feature="android")]
-fn window() -> glutin::WindowBuilder {
-    glutin::WindowBuilder::new()
+
+const WIN_W: u32 = 1040;
+const WIN_H: u32 = 542;
+
+struct Window {
+    action_instant:Instant,
+    cardmeta: [codec_lib::cards::ListCard<BoardStruct>; 180],
+    game_process:logic::game::GameProcess<String>,
+    game_data: app::GameData,
+    renderer: Renderer,
+    result_map:HashMap::<ResourceEnum, SupportIdType>,
+    ui: conrod_core::Ui,
+    image_map: conrod_core::image::Map<TextureHandle>,
+    batch: CommandBuffer,
+    time: f32,
+    page:page::Page,
+    resources: WindowResources,
+    p_surface: SurfaceHandle,
+    p_shader: ShaderHandle
 }
-#[cfg(feature="default")]
-fn window() -> glutin::WindowBuilder {
-    glutin::WindowBuilder::new().with_dimensions(1040, 542)
-}
-impl GameApp {
-    pub fn new() -> Result<(), String> {
-        let window_z = window();
-        let context =
-            glium::glutin::ContextBuilder::new()
-                .with_gl(glium::glutin::GlRequest::Specific(glium::glutin::Api::OpenGlEs, (3, 0)));
-        let mut events_loop = glutin::EventsLoop::new();
-        let display = glium::Display::new(window_z, context, &events_loop).unwrap();
-        let mut renderer = conrod::backend::glium::Renderer::new(&display).unwrap();
-        // construct our `Ui`.
-        let (screen_w, screen_h) = display.get_framebuffer_dimensions();
+//crayon_bytes = { git = "https://github.com/alanpoon/crayon.git", branch ="textedit"}
+//crayon = { git = "https://github.com/alanpoon/crayon.git", branch ="textedit"}
+
+impl Window {
+    pub fn build(resources: &WindowResources) -> CrResult<Self> {
+        let screen_dim = crayon::window::dimensions();
+        let (screen_w,screen_h) = (screen_dim.x,screen_dim.y);
+        let dpi_factor = crayon::window::device_pixel_ratio();
         let appdata = AppData::new(screen_w as f64, screen_h as f64, "Hardback");
-        let mut ui = conrod::UiBuilder::new([screen_w as f64, screen_h as f64])
+        let mut ui = conrod_core::UiBuilder::new([screen_w as f64 , screen_h as f64 ])
             .theme(support::theme(&appdata))
             .build();
-
         let mut result_map = HashMap::<ResourceEnum, SupportIdType>::new();
-        let mut image_map = conrod::image::Map::new();
-        game_conrod::ui::init_load_resources_to_result_map(&mut result_map,
-                                                           &mut image_map,
-                                                           &display,
-                                                           &mut ui);
-
+        let mut image_map = conrod_core::image::Map::new();
+        resources.pump(&mut result_map,&mut image_map,&mut ui);
         if let Some(&SupportIdType::FontId(regular)) =
             result_map.get(&ResourceEnum::Font(Font::REGULAR)) {
             ui.theme.font_id = Some(regular);
         }
-
-        if let Some(SupportIdType::MusicId(background_music)) =
-            result_map.remove(&ResourceEnum::Music(MusicEnum::BACKGROUND)) {}
-        let (server_lookup_tx, server_lookup_rx) = std::sync::mpsc::channel::<Option<String>>();
-        let (proxy_tx, proxy_rx) = std::sync::mpsc::channel();
-        let (proxy_action_tx, proxy_action_rx) = mpsc::channel(2);
-        let s_tx = Arc::new(Mutex::new(proxy_action_tx));
-        let s_rx = Arc::new(Mutex::new(proxy_action_rx));
-        let (ss_tx, _ss_rx) = (s_tx.clone(), s_rx.clone());
-        let mut gamedata = app::GameData::new();
+        if let Some(&SupportIdType::ImageId(th)) =
+            result_map.get(&ResourceEnum::Sprite(Sprite::GAMEICONS)) {
+            
+        }
+        let renderer = Renderer::new((screen_w as f64,screen_h as f64),  dpi_factor as f64);
+        let gamedata = app::GameData::new();
         let cardmeta: [codec_lib::cards::ListCard<BoardStruct>; 180] =
             cards::populate::<BoardStruct>();
-        let (load_asset_tx, load_asset_rx) = std::sync::mpsc::channel();
-        let mut action_instant = Instant::now(); //let the app to sleep after 1 min
-        let time_to_sleep = std::time::Duration::new(15, 0);
-        std::thread::spawn(move || {
-            let mut last_update = std::time::Instant::now();
-            let mut connected = false;
-            let mut count =0;
-            while !connected {
-                count= count+1;
-                let sixteen_ms = std::time::Duration::from_millis(1000);
-                let now = std::time::Instant::now();
-                let duration_since_last_update = now.duration_since(last_update);
-                last_update = now;
-                if duration_since_last_update < sixteen_ms {
-                    std::thread::sleep(sixteen_ms - duration_since_last_update);
-                }
-                while let Ok(server_lookup_text_z) = server_lookup_rx.try_recv() {
-                    if let Some(server_lookup_text) = server_lookup_text_z{
-                        let (tx, rx) = mpsc::channel(3);
-                        let mut ss_tx = ss_tx.lock().unwrap();
-                        *ss_tx = tx;
-                        drop(ss_tx);
-                        let mut server_lookup_t = "ws://".to_owned();
-                        server_lookup_t.push_str(&server_lookup_text);
-                        match client::run_owned_message(server_lookup_t, proxy_tx.clone(), rx) {
-                            Ok(_) => {
-                                connected = true;
-                                print!("Connection Success");
-                            }
-                            Err(_err) => {
-                                connected = false;
-                                print!("Connection Failure");
-                            }
-                        }
-                        last_update = std::time::Instant::now();
-                    }      
-            }
-          }
-        });
-        let mut _page = page::Page::new();
-        {
-            render(&mut _page);
-        }
-
-        let vertex_buffer = glium::VertexBuffer::new(&display, &_page.in_mesh).unwrap();
-        let indices = glium::IndexBuffer::new(&display,
-                                              glium::index::PrimitiveType::TriangleStrip,
-                                              &_page.front_strip)
-                .unwrap();
-        let vertex_shader_src = page_curl::deform::glsl();
-        let fragment_shader_src = page_curl::fragment::glsl();
-        let program =
-            glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
-                .unwrap();
-        
-        let mut game_proc =
-            logic::game::GameProcess::<OwnedMessage>::new(&mut ui,
+        let game_proc =
+            logic::game::GameProcess::<String>::new(app::Ids::new(ui.widget_id_generator()),
                                                           appdata,
                                                           Box::new(|gamedata,
                                                                     appdata,
                                                                     result_map,
                                                                     msg| {
-                if let OwnedMessage::Text(z) = OwnedMessage::from(msg) {
-                    if let Ok(s) = codec::ClientReceivedMsg::deserialize_receive(&z) {
+                    if let Ok(s) = codec::ClientReceivedMsg::deserialize_receive(&msg) {
                         on_request::update(s, gamedata, appdata, result_map);
                     } else {
                         println!("err");
                     }
-                }
             }));
-        let mut old_captured_event: Option<ConrodMessage> = None;
-        let mut captured_event: Option<ConrodMessage> = None;
-        let mut last_update = std::time::Instant::now();
-        let mut gui_count=0;
-        'render: loop {
-            let sixteen_ms = std::time::Duration::from_millis(32);
-            let now = std::time::Instant::now();
-            let duration_since_last_update = now.duration_since(last_update);
-            if duration_since_last_update < sixteen_ms {
-                std::thread::sleep(sixteen_ms - duration_since_last_update);
-            }
-
-            let ss_tx = s_tx.lock().unwrap();
-            let proxy_action_tx = ss_tx.clone();
-            let mut to_break = false;
-            let mut to_continue = false;
-            events_loop.poll_events(|event| {
-                match event.clone() {
-                    glium::glutin::Event::WindowEvent { event, .. } => {
-                        match event {
-                            glium::glutin::WindowEvent::CloseRequested |
-                            glium::glutin::WindowEvent::KeyboardInput {
-                                input: glium::glutin::KeyboardInput {
-                                    virtual_keycode: Some(glium::glutin::VirtualKeyCode::Escape),
-                                    ..
-                                },
-                                ..
-                            } => {to_break=true;}
-                            _ => (),
-                        }
-                    }
-                    _ => {}
-                }
-                match conrod::backend::winit::convert_event(event.clone(), &display) {
-                    None => {
-                        to_continue = true;
-                    }
-                    Some(input) => {
-                        let d = std::time::Instant::now();
-                        if let event::Input::Text(s) = input.clone() {
-                            if s != String::from("") {
-                                captured_event = Some(ConrodMessage::Event(d, input));
-                            }
-                        } else {
-                            captured_event = Some(ConrodMessage::Event(d, input));
-                        }
-
-                    }
-                }
-            });
-            if to_break {
-                break 'render;
-            }
-            if to_continue {
-                continue;
-            }
-            match captured_event {
-                Some(ConrodMessage::Event(d, ref input)) => {
-                    if let Some(ConrodMessage::Event(_oldd, ref oldinput)) = old_captured_event {
-                        if oldinput.clone() != input.clone() {
-                            ui.handle_event(input.clone());
-                        }
-                    }
-                    if let None = old_captured_event {
-                        ui.handle_event(input.clone());
-                    }
-                    old_captured_event = Some(ConrodMessage::Event(d, input.clone()));
-                    // Set the widgets.
-                    game_proc.run(&mut ui,
-                                  &cardmeta,
-                                  &mut (gamedata),
-                                  &result_map,
-                                  load_asset_tx.clone(),
-                                  proxy_action_tx.clone(),
-                                  server_lookup_tx.clone());
-
-                    action_instant = std::time::Instant::now();
-                }
-                Some(ConrodMessage::Thread(_t)) => {
-                    // Set the widgets.
-                    if action_instant.elapsed() <= time_to_sleep {
-                        game_proc.run(&mut ui,
-                                      &cardmeta,
-                                      &mut (gamedata),
-                                      &result_map,
-                                      load_asset_tx.clone(),
-                                      proxy_action_tx.clone(),
-                                      server_lookup_tx.clone());
-                    }
-
-                }
-                None => {
-                    let now = std::time::Instant::now();
-                    let duration_since_last_update = now.duration_since(last_update);
-                    if duration_since_last_update < sixteen_ms {
-                        std::thread::sleep(sixteen_ms - duration_since_last_update);
-                    }
-                    let t = std::time::Instant::now();
-                    captured_event = Some(ConrodMessage::Thread(t));
-                }
-            }
-
-            while let Ok(s) = proxy_rx.try_recv() {
-                game_proc.update_state(&mut gamedata, &result_map, s);
-            }
-            while let Ok(s) = load_asset_rx.try_recv() {
-                match s {
-                    (ResourceEnum::Sprite(_s), Some(rgba_image), None) => {
-                        let image_dimensions = rgba_image.dimensions();
-                        let raw_image = glium::texture::RawImage2d::from_raw_rgba_reversed(&rgba_image.into_raw(),
-                                                                                        image_dimensions);
-                        let texture = glium::texture::Texture2d::new(&display, raw_image).unwrap();
-                        let id_i = image_map.insert(texture);
-                        result_map.insert(ResourceEnum::Sprite(_s), SupportIdType::ImageId(id_i));
-                    }
-                    (ResourceEnum::Texture(_t), Some(rgba_image), None) => {
-                        let image_dimensions = rgba_image.dimensions();
-                        let raw_image = glium::texture::RawImage2d::from_raw_rgba_reversed(&rgba_image.into_raw(),
-                                                                                        image_dimensions);
-                        let texture = glium::texture::Texture2d::new(&display, raw_image).unwrap();
-                        result_map.insert(ResourceEnum::Texture(_t),
-                                          SupportIdType::TextureId(texture));
-                    }
-                    (re, None, Some(_font)) => {
-                        let _font_id = ui.fonts.insert(_font);
-                        result_map.insert(re, SupportIdType::FontId(_font_id));
-                    }
-                    _ => {}
-                }
-            }
-            // Draw the `Ui` if it has changed.
-            if action_instant.elapsed() <= time_to_sleep {
-                let primitives = ui.draw();
-                renderer.fill(&display, primitives, &image_map);
-                let mut target = display.draw();
-                target.clear_color(0.0, 0.0, 0.0, 1.0);
-                opengl::draw_mutliple(&mut target,
-                                      &vertex_buffer,
-                                      &indices,
-                                      &program,
-                                      &mut gamedata.page_vec,
-                                      &result_map);
-                renderer.draw(&display, &mut target, &image_map).unwrap();
-                target.finish().unwrap();
-            }
-
-            last_update = std::time::Instant::now();
-            gui_count = gui_count+1;
+        let mut page = page::Page::new();
+        {
+            render(&mut page);
         }
+
+        let p_attributes = AttributeLayoutBuilder::new()
+            .with(Attribute::Position, 2)
+            .with(Attribute::Texcoord0, 2)
+            .finish();
+        let p_uniforms = UniformVariableLayout::build()
+            .with("scale", UniformVariableType::F32)
+            .with("tex", UniformVariableType::Texture)
+            .with("rotation", UniformVariableType::F32)
+            .with("translation", UniformVariableType::F32)
+            .with("theta", UniformVariableType::F32)
+            .finish();
+        let mut p_params = ShaderParams::default();
+        //p_params.state.color_blend = Some((crayon::video::assets::shader::Equation::Add,
+        //crayon::video::assets::shader::BlendFactor::Value(crayon::video::assets::shader::BlendValue::SourceAlpha),
+        //crayon::video::assets::shader::BlendFactor::OneMinusValue(crayon::video::assets::shader::BlendValue::SourceAlpha)));
+        p_params.attributes = p_attributes;
+        p_params.uniforms = p_uniforms;
+        let p_vs = include_str!("../page_curl/deform.vs").to_owned();;
+        let p_fs = include_str!("../page_curl/deform.fs").to_owned();;
+        let p_shader = video::create_shader(p_params.clone(), p_vs, p_fs).unwrap();
+        let mut p_params = SurfaceParams::default();
+        //p_params.set_clear(Color::gray(), None, None);
+        let p_vert:Vec<page_curl::vertex::Vertex> = Vec::new();
+        let p_surface = video::create_surface(p_params).unwrap();
+        let action_instant = Instant::now();
+        Ok(Window {
+            action_instant:action_instant,
+            cardmeta:cardmeta,
+            game_data:gamedata,
+            game_process: game_proc,
+            ui:ui,
+            image_map:image_map,
+            renderer:renderer,
+            result_map:result_map,
+            batch: CommandBuffer::new(),
+            time: 0.0,
+            page:page,
+            resources: *resources,
+            p_surface: p_surface,
+            p_shader: p_shader
+        })
+    }
+}
+
+impl Drop for Window {
+    fn drop(&mut self) {
+    }
+}
+
+impl LifecycleListener for Window {
+    fn on_update(&mut self) -> CrResult<()> {
+        let screen_dim = crayon::window::dimensions();
+        let (screen_w,screen_h) = (screen_dim.x,screen_dim.y);
+        self.ui.win_w = screen_w as f64;
+        self.ui.win_h = screen_h as f64;
+        let action_time  = conrod_crayon::events::convert_event(&mut self.ui);
+        let time_to_sleep:std::time::Duration = std::time::Duration::new(15, 0);
+        if let Some(at) = action_time{
+            self.action_instant = at;
+        }
+        {
+            
+            const LOGO_SIDE: conrod_core::Scalar = 306.0;
+            self.game_process.run(&mut self.ui,
+                                  &mut self.image_map,
+                                  &self.cardmeta,
+                                  &mut self.game_data,
+                                  &mut self.result_map
+                                 );
+            for s in network::receive(){
+                self.game_process.update_state(&mut self.game_data, &self.result_map, s);
+            }
+            
+        }
+        let mut loaded = 0;
+        
+        opengl::draw_multiple(&mut self.batch,
+                            &self.page.in_mesh,
+                            &self.page.front_strip,
+                            self.p_shader,
+                            self.p_surface,
+                            &mut self.game_data.page_vec,
+                            &self.result_map);
+                          
+        let dpi_factor = crayon::window::device_pixel_ratio() as f64;
+        let primitives = self.ui.draw();
+        let dims = (screen_w as f64 * dpi_factor, screen_h as f64 * dpi_factor);
+        //let dims = (screen_w as f64, screen_h as f64);
+        self.renderer.fill(dims,dpi_factor as f64,primitives,&self.image_map);
+        self.renderer.draw(&mut self.batch,&self.image_map);
+        
         Ok(())
     }
 }
-fn main() {
-    match GameApp::new() {
-        Err(why) => println!("Error while running Hardback:\n{}", why),
-        Ok(_) => (),
-    }
-}
+
+main!({
+    #[cfg(not(target_arch = "wasm32"))]
+    let res = format!("file://{}/resources/", env!("CARGO_MANIFEST_DIR").replace("\\","/"));
+    #[cfg(target_arch = "wasm32")]
+    let res = format!("http://localhost:3000/");
+    let mut params = Params::default();
+    params.window.title = "CR: RenderTexture".into();
+    params.window.size = (WIN_W as u32, WIN_H as u32).into();
+    params.res.shortcuts.add("res:", res).unwrap();
+    params.res.dirs.push("res:".into());
+    crayon::application::setup(params,|| {
+        let resources = WindowResources::new()?;
+        Ok(Launcher::new(resources, |r| Window::build(r)))
+    }).unwrap();
+});

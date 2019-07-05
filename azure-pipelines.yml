@@ -32,6 +32,15 @@ stages:
         echo $PATH
       displayName: 'crayon-cli which'
     - script: |
+        ls /root/.cargo/bin
+      displayName: '/root/.cargo/bin'
+    - script: |
+        which crayon-cli
+      displayName: 'which crayon-cli'
+    - script: |
+        ls /
+      displayName: 'ls /'
+    - script: |
         crayon-cli build
       displayName: 'crayon-cli'
     - script: |

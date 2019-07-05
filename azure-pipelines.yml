@@ -38,7 +38,7 @@ stages:
         which crayon-cli
       displayName: 'which crayon-cli'
     - script: |
-        ls -l .
+        ls -l /crayon-tools/target/crayon-cli
       displayName: 'ls this directory'
     - script: |
         whoami

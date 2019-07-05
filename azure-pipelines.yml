@@ -29,7 +29,7 @@ stages:
       
     steps:
     - script: |
-        cd root && ls -a
+        cd /root && ls -a
       displayName: 'set path'    
     - script: |
         . ~/.cargo/env && cargo -v

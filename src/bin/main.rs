@@ -201,7 +201,7 @@ main!({
     #[cfg(not(target_arch = "wasm32"))]
     let res = format!("file://{}/resources/", env!("CARGO_MANIFEST_DIR").replace("\\","/"));
     #[cfg(target_arch = "wasm32")]
-    let res = format!("http://localhost:3000/");
+    let res = format!("http://localhost:80/");
     let mut params = Params::default();
     params.window.title = "CR: RenderTexture".into();
     params.window.size = (WIN_W as u32, WIN_H as u32).into();

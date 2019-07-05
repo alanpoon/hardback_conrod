@@ -25,7 +25,7 @@ stages:
     displayName: Build
     pool:
       vmImage: $(vmImageName)
-    container: rustropy/crayon:secondtry
+    container: rustropy/crayon:version1.0
       
     steps:
     - script: |
@@ -37,9 +37,6 @@ stages:
     - script: |
         which crayon-cli
       displayName: 'which crayon-cli'
-    - script: |
-        ls /
-      displayName: 'ls /'
     - script: |
         crayon-cli build
       displayName: 'crayon-cli'
@@ -53,8 +50,8 @@ stages:
     - task: ArchiveFiles@2
       displayName: 'Archive files'
       inputs:
-        rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
-        includeRootFolder: false
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/tools/wasm-template'
+        includeRootFolder: true
         archiveType: zip
         archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
         replaceExistingArchive: true
@@ -91,4 +88,4 @@ stages:
               appName: $(webAppName)
               runtimeStack: 'NODE|10.10'
               package: $(System.ArtifactsDirectory)/drop/$(Build.BuildId).zip
-              startUpCommand: 'npm run start'
+              startUpCommand: 'npm run serve'

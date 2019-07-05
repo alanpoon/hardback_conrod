@@ -38,7 +38,7 @@ stages:
         which crayon-cli
       displayName: 'which crayon-cli'
     - script: |
-        /crayon-tools/target/crayon-cli/crayon-cli build
+        RUST_BACKTRACE=1 crayon-cli build
       displayName: 'crayon-cli'
     - script: |
         cd tools/wasm-template && npm install

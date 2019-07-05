@@ -29,6 +29,9 @@ stages:
       
     steps:
     - script: |
+        cargo -v
+      displayName: 'cargo version'
+    - script: |
         echo $PATH
       displayName: 'crayon-cli which'
     - script: |

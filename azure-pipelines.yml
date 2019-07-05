@@ -29,7 +29,7 @@ stages:
       
     steps:
     - script: |
-        which crayon-cli
+        echo $PATH
       displayName: 'crayon-cli which'
     - script: |
         crayon-cli build

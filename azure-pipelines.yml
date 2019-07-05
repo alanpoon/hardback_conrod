@@ -29,6 +29,9 @@ stages:
       
     steps:
     - script: |
+        export PATH=/root/.cargo/bin:$PATH
+      displayName: 'set path'    
+    - script: |
         cargo -v
       displayName: 'cargo version'
     - script: |

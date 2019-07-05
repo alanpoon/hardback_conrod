@@ -25,20 +25,29 @@ stages:
     displayName: Build
     pool:
       vmImage: $(vmImageName)
-    container: rustropy/crayon:version1.0
+    container: rustropy/crayon:version1.01
       
     steps:
+    - script: |
+        cargo -v
+      displayName: 'cargo version'
     - script: |
         echo $PATH
       displayName: 'crayon-cli which'
     - script: |
-        /crayon-tools/target/crayon-cli/crayon-cli  --version
+        crayon-cli  --version
       displayName: 'crayon-cli verison'
     - script: |
         which crayon-cli
       displayName: 'which crayon-cli'
     - script: |
-        crayon-cli build
+        ls -l /crayon-tools/target/crayon-cli
+      displayName: 'ls this directory'
+    - script: |
+        whoami
+      displayName: 'whoami'
+    - script: |
+        RUST_BACKTRACE=1 crayon-cli build
       displayName: 'crayon-cli'
     - script: |
         cd tools/wasm-template && npm install

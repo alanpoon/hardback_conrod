@@ -38,6 +38,12 @@ stages:
         which crayon-cli
       displayName: 'which crayon-cli'
     - script: |
+        ls -l .
+      displayName: 'ls this directory'
+    - script: |
+        whoami
+      displayName: 'whoami'
+    - script: |
         RUST_BACKTRACE=1 crayon-cli build
       displayName: 'crayon-cli'
     - script: |

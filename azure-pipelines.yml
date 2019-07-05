@@ -29,10 +29,10 @@ stages:
       
     steps:
     - script: |
-        export PATH=/root/.cargo/bin:$PATH
+        cd root && ls -a
       displayName: 'set path'    
     - script: |
-        export PATH=/root/.cargo/bin:$PATH && cargo -v
+        . ~/.cargo/env && cargo -v
       displayName: 'cargo version'
     - script: |
         echo $PATH

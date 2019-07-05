@@ -29,9 +29,6 @@ stages:
       
     steps:
     - script: |
-        cd /root && ls -a
-      displayName: 'set path'    
-    - script: |
         . ~/.cargo/env && cargo -v
       displayName: 'cargo version'
     - script: |

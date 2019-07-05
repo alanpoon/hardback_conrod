@@ -28,10 +28,18 @@ stages:
     container: rustropy/crayon:secondtry
       
     steps:
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '10.x'
-      displayName: 'Install Node.js'
+    - script: |
+        echo $PATH
+      displayName: 'crayon-cli which'
+    - script: |
+        /crayon-tools/target/crayon-cli/crayon-cli  --version
+      displayName: 'crayon-cli verison'
+    - script: |
+        which crayon-cli
+      displayName: 'which crayon-cli'
+    - script: |
+        ls /
+      displayName: 'ls /'
     - script: |
         crayon-cli build
       displayName: 'crayon-cli'

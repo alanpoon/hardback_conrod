@@ -21,7 +21,7 @@ module.exports = {
     ],
     devServer: {
         contentBase: [__dirname, path.join(__dirname, '../../resources')],
-        port: 80
+        port: 3000
     },
     module: {
         rules: [

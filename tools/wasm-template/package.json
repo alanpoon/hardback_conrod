@@ -12,6 +12,6 @@
     },
     "dependencies": {
         "@open-wc/webpack-import-meta-loader": "^0.2.4",
-        "ws": "^7.0.0"
+        "ws": "^7.4.6"
     }
 }
